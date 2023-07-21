@@ -2,6 +2,7 @@
   "name": "chat",
   "version": "0.0.1",
   "private": true,
+  "homepage": "/",
   "dependencies": {
     "@bubble-protocol/client": "^0.0.x",
     "@bubble-protocol/core": "^0.0.x",
