@@ -29,7 +29,7 @@ export class ConversationBubble extends WebsocketBubble {
     ],
     subscriptions: [
       {file: CONTENT.metadataFile, onNotify: this._handleMetadataChange.bind(this), onRead: this._handleMetadataChange.bind(this)},
-      {file: CONTENT.textChat, onNotify: this._handleMessageNotification.bind(this), onRead: this._handleMessageNotification.bind(this), since: () => this.lastModTime}
+      {file: CONTENT.textChat, onNotify: this._handleMessageNotification.bind(this), onList: this._handleMessageNotification.bind(this), onRead: this._handleMessageNotification.bind(this), since: () => this.lastModTime}
     ]
   }
 

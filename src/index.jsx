@@ -21,7 +21,7 @@ console.debug = DEBUG_ON ? Function.prototype.bind.call(console.info, console, "
 await initialiseLocalStorage('BubbleChat');
 
 const messenger = new MessengerApp(stateManager);
-messenger.initialise();
+messenger.initialise().catch(console.error);
 
 window.addEventListener('online', () => messenger.setOnlineStatus(true));
 window.addEventListener('offline', () => messenger.setOnlineStatus(false));
