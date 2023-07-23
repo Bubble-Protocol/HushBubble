@@ -39,6 +39,21 @@
   width: fit-content;
 }
 
+.desktop .header-link {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.56px;
+  line-height: normal;
+  position: relative;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.desktop .header-link:hover {
+  color: #ccc;
+}
+
 .desktop .spacer {
   align-self: stretch;
   flex: 1;
