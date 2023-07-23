@@ -8,7 +8,7 @@ body {
 
 .content {
   max-width: 800px;
-  margin-bottom: 64px;
+  margin: 0 16px 64px 16px;
 }
 
 img {
@@ -43,4 +43,14 @@ h2 {
 
 p {
   line-height: 24px;
+}
+
+li {
+  margin-bottom: 16px;
+}
+
+@media only screen and (max-width: 500px) {
+  img {
+    width: 100%;
+  }
 }

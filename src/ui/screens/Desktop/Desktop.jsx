@@ -20,7 +20,7 @@ export const Desktop = () => {
         <h1 className="title">HushBubble</h1>
         <div className="spacer" />
         {!online && <div className="connecting-indicator"><span>offline</span><span className="loader loader-small"></span></div> }
-        <a class="header-link" href="about.html">What is HushBubble?</a>
+        <a class="header-link" href="https://bubbleprotocol.com/chat/about.html">What is HushBubble?</a>
       </header>
 
       {/* Content */}
