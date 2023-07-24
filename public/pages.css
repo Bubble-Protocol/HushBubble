@@ -18,6 +18,18 @@ img {
   width: 500px;
 }
 
+.screenshot {
+  margin-top: 48px;
+  width: 700px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+figcaption {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
 a {
   text-decoration: none;
   color: rgb(182, 119, 24);
@@ -55,7 +67,7 @@ hr {
 }
 
 @media only screen and (max-width: 500px) {
-  img {
+  img, .screenshot {
     width: 100%;
   }
 }
