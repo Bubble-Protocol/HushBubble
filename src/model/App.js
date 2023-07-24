@@ -14,13 +14,16 @@ export class MessengerApp {
 
   state = STATE.uninitialised;
   deviceKey;
+  newMsgCount = 0;
 
   constructor() {
     this.conversation = new Conversation(DEFAULT_CONFIG.bubbleId);
     stateManager.register('app-state', this.state);
     stateManager.register('chat');
+    stateManager.register('new-message-notification');
     stateManager.register('online', window.navigator.onLine);
     stateManager.register('myId', undefined);
+    this.conversation.on('new-message-notification', this._handleNewMessage.bind(this));
   }
 
   initialise() {
@@ -44,6 +47,11 @@ export class MessengerApp {
 
   async close() {
     return this.conversation.close();
+  }
+
+  _handleNewMessage() {
+    this.newMsgCount++;
+    stateManager.dispatch('new-message-notification', this.newMsgCount);
   }
 
   _loadState() {

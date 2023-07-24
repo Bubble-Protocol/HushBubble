@@ -44,6 +44,7 @@ export class ConversationBubble extends WebsocketBubble {
     stateManager.register(this.id+'-connection-state', this.getConnectionState());
     stateManager.register(this.id+'-metadata', {});
     stateManager.register(this.id+'-messages', []);
+    this.listeners.addEvents(['message']);
     this.listeners.on('state-change', state => stateManager.dispatch(this.id+'-connection-state', state))
   }
 
@@ -138,6 +139,7 @@ export class ConversationBubble extends WebsocketBubble {
     this.messages = [...this.messages];  // mutate to trigger any react hooks
     localStorage.writeMessage(message);
     stateManager.dispatch(this.id+'-messages', this.messages);
+    this.listeners.notifyListeners('message', message);
   }
 
   _loadMessages(conversationId) {

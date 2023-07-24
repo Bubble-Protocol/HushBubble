@@ -1,5 +1,6 @@
 import { ContentId, assert } from "@bubble-protocol/core";
 import { ConversationBubble } from "./ConversationBubble";
+import { EventManager } from "./utils/EventManager";
 
 const STATE = {
   connecting: 'connecting',
@@ -12,15 +13,19 @@ export class Conversation {
 
   messages = [];
   state = STATE.connecting;
+  listeners = new EventManager(['new-message-notification']);
 
   constructor(bubbleId) {
     assert.isInstanceOf(bubbleId, ContentId, 'bubbleId');
     this.id = bubbleId.chain+'-'+bubbleId.contract;
     this.bubbleId = bubbleId;
+    this.on = this.listeners.on.bind(this.listeners);
+    this.off = this.listeners.off.bind(this.listeners);
   }
 
   initialise(deviceKey) {
     this.bubble = new ConversationBubble(this.bubbleId, deviceKey);
+    this.bubble.on('message', () => this.listeners.notifyListeners('new-message-notification'));
     return this.bubble.initialise(this.id)
       .then(this._setMetadata.bind(this))
       .then(() => { 
@@ -62,15 +67,6 @@ export class Conversation {
     this.title = metadata.title;
     this.metadata = {...metadata};
     delete(this.metadata.title);
-  }
-
-  _setupBubbleListeners() {
-    this.bubble.on('metadata', this._handleMetadata.bind(this));
-    this.bubble.on('message', (...params) => this.listeners.notifyListeners('update-content', ...params));
-    this.bubble.on('state-change', (state, error) => console.trace('conversation', this.id, 'state changed to', state, error));
-    this.bubble.on('state-change', (...params) => { console.debug('Conversation: state-change', ...params); this.listeners.notifyListeners('connection-state-change', ...params)});
-    this.bubble.on('error', (...params) => console.warn('Conversation', this.id, 'bubble error', ...params)); 
-    this.listeners.notifyListeners('connection-state-change', this.bubble.getConnectionState());
   }
 
 }
