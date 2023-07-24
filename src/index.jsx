@@ -4,6 +4,7 @@ import { Desktop } from "./ui/screens/Desktop";
 import { initialiseLocalStorage } from "./model/utils/LocalStorage";
 import { MessengerApp } from "./model/App";
 import { stateManager } from "./state-context";
+import { setFaviconWithCount } from "./ui/utils/favicon";
 
 //
 // Application
@@ -34,6 +35,8 @@ window.addEventListener('beforeunload', () => messenger.close());
 
 const app = document.getElementById("app");
 const root = ReactDOMClient.createRoot(app);
+
+setFaviconWithCount(0);
 
 function render() { 
   root.render(

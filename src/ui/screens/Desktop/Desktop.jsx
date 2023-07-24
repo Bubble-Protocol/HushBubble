@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./style.css";
 import { stateManager } from "../../../state-context";
 import { ChatScreen } from "../ChatScreen/ChatScreen";
-import ping from '../../assets/audio/ping.mp3';
+import { setFaviconWithCount } from "../../utils/favicon";
 
 export const Desktop = () => {
 
@@ -14,14 +14,25 @@ export const Desktop = () => {
   const chat = stateManager.useStateData('chat')();
   const newMsgCount = stateManager.useStateData('new-message-notification')();
 
-  const audioPing = new Audio(ping);
-
   console.debug('Desktop', online, chat);
 
   if (newMsgCount > msgCount) {
-    if (!document.hasFocus()) audioPing.play();
+    if (!document.hasFocus()) setFaviconWithCount(newMsgCount - unreadMsgCount);
     setMsgCount(newMsgCount);
   }
+
+  useEffect(() => {
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') {
+        setUnreadMsgCount(newMsgCount);
+        setFaviconWithCount(0);
+      }
+    }
+    document.addEventListener('visibilitychange', onFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, []);
 
   const html = (
     <div className="desktop">
@@ -31,8 +42,8 @@ export const Desktop = () => {
         <h1 className="title">HushBubble</h1>
         <div className="spacer" />
         {!online && <div className="connecting-indicator"><span>offline</span><span className="loader loader-small"></span></div> }
-        <a class="header-link no-mobile" href="https://bubbleprotocol.com/chat/about.html">What is HushBubble?</a>
-        <a class="header-link mobile" href="https://bubbleprotocol.com/chat/about.html">What is it?</a>
+        <a className="header-link no-mobile" href="https://bubbleprotocol.com/chat/about.html">What is HushBubble?</a>
+        <a className="header-link mobile" href="https://bubbleprotocol.com/chat/about.html">What is it?</a>
       </header>
 
       {/* Content */}
