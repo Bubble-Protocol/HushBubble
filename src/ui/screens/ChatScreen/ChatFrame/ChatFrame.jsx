@@ -72,7 +72,7 @@ export const ChatFrame = ({ chat }) => {
 
       {/* Header */}
       <div className="chat-header">
-        <div className="chat-header-icons">
+        <div className="chat-header-icons no-mobile">
           <div className="chat-header-member-icons">
             {chatIcons}
           </div>
@@ -81,7 +81,7 @@ export const ChatFrame = ({ chat }) => {
           <div className="chat-header-title">{chatData.title || chatData.members[1].title || chatData.members[1].address}</div>
           {chatData.members.length > 0 && <div className="chat-header-subtext">{chatData.members.length + ' member' + (chatData.members.length === 1 ? '' : 's')}</div>}
         </div>
-        <div className="chat-header-menu" />
+        <div className="chat-header-menu no-mobile" />
       </div>
 
       {/* Content */}

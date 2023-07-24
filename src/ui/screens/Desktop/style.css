@@ -50,6 +50,10 @@
   width: fit-content;
 }
 
+.desktop .mobile {
+  display: none;
+}
+
 .desktop .header-link:hover {
   color: #ccc;
 }
@@ -122,8 +126,23 @@
 .desktop .expander {
   align-self: stretch;
   height: 1px;
-  min-width: 1600px;
   position: relative;
+}
+
+@media only screen and (max-width: 800px) {
+
+  .desktop .mobile {
+    display: inherit;
+  }
+  
+  .desktop .no-mobile {
+    display: none;
+  }
+  
+  .desktop .header {
+    padding: 8px 16px;
+  }
+    
 }
 
 .loader {
