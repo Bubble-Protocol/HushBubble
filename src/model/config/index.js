@@ -2,8 +2,8 @@ import { ContentId } from "@bubble-protocol/core";
 
 export const DEFAULT_CONFIG = {
   bubbleId: new ContentId({
-    chain: 137,
-    contract: '0xf9F287Eb990a65784F599a3F5670c8E14071F473',
-    provider: 'wss://vault.bubbleprotocol.com/v2/polygon'
+    chain: 84531,
+    contract: '0x53c3A5ffa39546baB673B78d8D75fD9419069097',
+    provider: 'wss://vault.bubbleprotocol.com/v2/base-goerli'
   })
 }

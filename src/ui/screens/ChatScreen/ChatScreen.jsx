@@ -1,23 +1,31 @@
-import PropTypes from "prop-types";
-import React from "react";
+import React, { useState } from "react";
 import "./style.css";
 import { ChatFrame } from "./ChatFrame";
+import { stateManager } from "../../../state-context.js";
 
-export const ChatScreen = ({chat}) => {
+export const ChatScreen = () => {
 
-  console.debug('chat object', chat)
+  const chats = stateManager.useStateData('chats')();
+
+  const [selectedChat, setSelectedChat] = useState(chats.length > 0 ? 0 : undefined);
+  if (selectedChat === undefined && chats.length > 0) setSelectedChat(0);
+
+  chats.sort((a,b) => { return getLastMessageTime(b) - getLastMessageTime(a) });
+
   return (
 
     <div className="chat-screen" >
+
       <div className="chat-frame">
-        <ChatFrame chat={chat} />    
+        {selectedChat !== undefined && <ChatFrame chat={chats[selectedChat]} />} 
       </div>
 
     </div>
   );
 };
 
-ChatScreen.propTypes = {
-  chat: PropTypes.object.isRequired,
-};
 
+function getLastMessageTime(conversation) {
+  if (conversation.messages.length === 0) return Number.MAX_SAFE_INTEGER;
+  else return conversation.messages.slice(-1)[0].modified;
+}

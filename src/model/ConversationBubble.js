@@ -87,6 +87,7 @@ export class ConversationBubble extends WebsocketBubble {
       })
     message.pending = true;
     message.created = Date.now();
+    message.modified = message.created;
     this._setMessage(message);
     return Promise.resolve();
   }

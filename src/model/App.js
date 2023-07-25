@@ -17,13 +17,12 @@ export class MessengerApp {
   newMsgCount = 0;
 
   constructor() {
-    this.conversation = new Conversation(DEFAULT_CONFIG.bubbleId);
     stateManager.register('app-state', this.state);
-    stateManager.register('chat');
+    stateManager.register('chats');
+    stateManager.register('total-unread', 0);
     stateManager.register('new-message-notification');
     stateManager.register('online', window.navigator.onLine);
     stateManager.register('myId', undefined);
-    this.conversation.on('new-message-notification', this._handleNewMessage.bind(this));
   }
 
   initialise() {
@@ -32,11 +31,15 @@ export class MessengerApp {
       this.deviceKey = new ecdsa.Key();
       this._saveState();
     }
-    return this.conversation.initialise(this.deviceKey)
+    this.myId = new User(this.deviceKey.cPublicKey);
+    this.conversations = [new Conversation(DEFAULT_CONFIG.bubbleId, this.myId)];
+    this.conversations[0].on('new-message-notification', this._handleNewMessage.bind(this));
+    this.conversations[0].on('unread-change', this._handleUnreadChange.bind(this));
+    return this.conversations[0].initialise(this.deviceKey)
       .then(() => {
         this.state = STATE.initialised;
-        stateManager.dispatch('myId', new User(this.deviceKey.cPublicKey));
-        stateManager.dispatch('chat', this.conversation);
+        stateManager.dispatch('myId', this.myId);
+        stateManager.dispatch('chats', this.conversations);
         stateManager.dispatch('app-state', this.state);
       })
   }
@@ -46,12 +49,18 @@ export class MessengerApp {
   }
 
   async close() {
-    return this.conversation.close();
+    return Promise.all(this.conversations.map(c => c.close()));
   }
 
   _handleNewMessage() {
     this.newMsgCount++;
     stateManager.dispatch('new-message-notification', this.newMsgCount);
+  }
+
+  _handleUnreadChange() {
+    let unread = 0; this.conversations.forEach(c => { unread += c.unreadMsgs });
+    console.debug('app unread', unread)
+    stateManager.dispatch('total-unread', unread);
   }
 
   _loadState() {

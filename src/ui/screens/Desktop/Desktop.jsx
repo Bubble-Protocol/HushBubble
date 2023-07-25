@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "./style.css";
 import { stateManager } from "../../../state-context";
 import { ChatScreen } from "../ChatScreen/ChatScreen";
@@ -6,33 +6,13 @@ import { setFaviconWithCount } from "../../utils/favicon";
 
 export const Desktop = () => {
 
-  const [msgCount, setMsgCount] = useState(0);
-  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
-
+  const unread = stateManager.useStateData('total-unread')();
   const online = stateManager.useStateData('online')();
   const appState = stateManager.useStateData('app-state')();
-  const chat = stateManager.useStateData('chat')();
-  const newMsgCount = stateManager.useStateData('new-message-notification')();
 
-  console.debug('Desktop', online, chat);
+  console.debug('Desktop', online);
 
-  if (newMsgCount > msgCount) {
-    if (!document.hasFocus()) setFaviconWithCount(newMsgCount - unreadMsgCount);
-    setMsgCount(newMsgCount);
-  }
-
-  useEffect(() => {
-    const onFocus = () => {
-      if (document.visibilityState === 'visible') {
-        setUnreadMsgCount(newMsgCount);
-        setFaviconWithCount(0);
-      }
-    }
-    document.addEventListener('visibilitychange', onFocus);
-    return () => {
-      document.removeEventListener('visibilitychange', onFocus);
-    };
-  }, []);
+  setFaviconWithCount(unread);
 
   const html = (
     <div className="desktop">
@@ -49,7 +29,7 @@ export const Desktop = () => {
       {/* Content */}
       <div className="content">
 
-        {appState === 'initialised' && chat && <ChatScreen chat={chat} />}
+        {appState === 'initialised' && <ChatScreen />}
 
       </div>
 

@@ -22,23 +22,44 @@ export const ChatFrame = ({ chat }) => {
   const endOfMessagesRef = useRef(null);
   const chatColumnRef = useRef(null);
 
-  const scrollToBottom = () => {
+  const atBottom = () => {
+    const { current: chatColumn } = chatColumnRef;
+    return chatColumn.scrollHeight - chatColumn.scrollTop === chatColumn.clientHeight;
+  }
+
+  const scrollToBottom = (force = false) => {
     const { current: chatColumn } = chatColumnRef;
     if (chatColumn && messages.length) {
-      if (messages[messages.length - 1].from.id === myId.id) {
-        endOfMessagesRef.current?.scrollIntoView({ behavior: 'auto' });
+      if (force || messages[messages.length - 1].from.id === myId.id) {
+        chatColumn.scrollTo(0, chatColumn.scrollHeight);
       }
-      else {
-        const lastMessageElement = chatColumn.lastElementChild;
-        if (lastMessageElement) {
-          const isLastMessageInView = chatColumn.scrollHeight - chatColumn.scrollTop - chatColumn.clientHeight <= 1;
-          if (isLastMessageInView) endOfMessagesRef.current?.scrollIntoView({ behavior: 'auto' });
-        }
-      }
+      else if (!atBottom()) chatColumn.scrollTo(0, chatColumn.scrollHeight);
     }
   }
 
   useEffect(scrollToBottom, [messages]);
+  useEffect(() => scrollToBottom(true), []);
+
+
+  // Clear notifications if user scrolls to bottom
+
+  useEffect(() => {
+
+    const handleScroll = () => {
+      if (atBottom() && document.hasFocus()) chat.setReadTime(Date.now());
+    };
+  
+    const chatContainer = chatColumnRef.current;
+    if (chatContainer) {
+      chatContainer.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (chatContainer) {
+        chatContainer.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
 
 
   // Functions
