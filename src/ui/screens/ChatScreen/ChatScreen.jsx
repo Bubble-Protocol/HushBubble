@@ -2,13 +2,11 @@ import React, { useState } from "react";
 import "./style.css";
 import { ChatFrame } from "./ChatFrame";
 import { stateManager } from "../../../state-context.js";
-import { ChatSelector } from "./ChatSelector";
+import { ChatSelectorColumn } from "./ChatSelectorColumn";
 
 export const ChatScreen = ({mobileView, setMobileView}) => {
 
   const chats = stateManager.useStateData('chats')();
-  const unread = stateManager.useStateData('total-unread')();
-  const myId = stateManager.useStateData('myId')();
 
   const [selectedChat, setSelectedChat] = useState(chats.length > 0 ? 0 : undefined);
   if (selectedChat === undefined && chats.length > 0) setSelectedChat(0);
@@ -44,34 +42,19 @@ export const ChatScreen = ({mobileView, setMobileView}) => {
     if (mobileView === 'menu') setMobileView('chat');
   };
 
+
+  // Sort chats
+  
   chats.sort((a,b) => { return getLastMessageTime(b) - getLastMessageTime(a) });
 
   return (
 
     <div className={"chat-screen" + (mobileView === 'menu' ? ' mobile-menu-visible' : '')} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} >
 
-      <div className="chat-column">
-        <div className="title-item">
-          <div className="selector-content">
-            <div className="selector-title-row">
-              <div className="title-item-title">Inbox</div>
-            </div>
-            <p className="p">{chats.length} conversation{chats.length === 1 ? '' : 's'}, {unread} unread message{unread === 1 ? '' : 's'}</p>
-          </div>
-        </div>
-        <div className="secondary-dividing-line" />
-        <div className="chat-list">
-          {chats !== undefined &&
-            chats.map((c, index) => {
-              return <ChatSelector key={index} chat={c} myId={myId} selected={index === selectedChat} onClick={() => setSelectedChat(index)} />
-            })
-          }
-        </div>
-      </div>
+      <ChatSelectorColumn chats={chats} selectedChat={selectedChat} setSelectedChat={setSelectedChat} />
 
-      <div className="chat-frame">
-        {selectedChat !== undefined && <ChatFrame chat={chats[selectedChat]} />} 
-      </div>
+      {selectedChat !== undefined && <ChatFrame chat={chats[selectedChat]} />}
+      {selectedChat === undefined && <div className="chat-frame"></div>}
 
     </div>
   );

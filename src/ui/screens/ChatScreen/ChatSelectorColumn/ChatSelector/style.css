@@ -5,7 +5,6 @@
   gap: 20px;
   padding: 12px 20px;
   position: relative;
-  max-width: 100%;
 }
 
 .chat-selector .disabled {
@@ -21,13 +20,13 @@
 }
 
 .chat-selector .content {
+  align-self: stretch;
   align-items: flex-start;
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 8px;
   position: relative;
-  width: 298px;
 }
 
 .chat-selector .title-row {
@@ -51,7 +50,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
 }
 
 .chat-selector .time {
@@ -63,10 +61,9 @@
   line-height: normal;
   position: relative;
   white-space: nowrap;
-  width: fit-content;
 }
 
-.chat-selector .notification-text-wrapper {
+.chat-selector .notification {
   align-items: center;
   background-color: #0e1218;
   border-radius: 3px;
@@ -105,7 +102,6 @@
   height: 78px;
   padding: 12px 20px;
   position: relative;
-  width: 400px;
 }
 
 .chat-selector .contact-icon {

@@ -6,8 +6,8 @@ Please share your feedback here: https://form.asana.com/?k=uvp-HPgd3_hyoXRBw1IcN
 import PropTypes from "prop-types";
 import React from "react";
 import "./style.css";
-import defaultIcon from "../../../assets/img/unknown-contact-icon.png";
-import { stateManager } from "../../../../state-context";
+import defaultIcon from "../../../../assets/img/unknown-contact-icon.png";
+import { stateManager } from "../../../../../state-context";
 
 export const ChatSelector = ({
   chat,
@@ -38,7 +38,7 @@ export const ChatSelector = ({
           <div className="title">{formatTitle(title || otherMember.title || otherMember.address)}</div>
           {notifications === 0 && <div className="time">{formatTime(latestMessage.modified)}</div>}
           {notifications > 0 && (
-            <div className="notification-text-wrapper">
+            <div className="notification">
               <div className="notification-text">{notifications > 99 ? '99' : notifications}</div>
             </div>
           )}

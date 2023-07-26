@@ -23,7 +23,7 @@ export const Desktop = () => {
       <header className="header">
         <div className="mobile-menu-button" onClick={() => setMobileView(mobileView === 'chat' ? 'menu' : 'chat')}>
           <PopularMoreVertical1 className="mobile" size="32px" color="#cccccc" />
-          {unread !== 0 && <span className="notification mobile">{unread}</span>}
+          {unread !== 0 && <span className="mobile-menu-notification mobile">{unread}</span>}
         </div>
         <h1 className="title">HushBubble</h1>
         <div className="spacer" />

@@ -71,12 +71,11 @@
 .chat-frame .chat-header-title-row {
   flex: 1;
   align-self: stretch;
-  align-items: center;
+  align-items: stretch;
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 12px;
-  min-width: 0;
   overflow: hidden;
   position: relative;
 }
@@ -93,7 +92,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  max-width: calc(100vw - 24px);
 }
 
 .chat-frame .chat-header-subtext {
@@ -188,8 +187,9 @@
 
 @media only screen and (max-width: 800px) {
 
-  .chat-messages {
+  .chat-frame .chat-messages {
     padding: 0 8px;
+    overflow-y: initial;
   }
 
   .desktop .mobile {
