@@ -29,6 +29,28 @@
   position: relative;
 }
 
+.desktop .mobile-menu-button {
+  position: relative;
+  width: 32px;
+  height: 32px;
+}
+
+.desktop .notification {
+  position: absolute;
+  margin-top: -26px;
+  margin-left: 2px;
+  border-radius: 10px;
+  width: 28px;
+  height: 20px;
+  background-color: #c00;
+  color: #fff;
+  font-size: 14px;
+  line-height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .desktop .title {
   color: #ffffff;
   font-size: 24px;
@@ -143,7 +165,7 @@
   .desktop .header {
     padding: 8px 16px;
   }
-    
+
 }
 
 .loader {

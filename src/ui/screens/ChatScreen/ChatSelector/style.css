@@ -1,0 +1,117 @@
+
+.chat-selector {
+  align-items: flex-start;
+  display: flex;
+  gap: 20px;
+  padding: 12px 20px;
+  position: relative;
+  max-width: 100%;
+}
+
+.chat-selector .disabled {
+  opacity: 50%;
+}
+
+.chat-selector:hover {
+  cursor: pointer;
+}
+
+.selected {
+  background-color: rgba(224, 250, 216, 0.70);
+}
+
+.chat-selector .content {
+  align-items: flex-start;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  width: 298px;
+}
+
+.chat-selector .title-row {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  gap: 10px;
+  height: 24px;
+  position: relative;
+}
+
+.chat-selector .title {
+  color: #0f1217;
+  flex: 1;
+  font-family: "Work Sans", Helvetica;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.chat-selector .time {
+  color: #666666;
+  font-family: "Work Sans", Helvetica;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.chat-selector .notification-text-wrapper {
+  align-items: center;
+  background-color: #0e1218;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  height: 20px;
+  justify-content: center;
+  overflow: hidden;
+  width: 20px;
+}
+
+.chat-selector .notification-text {
+  color: #ffffff;
+  font-family: "Work Sans", Helvetica;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.chat-selector .text {
+  align-self: stretch;
+  color: #666666;
+  font-family: "Work Sans", Helvetica;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 22px;
+  position: relative;
+}
+
+.chat-selector .chat-selector {
+  align-items: flex-start;
+  display: flex;
+  gap: 20px;
+  height: 78px;
+  padding: 12px 20px;
+  position: relative;
+  width: 400px;
+}
+
+.chat-selector .contact-icon {
+  border-radius: 21px;
+  height: 42px;
+  min-width: 42px;
+  position: relative;
+}
+

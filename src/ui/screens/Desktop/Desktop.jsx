@@ -1,14 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useRef, useState } from "react";
 import "./style.css";
 import { stateManager } from "../../../state-context";
 import { ChatScreen } from "../ChatScreen/ChatScreen";
 import { setFaviconWithCount } from "../../utils/favicon";
+import { PopularMoreVertical1 } from "../../icons/PopularMoreVertical1/PopularMoreVertical1";
 
 export const Desktop = () => {
 
   const unread = stateManager.useStateData('total-unread')();
   const online = stateManager.useStateData('online')();
   const appState = stateManager.useStateData('app-state')();
+  const [mobileView, setMobileView] = useState('chat');
 
   console.debug('Desktop', online);
 
@@ -19,6 +21,10 @@ export const Desktop = () => {
 
       {/* Header */}
       <header className="header">
+        <div className="mobile-menu-button" onClick={() => setMobileView(mobileView === 'chat' ? 'menu' : 'chat')}>
+          <PopularMoreVertical1 className="mobile" size="32px" color="#cccccc" />
+          {unread !== 0 && <span className="notification mobile">{unread}</span>}
+        </div>
         <h1 className="title">HushBubble</h1>
         <div className="spacer" />
         {!online && <div className="connecting-indicator"><span>offline</span><span className="loader loader-small"></span></div> }
@@ -29,7 +35,7 @@ export const Desktop = () => {
       {/* Content */}
       <div className="content">
 
-        {appState === 'initialised' && <ChatScreen />}
+        {appState === 'initialised' && <ChatScreen mobileView={mobileView} setMobileView={setMobileView} />}
 
       </div>
 
