@@ -187,6 +187,10 @@
 
 @media only screen and (max-width: 800px) {
 
+  .chat-frame {
+    overflow-y: scroll;
+  }
+  
   .chat-frame .chat-messages {
     padding: 0 8px;
     overflow-y: initial;
