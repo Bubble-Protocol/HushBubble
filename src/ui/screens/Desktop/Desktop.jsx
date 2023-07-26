@@ -21,7 +21,7 @@ export const Desktop = () => {
 
       {/* Header */}
       <header className="header">
-        <div className="mobile-menu-button" onClick={() => setMobileView(mobileView === 'chat' ? 'menu' : 'chat')}>
+        <div className="mobile-menu-button mobile" onClick={() => setMobileView(mobileView === 'chat' ? 'menu' : 'chat')}>
           <PopularMoreVertical1 className="mobile" size="32px" color="#cccccc" />
           {unread !== 0 && <span className="mobile-menu-notification mobile">{unread}</span>}
         </div>
