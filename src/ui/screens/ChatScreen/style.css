@@ -17,8 +17,6 @@
     left: calc(max(-100vw, -400px));
     top: 0;
     width: calc(100vw + min(100vw, 400px));
-    height: 100%;
-    transition: transform 0.2s ease;
   }
 
   .mobile-menu-visible {
