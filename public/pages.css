@@ -53,6 +53,14 @@ h2 {
   color: #1e3e79;
 }
 
+h3 {
+  font-family: "Work Sans", Helvetica;
+  margin-top: 20px;
+  font-size: 18px;
+  margin-bottom: -4px;
+  color: #1e3e79;
+}
+
 p {
   line-height: 24px;
 }
