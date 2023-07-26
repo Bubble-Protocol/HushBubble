@@ -39,7 +39,7 @@ export class ConversationBubble extends WebsocketBubble {
       delegation,
       signFunction: toDelegateSignFunction(deviceKey.signFunction, delegation)
     }
-    super(bubbleId, user);
+    super(bubbleId, user, {sendTimeout: 10000});
     this.id = bubbleId.chain+'-'+bubbleId.contract;
     stateManager.register(this.id+'-connection-state', this.getConnectionState());
     stateManager.register(this.id+'-metadata', {});
@@ -114,7 +114,7 @@ export class ConversationBubble extends WebsocketBubble {
     stateManager.dispatch(this.id+'-metadata', this.metadata);
   }
 
-  _readMessage(messageDetails) {
+  _readMessage(messageDetails, attempts=5) {
     console.trace('reading message', messageDetails);
     return this.read(messageDetails.name)
       .then(messageJson => {
@@ -127,6 +127,17 @@ export class ConversationBubble extends WebsocketBubble {
         }
         catch(error) {
           console.warn(this.id, 'message parse error', error);
+        }
+      })
+      .catch(error => {
+        console.warn(this.id, 'message read error', error.code, error.message);
+        if (error.code === -32005) { 
+          // bubble server internal error.  Try again in 1s.
+          if (attempts <= 1) console.warn(this.id, 'abandoning message read after 5 failed attempts');
+          else {
+            console.trace(this.id, 'trying again in 1s')
+            setTimeout(() => this._readMessage(messageDetails, --attempts), 1000);
+          }
         }
       })
   }

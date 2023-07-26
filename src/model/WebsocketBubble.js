@@ -20,10 +20,10 @@ export class WebsocketBubble extends Bubble {
   listeners = new EventManager(['state-change', 'available', 'close', 'error']);
   content = {};
 
-  constructor(bubbleId, key) {
+  constructor(bubbleId, key, options) {
     assert.isInstanceOf(bubbleId, ContentId, 'bubbleId');
     assert.isObject(key, 'key'); console.debug('key', key.signFunction)
-    super(bubbleId, new bubbleProviders.WebsocketBubbleProvider(bubbleId.provider), key.signFunction)
+    super(bubbleId, new bubbleProviders.WebsocketBubbleProvider(bubbleId.provider, options), key.signFunction)
     this.on = this.listeners.on.bind(this.listeners);
     this.off = this.listeners.off.bind(this.listeners);
   }
