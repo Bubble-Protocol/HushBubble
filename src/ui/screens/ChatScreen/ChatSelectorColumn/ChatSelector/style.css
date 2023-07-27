@@ -93,6 +93,8 @@
   letter-spacing: 0;
   line-height: 22px;
   position: relative;
+  max-height: 66px;
+  overflow: hidden;
 }
 
 .chat-selector .chat-selector {
