@@ -83,7 +83,7 @@ export class HushBubbleCentralWallet {
     if (this.state !== WALLET_STATE.connected) throw new Error('wallet is not available');
     const nonce = Date.now() + Math.random() * 100000;
     const packetToSign = {nonce, ...packet};
-    const sig = this.applicationKey.sign(ecdsa.hash(packetToSign));
+    const sig = this.applicationKey.sign(ecdsa.hash(JSON.stringify(packetToSign)));
     return this.provider.post('send', {nonce, ...packet, sig, options});
   }
 

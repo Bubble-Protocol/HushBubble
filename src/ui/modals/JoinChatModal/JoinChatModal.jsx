@@ -5,8 +5,8 @@ import { Button } from "../../components/Button/Button";
 import { TextBox } from "../../components/TextBox";
 import { ContentId } from "@bubble-protocol/core";
 
-export const JoinChatModal = ({ onJoin, onCancel, onCompletion }) => {
-  const [bubbleId, setBubbleId] = useState('');
+export const JoinChatModal = ({ bubbleIn, onJoin, onCancel, onCompletion }) => {
+  const [bubbleId, setBubbleId] = useState(bubbleIn);
   const [error, setError] = useState();
 
   let contentId;
@@ -42,6 +42,7 @@ export const JoinChatModal = ({ onJoin, onCancel, onCompletion }) => {
 };
 
 JoinChatModal.propTypes = {
+  bubbleIn: PropTypes.string,
   onJoin: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   onCompletion: PropTypes.func,

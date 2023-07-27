@@ -3,13 +3,13 @@ import React, { useState } from "react";
 import { Modal } from "../../components/Modal/Modal";
 import { Button } from "../../components/Button/Button";
 import { TextBox } from "../../components/TextBox";
-import { ecdsa } from "@bubble-protocol/crypto";
 import { ModalHostInfo } from "../../components/ModalHostInfo";
 import { ModalHostCustomise } from "../../components/ModalHostCustomise";
+import { User } from "../../../model/User";
 
-export const CreateChatModal = ({ chains, hosts, session, bubble, onCreate, onCancel, onCompletion }) => {
+export const CreateChatModal = ({ chains, hosts, session, bubble, userIn='', onCreate, onCancel, onCompletion }) => {
   const defaultChain = chains.find(c => c.id === session.chain.id) || chains[0];
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState(userIn);
   const [hostValues, setHostValues] = useState({chain: defaultChain, host: hosts[0], url: "", urlValid: false});
   const [customise, setCustomised] = useState(false);
   const [createError, setCreateError] = useState();
@@ -22,13 +22,17 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, onCreate, onCa
     return host;
   }
 
-  function isId(val) {
+  let userObj;
+  try {
+    let id = user;
     try {
-      const publicKey = Buffer.from(val, 'base64').toString('hex');
-      return ecdsa.assert.isCompressedPublicKey(publicKey);
+      const url = new URL(id);
+      id = url.searchParams.get('connect');
     }
-    catch(_) { return false }
+    catch(_) {}
+    userObj = new User(id);
   }
+  catch(_) {}
 
   function createChat() {
     onCreate({
@@ -56,12 +60,12 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, onCreate, onCa
         <div className="step-frame">
           <p className="step-title">Users</p>
           <p className="small-text">Members of your chat, other than you...</p>
-          <TextBox text={user} onChange={v => {setCreateError(); setUser(v)}} valid={isId(user)} />
+          <TextBox text={userObj ? userObj.address : user} onChange={v => {setCreateError(); setUser(v)}} valid={userObj !== undefined} />
         </div>
         <div className="step-frame">
           <p className="small-text">Requires a blockchain transaction to deploy the chat smart contract.</p>
           {createError && <p className="small-text error-text">{createError.message}</p>}
-          <Button title="Create" onClick={createChat} disabled={(hostValues.url !== "" && !hostValues.urlValid) || !isId(user)} />
+          <Button title="Create" onClick={createChat} disabled={(hostValues.url !== "" && !hostValues.urlValid) || userObj === undefined} />
         </div>
       </React.Fragment>
     />
@@ -73,6 +77,7 @@ CreateChatModal.propTypes = {
   hosts: PropTypes.array.isRequired,
   session: PropTypes.object.isRequired,
   bubble: PropTypes.object.isRequired,
+  userIn: PropTypes.string,
   onCreate: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   onCompletion: PropTypes.func.isRequired,

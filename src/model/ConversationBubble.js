@@ -65,15 +65,12 @@ export class ConversationBubble extends WebsocketBubble {
       })
   }
 
-  join(deviceKey) {
+  join() {
     console.trace('joining conversation bubble');
-    return this.provider.connect()
+    return super.initialise()
       .then(() => {
-        return super.recoverMetadata();
+        return this.metadata;
       })
-      .then(() => {
-        return this.addUser(deviceKey.address, deviceKey.cPublicKey);
-      });
   }
 
   postMessage(message) {
@@ -93,7 +90,7 @@ export class ConversationBubble extends WebsocketBubble {
   }
 
   getMessages() {
-    return this.messages;
+    return this.messages || [];
   }
 
   setMetadata(metadata) {

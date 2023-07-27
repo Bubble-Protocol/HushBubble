@@ -21,8 +21,19 @@ console.debug = DEBUG_ON ? Function.prototype.bind.call(console.info, console, "
 
 await initialiseLocalStorage('BubbleChat');
 
+stateManager.register('url-params');
+
 const messenger = new MessengerApp(stateManager);
-messenger.initialise().catch(console.error);
+messenger.initialise()
+  .then(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const params = {
+      connect: urlParams.get('connect'), 
+      join: urlParams.get('chat')
+    }
+    stateManager.dispatch('url-params', params);
+  })
+  .catch(console.error);
 
 window.addEventListener('online', () => messenger.setOnlineStatus(true));
 window.addEventListener('offline', () => messenger.setOnlineStatus(false));
@@ -38,9 +49,9 @@ const root = ReactDOMClient.createRoot(app);
 
 setFaviconWithCount(0);
 
-function render() { 
+function render(params={}) { 
   root.render(
-    <Desktop />
+    <Desktop connect={params.connect} />
   );
 }
 

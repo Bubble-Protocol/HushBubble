@@ -15,7 +15,7 @@ const STATE = {
 export class MessengerApp {
 
   state = STATE.uninitialised;
-  wallet = new HushBubbleCentralWallet();
+  wallet;
   deviceKey;
   newMsgCount = 0;
 
@@ -27,11 +27,6 @@ export class MessengerApp {
     stateManager.register('online', window.navigator.onLine);
     stateManager.register('myId', undefined);
     stateManager.register('config', DEFAULT_CONFIG);
-    stateManager.register('chat-functions', {
-      joinChat: () => Promise.reject(new Error('not yet implemented')),
-      createChat: () => Promise.reject(new Error('not yet implemented')),
-      terminateChat: () => Promise.reject(new Error('not yet implemented'))
-    });
   }
 
   initialise() {
@@ -40,6 +35,7 @@ export class MessengerApp {
       this.deviceKey = new ecdsa.Key();
       this._saveState();
     }
+    this.wallet = new HushBubbleCentralWallet(this.deviceKey);
     this.session = new Session(DEFAULT_CONFIG.chains[4], this.wallet, this.deviceKey);
     stateManager.register('session', this.session);
     return this.session.open()

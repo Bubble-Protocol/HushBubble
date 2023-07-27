@@ -21,23 +21,15 @@ export const ChatSelectorColumn = ({chats, selectedChat, setSelectedChat, setMod
   const myId = stateManager.useStateData('myId')();
   const config = stateManager.useStateData('config')();
   const session = stateManager.useStateData('session')();
-  const chatFunctions = stateManager.useStateData('chat-functions')();
 
   const [menuMinimized, setMenuMinimized] = useState(false);
   const [centrePanel, setCentrePanel] = useState('chat');
 
   // Modals
 
-  const joinChatModal = <JoinChatModal onJoin={chatFunctions.joinChat} onDone={() => setModal(null)} onCancel={() => setModal(null)} />;
-
   function createChatModal(bubble) {
-    return <CreateChatModal session={session} chains={config.chains} hosts={config.hosts} bubble={bubble} onCreate={chatFunctions.createChat} onCancel={() => {setModal(null)}} onCompletion={() => {setModal(null); setCentrePanel('chat')}} />;
+    return <CreateChatModal session={session} chains={config.chains} hosts={config.hosts} bubble={bubble} onCreate={session.createChat} onCancel={() => {setModal(null)}} onCompletion={() => {setModal(null); setCentrePanel('chat')}} />;
   } 
-
-  function deleteChatModal(conversation) {
-    return <DeleteChatModal conversation={conversation} onDelete={chatFunctions.terminateChat} onCancel={() => {setModal(null)}} onCompletion={() => {setModal(null)}} />;
-  } 
-
 
 
   return menuMinimized

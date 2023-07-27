@@ -45,7 +45,7 @@ export const ChatScreen = ({mobileView, setMobileView, setModal}) => {
 
   // Sort chats
   
-  chats.sort((a,b) => { return getLastMessageTime(b) - getLastMessageTime(a) });
+  chats.sort((a,b) => { return getLastMessageTime(b.getMessages()) - getLastMessageTime(a.getMessages()) });
 
   return (
 
@@ -61,7 +61,7 @@ export const ChatScreen = ({mobileView, setMobileView, setModal}) => {
 };
 
 
-function getLastMessageTime(conversation) {
-  if (conversation.messages.length === 0) return Number.MAX_SAFE_INTEGER;
-  else return conversation.messages.slice(-1)[0].modified;
+function getLastMessageTime(messages) {
+  if (messages.length === 0) return Number.MAX_SAFE_INTEGER;
+  else return messages.slice(-1)[0].modified;
 }

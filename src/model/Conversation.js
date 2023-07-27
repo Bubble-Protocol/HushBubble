@@ -23,7 +23,7 @@ export class Conversation {
     this.bubbleId = bubbleId;
     this.myId = myId;
     if (stateData.metadata) this._setMetadata(stateData.metadata);
-    this.users = stateData.users;
+    this.members = stateData.members;
     this.on = this.listeners.on.bind(this.listeners);
     this.off = this.listeners.off.bind(this.listeners);
     stateManager.register(this.id+'-unread', 0);
@@ -40,6 +40,11 @@ export class Conversation {
       });
   }
 
+  getMessages() { 
+    if (!this.bubble) throw new Error('conversation not initialised');
+    return this.bubble.getMessages();
+  }
+
   postMessage(message) {
     if (!this.bubble) throw new Error('conversation not initialised');
     assert.isObject(message, 'message');
@@ -54,13 +59,9 @@ export class Conversation {
       .then(() => { this.state = STATE.open });
   }
 
-  join(applicationKey, deviceKey, delegation) { console.debug('joining conversation', applicationKey, deviceKey)
-    const appBubble = new ConversationBubble(new ContentId(this.bubbleId), applicationKey);
-    return appBubble.join(deviceKey)
-      .then(() => {
-        appBubble.close();
-        return this.initialise(deviceKey, delegation);
-      })
+  join(deviceKey) {
+    console.trace(this.id, 'joining conversation')
+    return this.initialise(deviceKey);
   }
 
   setReadTime(time) {
@@ -73,7 +74,7 @@ export class Conversation {
   }
 
   serialize() {
-    return {id: this.id, bubbleId: this.bubbleId, metadata: this.metadata, users: this.users}
+    return {id: this.id, bubbleId: this.bubbleId, metadata: this.metadata, members: this.members}
   }
 
   _handleMetadata(metadata) {

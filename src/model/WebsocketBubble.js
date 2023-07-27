@@ -55,6 +55,13 @@ export class WebsocketBubble extends Bubble {
       })
   }
 
+  recoverMetadata() {
+    return this.provider.connect()
+      .then(() => {
+        return this.metadata;
+      })
+  }
+
   getConnectionState() {
     if (this.state !== BUBBLE_STATE.initialised) return CONNECTED_STATE.closed;
     else {
