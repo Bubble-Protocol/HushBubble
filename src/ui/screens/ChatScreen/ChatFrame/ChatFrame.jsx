@@ -24,7 +24,7 @@ export const ChatFrame = ({ chat }) => {
 
   const atBottom = () => {
     const { current: chatColumn } = chatColumnRef;
-    return chatColumn.scrollHeight - chatColumn.scrollTop === chatColumn.clientHeight;
+    return chatColumn.scrollHeight - chatColumn.scrollTop - chatColumn.clientHeight < 1;
   }
 
   const scrollToBottom = (force = false) => {
