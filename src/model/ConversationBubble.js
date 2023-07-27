@@ -42,7 +42,7 @@ export class ConversationBubble extends WebsocketBubble {
     super(bubbleId, user, {sendTimeout: 10000});
     this.id = bubbleId.chain+'-'+bubbleId.contract;
     stateManager.register(this.id+'-connection-state', this.getConnectionState());
-    stateManager.register(this.id+'-metadata', {});
+    stateManager.register(this.id+'-metadata', {bubbleId: bubbleId});
     stateManager.register(this.id+'-messages', []);
     this.listeners.addEvents(['message']);
     this.listeners.on('state-change', state => stateManager.dispatch(this.id+'-connection-state', state))
@@ -110,7 +110,7 @@ export class ConversationBubble extends WebsocketBubble {
   _handleMetadataChange(notification) { 
     const metadata = JSON.parse(notification.data);
     console.debug('new metadata', metadata)
-    this.metadata = {...DEFAULT_METADATA, ...metadata};
+    this.metadata = {...DEFAULT_METADATA, ...metadata, bubbleId: this.contentId};
     stateManager.dispatch(this.id+'-metadata', this.metadata);
   }
 

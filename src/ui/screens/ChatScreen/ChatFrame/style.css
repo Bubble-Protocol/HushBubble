@@ -115,6 +115,10 @@
   width: 164px;
 }
 
+.chat-frame .chat-header-menu-left {
+  width: 32px;
+}
+
 .chat-frame .chat-messages {
   align-self: stretch;
   flex: 1;
@@ -190,6 +194,11 @@
   .chat-frame {
     overflow-y: scroll;
   }
+
+  .chat-frame .chat-header-menu {
+    width: 32px;
+    padding: 0;
+  }  
   
   .chat-frame .chat-messages {
     padding: 0 8px;

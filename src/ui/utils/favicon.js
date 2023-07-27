@@ -1,4 +1,4 @@
-import favicon from '../assets/img/favicon.ico';
+import favicon from '../../assets/img/favicon.ico';
 
 export function setFaviconWithCount(count) {
   if (count > 99) count = 99;

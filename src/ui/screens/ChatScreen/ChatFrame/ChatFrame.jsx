@@ -1,12 +1,14 @@
 import { ChatDateRow } from "./ChatDateRow";
 import { Message } from "../../../components/Message";
-import defaultIcon from "../../../assets/img/unknown-contact-icon.png";
+import defaultIcon from "../../../../assets/img/unknown-contact-icon.png";
 
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import "./style.css";
 import { Button } from "../../../components/Button/Button";
+import { DropdownMenu } from "../../../components/DropdownMenu/DropdownMenu";
 import { stateManager } from "../../../../state-context";
+import { PopularMoreVertical1 } from "../../../icons/PopularMoreVertical1";
 
 export const ChatFrame = ({ chat }) => {
 
@@ -16,6 +18,7 @@ export const ChatFrame = ({ chat }) => {
   const messages = stateManager.useStateData(chat.id+'-messages')();
   const connectionState = stateManager.useStateData(chat.id+'-connection-state')();
   const online = stateManager.useStateData('online')();
+  const config = stateManager.useStateData('config')();
 
   // Setup scroll-to-bottom
 
@@ -93,6 +96,7 @@ export const ChatFrame = ({ chat }) => {
 
       {/* Header */}
       <div className="chat-header">
+        <div className="chat-header-menu-left mobile"></div>
         <div className="chat-header-icons no-mobile">
           <div className="chat-header-member-icons">
             {chatIcons}
@@ -102,7 +106,11 @@ export const ChatFrame = ({ chat }) => {
           <div className="chat-header-title">{chatData.title || chatData.members[1].title || chatData.members[1].address}</div>
           {chatData.members.length > 0 && <div className="chat-header-subtext">{chatData.members.length + ' member' + (chatData.members.length === 1 ? '' : 's')}</div>}
         </div>
-        <div className="chat-header-menu no-mobile" />
+        <div className="chat-header-menu">
+          <DropdownMenu direction="bottom-left" options={[{name: "Copy Chat Link", onClick: () => navigator.clipboard.writeText(config.appUrl+'?chat='+chatData.bubbleId.toString())}]} >
+            <PopularMoreVertical1 className="icon-instance-node-3" />
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Content */}

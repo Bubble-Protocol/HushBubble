@@ -23,6 +23,12 @@ export class MessengerApp {
     stateManager.register('new-message-notification');
     stateManager.register('online', window.navigator.onLine);
     stateManager.register('myId', undefined);
+    stateManager.register('config', DEFAULT_CONFIG);
+    stateManager.register('chat-functions', {
+      joinChat: () => Promise.reject(new Error('not yet implemented')),
+      createChat: () => Promise.reject(new Error('not yet implemented')),
+      terminateChat: () => Promise.reject(new Error('not yet implemented'))
+    });
   }
 
   initialise() {
@@ -32,6 +38,12 @@ export class MessengerApp {
       this._saveState();
     }
     this.myId = new User(this.deviceKey.cPublicKey);
+
+    stateManager.register('session', {
+      chain: DEFAULT_CONFIG.chains[4],
+      getUserId: () => this.myId
+    });
+
     this.conversations = [new Conversation(DEFAULT_CONFIG.bubbleId, this.myId)];
     this.conversations[0].on('new-message-notification', this._handleNewMessage.bind(this));
     this.conversations[0].on('unread-change', this._handleUnreadChange.bind(this));

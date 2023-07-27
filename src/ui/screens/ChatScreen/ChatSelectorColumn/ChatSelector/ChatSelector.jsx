@@ -6,7 +6,7 @@ Please share your feedback here: https://form.asana.com/?k=uvp-HPgd3_hyoXRBw1IcN
 import PropTypes from "prop-types";
 import React from "react";
 import "./style.css";
-import defaultIcon from "../../../../assets/img/unknown-contact-icon.png";
+import defaultIcon from "../../../../../assets/img/unknown-contact-icon.png";
 import { stateManager } from "../../../../../state-context";
 
 export const ChatSelector = ({

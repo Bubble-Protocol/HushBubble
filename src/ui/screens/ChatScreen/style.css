@@ -14,6 +14,7 @@
 @media only screen and (max-width: 800px) {
 
   .chat-screen {
+    touch-action: pan-y;
     position: absolute;
     left: calc(max(-100vw, -400px));
     top: 0;

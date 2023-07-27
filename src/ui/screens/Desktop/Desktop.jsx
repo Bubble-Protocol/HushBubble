@@ -16,6 +16,10 @@ export const Desktop = () => {
 
   setFaviconWithCount(unread);
 
+  // Setup Modals
+
+  const [modal, setModal] = useState(null);    
+    
   const html = (
     <div className="desktop">
 
@@ -35,9 +39,13 @@ export const Desktop = () => {
       {/* Content */}
       <div className="content">
 
-        {appState === 'initialised' && <ChatScreen mobileView={mobileView} setMobileView={setMobileView} />}
+        {appState === 'initialised' && <ChatScreen mobileView={mobileView} setMobileView={setMobileView} setModal={setModal} />}
 
       </div>
+
+      {/* Modals */}
+      {modal && <div className="modalMask"/>}
+      {modal}
 
     </div>
   );

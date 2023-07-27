@@ -4,7 +4,7 @@ import { ChatFrame } from "./ChatFrame";
 import { stateManager } from "../../../state-context.js";
 import { ChatSelectorColumn } from "./ChatSelectorColumn";
 
-export const ChatScreen = ({mobileView, setMobileView}) => {
+export const ChatScreen = ({mobileView, setMobileView, setModal}) => {
 
   const chats = stateManager.useStateData('chats')();
 
@@ -51,7 +51,7 @@ export const ChatScreen = ({mobileView, setMobileView}) => {
 
     <div className={"chat-screen" + (mobileView === 'menu' ? ' mobile-menu-visible' : '')} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} >
 
-      <ChatSelectorColumn chats={chats} selectedChat={selectedChat} setSelectedChat={setSelectedChat} />
+      <ChatSelectorColumn chats={chats} selectedChat={selectedChat} setSelectedChat={setSelectedChat} setModal={setModal} />
 
       {selectedChat !== undefined && <ChatFrame chat={chats[selectedChat]} />}
       {selectedChat === undefined && <div className="chat-frame"></div>}
