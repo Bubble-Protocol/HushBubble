@@ -16,11 +16,14 @@ export class Conversation {
   state = STATE.connecting;
   listeners = new EventManager(['new-message-notification', 'unread-change']);
 
-  constructor(bubbleId, myId) {
-    assert.isInstanceOf(bubbleId, ContentId, 'bubbleId');
+  constructor(stateData, myId) {
+    assert.isObject(stateData, 'stateData');
+    const bubbleId = new ContentId(stateData.bubbleId);
     this.id = bubbleId.chain+'-'+bubbleId.contract;
     this.bubbleId = bubbleId;
     this.myId = myId;
+    if (stateData.metadata) this._setMetadata(stateData.metadata);
+    this.users = stateData.users;
     this.on = this.listeners.on.bind(this.listeners);
     this.off = this.listeners.off.bind(this.listeners);
     stateManager.register(this.id+'-unread', 0);
@@ -45,6 +48,21 @@ export class Conversation {
     return this.bubble.postMessage(message);
   }
 
+  create(deviceKey, delegation, options) {
+    this.bubble = new ConversationBubble(new ContentId(this.bubbleId), deviceKey, delegation);
+    return this.bubble.create(this._getMetadata(), options)
+      .then(() => { this.state = STATE.open });
+  }
+
+  join(applicationKey, deviceKey, delegation) { console.debug('joining conversation', applicationKey, deviceKey)
+    const appBubble = new ConversationBubble(new ContentId(this.bubbleId), applicationKey);
+    return appBubble.join(deviceKey)
+      .then(() => {
+        appBubble.close();
+        return this.initialise(deviceKey, delegation);
+      })
+  }
+
   setReadTime(time) {
     this.lastRead = time;
     this._updateUnread();
@@ -52,6 +70,10 @@ export class Conversation {
 
   close() {
     return this.bubble ? this.bubble.close() : Promise.resolve();
+  }
+
+  serialize() {
+    return {id: this.id, bubbleId: this.bubbleId, metadata: this.metadata, users: this.users}
   }
 
   _handleMetadata(metadata) {

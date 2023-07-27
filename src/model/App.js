@@ -4,6 +4,8 @@ import { Conversation } from "./Conversation";
 import localStorage from "./utils/LocalStorage";
 import { ecdsa } from "@bubble-protocol/crypto";
 import { User } from "./User";
+import { HushBubbleCentralWallet } from "./wallets/HushBubbleCentralWallet";
+import { Session } from "./Session";
 
 const STATE = {
   uninitialised: 'uninitialised',
@@ -13,6 +15,7 @@ const STATE = {
 export class MessengerApp {
 
   state = STATE.uninitialised;
+  wallet = new HushBubbleCentralWallet();
   deviceKey;
   newMsgCount = 0;
 
@@ -37,23 +40,15 @@ export class MessengerApp {
       this.deviceKey = new ecdsa.Key();
       this._saveState();
     }
-    this.myId = new User(this.deviceKey.cPublicKey);
-
-    stateManager.register('session', {
-      chain: DEFAULT_CONFIG.chains[4],
-      getUserId: () => this.myId
-    });
-
-    this.conversations = [new Conversation(DEFAULT_CONFIG.bubbleId, this.myId)];
-    this.conversations[0].on('new-message-notification', this._handleNewMessage.bind(this));
-    this.conversations[0].on('unread-change', this._handleUnreadChange.bind(this));
-    return this.conversations[0].initialise(this.deviceKey)
+    this.session = new Session(DEFAULT_CONFIG.chains[4], this.wallet, this.deviceKey);
+    stateManager.register('session', this.session);
+    return this.session.open()
       .then(() => {
         this.state = STATE.initialised;
-        stateManager.dispatch('myId', this.myId);
-        stateManager.dispatch('chats', this.conversations);
+        stateManager.dispatch('myId', this.session.myId);
+        stateManager.dispatch('chats', this.session.conversations);
         stateManager.dispatch('app-state', this.state);
-      })
+      });
   }
 
   setOnlineStatus(online) {
@@ -61,18 +56,7 @@ export class MessengerApp {
   }
 
   async close() {
-    return Promise.all(this.conversations.map(c => c.close()));
-  }
-
-  _handleNewMessage() {
-    this.newMsgCount++;
-    stateManager.dispatch('new-message-notification', this.newMsgCount);
-  }
-
-  _handleUnreadChange() {
-    let unread = 0; this.conversations.forEach(c => { unread += c.unreadMsgs });
-    console.debug('app unread', unread)
-    stateManager.dispatch('total-unread', unread);
+    if (this.session) this.session.close();
   }
 
   _loadState() {
@@ -89,5 +73,6 @@ export class MessengerApp {
     }
     localStorage.write('default', JSON.stringify(state));
   }
+
 }
 
