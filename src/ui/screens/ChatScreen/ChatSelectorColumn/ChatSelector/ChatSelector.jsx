@@ -28,8 +28,6 @@ export const ChatSelector = ({
   const otherMember = !members || members.length === 0 ? {} : members[0].id === myId.id ? members[1] : members[0];
 
 
-  console.debug('ChatSelector', connectionState)
-
   return (
     <div className={"chat-selector" + (selected ? ' selected' : '') + (connectionState !== 'open' ? ' disabled' : '')} onClick={onClick}>
       <img className="contact-icon" src={icon || otherMember.icon || defaultIcon} />
