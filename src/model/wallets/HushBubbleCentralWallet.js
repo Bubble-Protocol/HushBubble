@@ -1,6 +1,5 @@
 import { ecdsa } from '@bubble-protocol/crypto';
-import { Bubble, bubbleProviders } from '@bubble-protocol/client';
-import { DEFAULT_CONFIG } from '../config';
+import { Bubble, bubbleProviders, toFileId } from '@bubble-protocol/client';
 import { Wallet } from './Wallet';
 
 const CHAIN = 84531;
@@ -17,12 +16,13 @@ const WALLET_STATE = {
  */
 export class HushBubbleCentralWallet extends Wallet {
 
-  state = WALLET_STATE.connected;
-  provider = new bubbleProviders.WebsocketBubbleProvider(DEFAULT_CONFIG.walletUrl, {sendTimeout: 60000});
+  state = WALLET_STATE.disconnected;
+  provider;
 
-  constructor(applicationKey) {
+  constructor(url, applicationKey) {
     super();
     this.applicationKey = applicationKey;
+    this.provider = new bubbleProviders.WebsocketBubbleProvider(url, {sendTimeout: 60000});
   }
 
   async isAvailable() {
@@ -36,7 +36,7 @@ export class HushBubbleCentralWallet extends Wallet {
 
   async disconnect() {
     return this.provider.close()
-      .then(() => this.state = WALLET_STATE.connected);
+      .then(() => this.state = WALLET_STATE.disconnected);
   }
 
   getAccount() {
@@ -76,22 +76,20 @@ export class HushBubbleCentralWallet extends Wallet {
   }
 
   sign() {
-    throw new Error('RemoteWallet does not support the sign function');
-  }
-
-  getSignFunction() {
     return () => Promise.reject(new Error('RemoteWallet does not support the sign function'));
   }
 
+  getSignFunction() {
+    throw new Error('RemoteWallet does not support the sign function');
+  }
+
   _post(method, packet, options) {
-    console.trace('wallet.'+method, packet)
     if (this.state !== WALLET_STATE.connected) throw new Error('wallet is not available');
     const nonce = Date.now() + Math.random() * 100000;
     const packetToSign = {nonce, ...packet};
     const sig = this.applicationKey.sign(ecdsa.hash(JSON.stringify(packetToSign)));
-    const bubble = new Bubble({chain: CHAIN, contract: DEFAULT_CONFIG.bubbleId.contract, provider: DEFAULT_CONFIG.walletUrl}, this.provider, this.applicationKey.signFunction);
+    const bubble = new Bubble({chain: CHAIN, contract: toFileId(0), provider: this.providerUrl}, this.provider, this.applicationKey.signFunction);
     return bubble.post({method: method, params: {nonce, ...packet, sig, options}});
-    // return this.provider.post(method, {nonce, ...packet, sig, options});
   }
 
 }
