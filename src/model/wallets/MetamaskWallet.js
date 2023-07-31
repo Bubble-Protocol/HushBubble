@@ -47,6 +47,10 @@ export class MetamaskWallet extends Wallet {
     });
   }
   
+  async isConnected() {
+    return Promise.resolve(this.state === WALLET_STATE.connected);
+  }
+
   async connect() {
     this.chainId = window.ethereum.networkVersion;
     return window.ethereum.request({ method: 'eth_requestAccounts' })

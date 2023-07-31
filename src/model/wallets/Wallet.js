@@ -11,10 +11,19 @@ export class Wallet {
    * Indicates whether this wallet exists and is available for connect.  E.g. for Metamask it indicates
    * whether Metamask is installed.
    * 
-   * @returns Promise to resolve true if available or false if not.
+   * @returns Promise to resolve true if available, or false if not.
    */
   async isAvailable() {
     return Promise.reject(new Error('Wallet.isAvailable is a virtual function and must be implemented'));
+  }
+  
+  /**
+   * Indicates whether this wallet is connected and hence available for transactions, etc.
+   * 
+   * @returns Promise to resolve true if connected, or false if not.
+   */
+  async isConnected() {
+    return Promise.reject(new Error('Wallet.isConnected is a virtual function and must be implemented'));
   }
   
   /**

@@ -29,6 +29,10 @@ export class HushBubbleCentralWallet extends Wallet {
     return Promise.resolve(true);
   }
   
+  async isConnected() {
+    return Promise.resolve(this.state === WALLET_STATE.connected);
+  }
+
   async connect() {
     return this.provider.connect()
       .then(() => this.state = WALLET_STATE.connected);
