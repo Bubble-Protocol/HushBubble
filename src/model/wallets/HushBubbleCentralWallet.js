@@ -3,6 +3,7 @@ import { Bubble, bubbleProviders, toFileId } from '@bubble-protocol/client';
 import { Wallet } from './Wallet';
 
 const CHAIN = 84531;
+const URL = "wss://vault.bubbleprotocol.com/v2/base-goerli";
 
 const WALLET_STATE = {
   disconnected: 'disconnected',
@@ -19,10 +20,10 @@ export class HushBubbleCentralWallet extends Wallet {
   state = WALLET_STATE.disconnected;
   provider;
 
-  constructor(url, applicationKey) {
+  constructor(applicationKey) {
     super();
     this.applicationKey = applicationKey;
-    this.provider = new bubbleProviders.WebsocketBubbleProvider(url, {sendTimeout: 60000});
+    this.provider = new bubbleProviders.WebsocketBubbleProvider(URL, {sendTimeout: 60000});
   }
 
   async isAvailable() {
@@ -92,7 +93,7 @@ export class HushBubbleCentralWallet extends Wallet {
     const nonce = Date.now() + Math.random() * 100000;
     const packetToSign = {nonce, ...packet};
     const sig = this.applicationKey.sign(ecdsa.hash(JSON.stringify(packetToSign)));
-    const bubble = new Bubble({chain: CHAIN, contract: toFileId(0), provider: this.providerUrl}, this.provider, this.applicationKey.signFunction);
+    const bubble = new Bubble({chain: CHAIN, contract: toFileId(0), provider: URL}, this.provider, this.applicationKey.signFunction);
     return bubble.post({method: method, params: {nonce, ...packet, sig, options}});
   }
 
