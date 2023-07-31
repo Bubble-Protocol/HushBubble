@@ -1,5 +1,7 @@
 import { ecdsa } from '@bubble-protocol/crypto';
-import { bubbleProviders } from '@bubble-protocol/client';
+import { Bubble, bubbleProviders } from '@bubble-protocol/client';
+import { DEFAULT_CONFIG } from '../config';
+import { Wallet } from './Wallet';
 
 const CHAIN = 84531;
 
@@ -8,53 +10,56 @@ const WALLET_STATE = {
   connected: 'connected'
 }
 
-export class HushBubbleCentralWallet {
+/**
+ * Implementation of the HushBubble Wallet class that uses the Bubble Private Cloud to provide the functionality.
+ * The Bubble Private Cloud provides an API to deploy contracts to the Base-Goerli testnet, and to send and call
+ * contract methods.
+ */
+export class HushBubbleCentralWallet extends Wallet {
 
   state = WALLET_STATE.connected;
-  provider = new bubbleProviders.HTTPBubbleProvider("https://vault.bubbleprotocol.com/wallet/base-goerli");
+  provider = new bubbleProviders.WebsocketBubbleProvider(DEFAULT_CONFIG.walletUrl, {sendTimeout: 60000});
 
   constructor(applicationKey) {
+    super();
     this.applicationKey = applicationKey;
   }
 
   async isAvailable() {
-    return true;
+    return Promise.resolve(true);
   }
   
   async connect() {
-    this.state = WALLET_STATE.connected;
-    return Promise.resolve();
+    return this.provider.connect()
+      .then(() => this.state = WALLET_STATE.connected);
   }
 
   async disconnect() {
-    this.state = WALLET_STATE.disconnected;
-    return Promise.resolve();
+    return this.provider.close()
+      .then(() => this.state = WALLET_STATE.connected);
   }
-  
+
   getAccount() {
     throw new Error('RemoteWallet does not have an account');
   }
   
-  getAccounts() {
-    throw new Error('RemoteWallet does not have accounts');
-  }
-
   getChain() {
     return CHAIN;
   }
 
   async deploy(sourceCode, params=[], options={}) {
-    const packet = {abi: sourceCode.abi, bytecode: sourceCode.bytecode, params};
-    return this._post('deploy', packet, options);
+    const packet = {abi: sourceCode.abi, bytecode: sourceCode.bytecode || sourceCode.bin, params};
+    return this._post('deploy', packet, options)
+      .then(receipt => receipt.options.address);
   }
 
-  async send(contract, sourceCode, method, params=[], options={}) { 
-    const packet = {contract, abi: sourceCode.abi, method, params};
+  async send(contract, abi, method, params=[], options={}) { 
+    const packet = {contract, abi: abi, method, params};
     return this._post('send', packet, options);
   }
 
-  async call(contract, sourceCode, method, params=[], options={}) {
-    const packet = {contract, abi: sourceCode.abi, method, params};
+  async call(contract, abi, method, params=[], options={}) {
+    const packet = {contract, abi: abi, method, params};
     return this._post('call', packet, options);
   }
 
@@ -84,7 +89,9 @@ export class HushBubbleCentralWallet {
     const nonce = Date.now() + Math.random() * 100000;
     const packetToSign = {nonce, ...packet};
     const sig = this.applicationKey.sign(ecdsa.hash(JSON.stringify(packetToSign)));
-    return this.provider.post('send', {nonce, ...packet, sig, options});
+    const bubble = new Bubble({chain: CHAIN, contract: DEFAULT_CONFIG.bubbleId.contract, provider: DEFAULT_CONFIG.walletUrl}, this.provider, this.applicationKey.signFunction);
+    return bubble.post({method: method, params: {nonce, ...packet, sig, options}});
+    // return this.provider.post(method, {nonce, ...packet, sig, options});
   }
 
 }
