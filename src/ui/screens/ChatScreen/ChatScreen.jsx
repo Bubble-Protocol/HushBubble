@@ -44,16 +44,17 @@ export const ChatScreen = ({mobileView, setMobileView, setModal}) => {
 
 
   // Sort chats
-  
-  chats.sort((a,b) => { return getLastMessageTime(b.getMessages()) - getLastMessageTime(a.getMessages()) });
+
+  const orderedChats = [...chats];
+  orderedChats.sort((a,b) => { return getLastMessageTime(b.getMessages()) - getLastMessageTime(a.getMessages()) });
 
   return (
 
     <div className={"chat-screen" + (mobileView === 'menu' ? ' mobile-menu-visible' : '')} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} >
 
-      <ChatSelectorColumn chats={chats} selectedChat={selectedChat} setSelectedChat={setSelectedChat} setModal={setModal} />
+      <ChatSelectorColumn chats={orderedChats} selectedChat={selectedChat} setSelectedChat={setSelectedChat} setModal={setModal} />
 
-      {selectedChat !== undefined && <ChatFrame chat={chats[selectedChat]} />}
+      {chats.map((c, i) => c.state === 'invalid' ? null : <ChatFrame key={i} hide={i !== selectedChat} chat={c} />)}
       {selectedChat === undefined && <div className="chat-frame"></div>}
 
     </div>

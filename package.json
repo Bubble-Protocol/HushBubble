@@ -4,7 +4,7 @@
   "private": true,
   "homepage": "/chat",
   "dependencies": {
-    "@bubble-protocol/client": "^0.0.x",
+    "@bubble-protocol/client": "^0.1.x",
     "@bubble-protocol/core": "^0.0.x",
     "@bubble-protocol/crypto": "^0.0.x",
     "@ethereumjs/tx": "^4.2.0",

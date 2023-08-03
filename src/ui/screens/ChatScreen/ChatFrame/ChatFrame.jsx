@@ -10,7 +10,7 @@ import { DropdownMenu } from "../../../components/DropdownMenu/DropdownMenu";
 import { stateManager } from "../../../../state-context";
 import { PopularMoreVertical1 } from "../../../icons/PopularMoreVertical1";
 
-export const ChatFrame = ({ chat }) => {
+export const ChatFrame = ({ chat, hide }) => {
 
   const [messageText, setMessageText] = useState('');
   const myId = stateManager.useStateData('myId')();
@@ -92,7 +92,7 @@ export const ChatFrame = ({ chat }) => {
   
   
   return (
-    <div className="chat-frame" >
+    <div className={"chat-frame" + (hide ? ' hide' : '')} >
 
       {/* Header */}
       <div className="chat-header">
@@ -103,7 +103,7 @@ export const ChatFrame = ({ chat }) => {
           </div>
         </div>
         <div className="chat-header-title-row">
-          <div className="chat-header-title">{chatData.title || chatData.members[1].title || chatData.members[1].address}</div>
+          <div className="chat-header-title">{chatData.title}</div>
           {chatData.members.length > 0 && <div className="chat-header-subtext">{chatData.members.length + ' member' + (chatData.members.length === 1 ? '' : 's')}</div>}
         </div>
         <div className="chat-header-menu">
@@ -136,5 +136,6 @@ export const ChatFrame = ({ chat }) => {
 };
 
 ChatFrame.propTypes = {
-  chat: PropTypes.object.isRequired
+  chat: PropTypes.object.isRequired,
+  hide: PropTypes.bool
 };

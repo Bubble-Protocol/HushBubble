@@ -1,9 +1,7 @@
 import { DEFAULT_CONFIG } from "./config";
 import { stateManager } from "../state-context";
-import { Conversation } from "./Conversation";
 import localStorage from "./utils/LocalStorage";
 import { ecdsa } from "@bubble-protocol/crypto";
-import { User } from "./User";
 import { HushBubbleCentralWallet } from "./wallets/HushBubbleCentralWallet";
 import { Session } from "./Session";
 
@@ -36,6 +34,7 @@ export class MessengerApp {
       this._saveState();
     }
     this.wallet = new HushBubbleCentralWallet(this.deviceKey);
+    this.wallet.connect().catch(error => console.warn('failed to connect wallet', error));
     this.session = new Session(DEFAULT_CONFIG.chains[4], this.wallet, this.deviceKey);
     stateManager.register('session', this.session);
     return this.session.open()
@@ -53,6 +52,7 @@ export class MessengerApp {
 
   async close() {
     if (this.session) this.session.close();
+    if (this.wallet) this.wallet.disconnect();
   }
 
   _loadState() {

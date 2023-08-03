@@ -38,8 +38,9 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, userIn='', onC
     onCreate({
       chain: hostValues.chain, 
       host: getHost(), 
-      bubbleType: bubble, 
-      users: [session.getUserId(), user]
+      bubbleType: bubble,
+      title: userObj.address,
+      users: [session.getUserId(), userObj]
     })
     .then(onCompletion)
     .catch(error => {

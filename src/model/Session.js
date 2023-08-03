@@ -1,10 +1,10 @@
 import localStorage from "./utils/LocalStorage";
 import { DEFAULT_CONFIG } from "./config";
-import { Conversation } from "./Conversation";
 import { User } from "./User";
 import { stateManager } from "../state-context";
 import { assert } from "@bubble-protocol/core";
 import { testProviderExists } from "./utils/BubbleUtils";
+import { PublicChat } from "./chats/PublicChat";
 
 const APP_UID = "4cc22e0c9f762f7378a226f0b7f06d2101fe6f727995bcd331ed298addf3301b";
 const DB_VERSION = 1;
@@ -43,11 +43,11 @@ export class Session {
     return this._loadState()
       .then(exists => {
         if (!exists) {
-          this.conversations = [new Conversation({bubbleId: DEFAULT_CONFIG.bubbleId}, this.myId)];
+          this.conversations = [new PublicChat(DEFAULT_CONFIG.bubbleId, this.myId, this.deviceKey)];
           this.conversations[0].on('new-message-notification', this._handleNewMessage.bind(this));
           this.conversations[0].on('unread-change', this._handleUnreadChange.bind(this));
           this._saveState();
-          return this.conversations[0].initialise(this.deviceKey);
+          return this.conversations[0].initialise();
         }
       })
   }
@@ -74,10 +74,9 @@ export class Session {
     assert.isHexString(bubbleType.sourceCode.bin || bubbleType.sourceCode.bytecode, 'bubbleType.sourceCode.bin (or bubbleType.sourceCode.bytecode)');
     assert.isArray(users, 'users');
 
-    console.trace("deploying conversation to chain", chain.id, "and provider", host.provider, 'with users', users);
+    console.trace("deploying conversation to chain", chain.id, "and provider", host.name, 'with users', users);
 
     const members = users.map(u => new User(u));
-    console.debug('members', members);
 
     // test provider exists then deploy encrypted application bubble (application id has access, use application key as encryption key)
     return testProviderExists(chain.id, host.chains[chain.id].url, chain.publicBubble)
@@ -86,22 +85,25 @@ export class Session {
       })
       .then(() => {
         console.trace('deploying chat contract');
-        return this.wallet.deploy(bubbleType.sourceCode, members.map(m => m.address));
+        // return this.wallet.deploy(bubbleType.sourceCode, members.map(m => m.address));
+        return "0xA8f86Ed9E5266abC41BcB7032230FB878C27E2a1";
       })
       .then(contractAddress => {
         console.trace('contract deployed with address', contractAddress);
-        const conversation = new Conversation({
-          bubbleId: {
+        const conversation = new PublicChat(
+          {
             chain: chain.id,
             contract: contractAddress,
             provider: host.chains[chain.id].url
           },
-          title: title,
-          members: members,
-          metadata: metadata
-        });
+          this.myId,
+          this.deviceKey
+        );
         console.trace('creating off-chain bubble on host', conversation.bubbleId.provider);
-        return conversation.create(this.deviceKey, this.delegation, {silent: true})
+        return conversation.create({
+          metadata: {title, members, ...metadata},
+          options: {silent: true}
+        })
           .then(() => {
             console.trace('bubble created with content id', conversation.bubbleId);
             this._addConversation(conversation);
@@ -118,23 +120,26 @@ export class Session {
   }
 
   async terminateChat(conversation) {
-    return this.wallet.send(conversation.bubbleId.contract, DEFAULT_CONFIG.bubbles[0].sourceCode, 'terminate')
+    return this.wallet.send(conversation.bubbleId.contract, DEFAULT_CONFIG.bubbles[0].sourceCode.abi, 'terminate')
       .then(() => this.removeConversation(conversation));
   }
 
   async joinChat(bubbleId) {
-    const conversation = new Conversation({bubbleId});
+    const conversation = new PublicChat(DEFAULT_CONFIG.bubbleId, this.myId, this.deviceKey);
     if (this.conversations.find(c => c.id === conversation.id)) return Promise.reject(new Error('You are already a member of this chat'));
-    return conversation.join(this.deviceKey, this.deviceKey)
+    return conversation.join(this.deviceKey)
       .then(() => {
         this._addConversation(conversation);
       });
   }
 
   _addConversation(conversation) {
-    this.conversations.push(conversation);
-    this._saveState();
-    stateManager.dispatch('chats', this.conversations)
+    if (!conversation.isValid()) throw new Error('chat is invalid');
+    else {
+      this.conversations.push(conversation);
+      this._saveState();
+      stateManager.dispatch('chats', this.conversations)
+    }
   }
 
   _handleNewMessage() {
@@ -144,7 +149,6 @@ export class Session {
 
   _handleUnreadChange() {
     let unread = 0; this.conversations.forEach(c => { unread += c.unreadMsgs });
-    console.debug('app unread', unread)
     stateManager.dispatch('total-unread', unread);
   }
 
@@ -157,10 +161,11 @@ export class Session {
       const state = JSON.parse(json);
       const promises = [];
       state.conversations.forEach(rawC => {
-        const conversation = new Conversation(rawC, this.myId);
-        const promise = conversation.initialise(this.deviceKey)
+        const conversation = new PublicChat(rawC.bubbleId, this.myId, this.deviceKey);
+        const promise = conversation.initialise()
           .then(() => {
-            this.conversations.push(conversation);
+            if (!conversation.isValid()) console.warn('conversation', conversation.id, 'is invalid', conversation);
+            else this.conversations.push(conversation);
           })
           .catch(error => {
             console.warn('failed to initialise conversation', error);
