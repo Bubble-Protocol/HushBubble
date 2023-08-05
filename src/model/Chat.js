@@ -1,5 +1,4 @@
-import { BubbleManager, ManagedBubble, bubbleProviders, assert, toFileId } from "@bubble-protocol/client";
-import { ContentId } from "@bubble-protocol/core";
+import { bubbleProviders, assert, toFileId, Bubble } from "@bubble-protocol/client";
 import localStorage from "./utils/LocalStorage";
 import { EventManager } from "./utils/EventManager";
 import { stateManager } from "../state-context";
@@ -24,7 +23,7 @@ const STATE = {
   failed: 'failed'
 }
 
-export class Chat extends ManagedBubble {
+export class Chat extends Bubble {
 
   state = STATE.uninitialised;
   listeners = new EventManager(['new-message-notification', 'unread-change']);
@@ -32,18 +31,19 @@ export class Chat extends ManagedBubble {
   user;
   metadata;
   messages = [];
-  lastModTime = 0;
+  lastModTime = 1;
   
-  constructor(bubbleId, myId, deviceKey, encryptionPolicy, contentManager) {
+  constructor(classType, bubbleId, myId, deviceKey, encryptionPolicy, userManager) {
+    assert.isString(classType, 'classType');
     assert.isObject(myId, 'myId');
     assert.isObject(deviceKey, 'deviceKey');
-    bubbleId = new ContentId(bubbleId);
 
     // construct the provider
     const provider = new bubbleProviders.WebsocketBubbleProvider(bubbleId.provider, {sendTimeout: 10000});
 
     // construct the bubble
-    super(bubbleId, provider, deviceKey.signFunction, encryptionPolicy, contentManager || new BubbleManager());
+    console.debug('Chat', classType, bubbleId, provider, deviceKey.signFunction, encryptionPolicy, userManager)
+    super(bubbleId, provider, deviceKey.signFunction, encryptionPolicy, userManager);
     this.id = bubbleId.chain+'-'+bubbleId.contract;
     this.myId = myId;
 
@@ -63,8 +63,9 @@ export class Chat extends ManagedBubble {
 
   create({metadata={}, options}) {
     this._validateMetadata(metadata);
-    return super.create(options)
-      .then(() => {
+    return this.provider.open()
+      .then(() => super.create(options))
+      .then(() => { console.debug(this.userManager)
         return Promise.all([
           this._saveMetadata(metadata, options),
           this.mkdir(CONTENT.textChat, options),
@@ -81,6 +82,7 @@ export class Chat extends ManagedBubble {
 
   initialise(options) {
     return this._loadMessages(this.id)
+      .then(() => this.provider.open())
       .then(() => super.initialise(options))
       .then(() => {
         return this._subscribeToContent(true, true, options);
@@ -91,11 +93,12 @@ export class Chat extends ManagedBubble {
       })
   }
 
-  join() {
+  join(options) {
     console.trace('joining conversation bubble');
-    return super.initialise()
+    return this.provider.open()
+      .then(() => super.initialise(options))
       .then(() => {
-        return this._subscribeToContent(true, true);
+        return this._subscribeToContent(true, true, options);
       })
       .then(() => {
         return this.metadata;
@@ -138,7 +141,7 @@ export class Chat extends ManagedBubble {
   }
 
   serialize() {
-    return {id: this.id, bubbleId: this.bubbleId.toString(), metadata: this.metadata}
+    return {classType: this.classType, id: this.id, bubbleId: this.contentId.toString(), metadata: this.metadata}
   }
 
   deserialize(data) {
@@ -177,6 +180,7 @@ export class Chat extends ManagedBubble {
   }
 
   _handleMetadataChange(notification) { 
+    console.debug('raw metadata', notification)
     const metadata = JSON.parse(notification.data);
     console.debug('new metadata', metadata)
     this.metadata = {...DEFAULT_METADATA, ...metadata, bubbleId: this.contentId};
