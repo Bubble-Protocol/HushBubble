@@ -70,6 +70,7 @@ export const ChatFrame = ({ chat, hide, onTerminate, setModal }) => {
 
   function postMessage() {
     chat.postMessage({text: messageText, from: myId.id}).then(() => setMessageText('')).catch(console.warn);
+    chat.setReadTime(Date.now());
   }
 
   const deleteModal = <DeleteChatModal chat={chat} onDelete={onTerminate} onCancel={() => setModal()} onCompletion={() => setModal()} />;

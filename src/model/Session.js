@@ -8,6 +8,7 @@ import { PublicChat } from "./chats/PublicChat";
 import { ChatFactory } from "./chats/ChatFactory";
 import { ecdsa } from "@bubble-protocol/crypto";
 import { Chat } from "./Chat";
+import { HushBubbleConnectRelay } from "./requestMonitors/HushBubbleConnectRelay";
 
 const CONSTRUCTION_STATE = {
   closed: 'closed',
@@ -18,11 +19,16 @@ const CONSTRUCTION_STATE = {
   failed: 'failed'
 }
 
+const DEFAULT_SETTINGS = {
+  monitorForRequests: true
+}
+
 export class Session {
 
   constructionState = CONSTRUCTION_STATE.closed;
   id;
   deviceKey;
+  settings = DEFAULT_SETTINGS;
   conversations = [];
 
 
@@ -47,6 +53,12 @@ export class Session {
           this._addConversation(new PublicChat(bubbleType.id, DEFAULT_CONFIG.bubbleId, this.myId, this.deviceKey));
           this._saveState();
           return this.conversations[0].initialise();
+        }
+      })
+      .then(() => {
+        if (this.settings.monitorForRequests) {
+          this.requestMonitor = new HushBubbleConnectRelay(this.deviceKey, this.joinChat.bind(this));
+          return this.requestMonitor.monitor();
         }
       })
   }
@@ -109,8 +121,14 @@ export class Session {
         .then(() => {
           console.trace('bubble created with content id', conversation.contentId);
           this._addNewConversation(conversation);
-          return conversation.contentId;
+          return conversation;
         })
+      })
+      .then(conversation => {
+        if (conversation.chatType.category === 'one-to-one' && this.requestMonitor) {
+          this.requestMonitor.notify(conversation.userManager.users[0].publicKey, conversation.getInvite());
+        }
+        return conversation.contentId;
       })
   }
 
@@ -178,13 +196,14 @@ export class Session {
     else {
       this._addConversation(conversation);
       this._saveState();
-      stateManager.dispatch('chats', this.conversations)
+      stateManager.dispatch('chats', [...this.conversations])
     }
   }
 
   _addConversation(conversation) {
     conversation.on('new-message-notification', this._handleNewMessage.bind(this));
     conversation.on('unread-change', this._handleUnreadChange.bind(this));
+    conversation.on('terminated', this._handleChatTerminated.bind(this));
     this.conversations.push(conversation);
   }
 
@@ -199,6 +218,13 @@ export class Session {
     stateManager.dispatch('total-unread', unread);
   }
 
+  _handleChatTerminated(conversation) {
+    conversation.close();
+    this.conversations = this.conversations.filter(c => c !== conversation);
+    this._saveState();
+    stateManager.dispatch('chats', this.conversations);
+  }
+
   _loadState() {
     const json = localStorage.read(this.id);
     if (!json) {
@@ -206,6 +232,7 @@ export class Session {
     }
     else {
       const state = JSON.parse(json);
+      this.settings = state.settings || DEFAULT_SETTINGS;
       const promises = [];
       state.conversations.forEach(rawC => {
         console.trace('loaded chat', rawC);
@@ -231,6 +258,7 @@ export class Session {
   _validateConversation(rawC) {
     try {
       new ContentId(rawC.bubbleId);
+      if (rawC.id === '84531-0x2e37F1E6aEdEcEEa2e6A4b4aC5C75Dd26a2c8877') return false;
       return true;
     }
     catch(error) { 
@@ -241,6 +269,7 @@ export class Session {
 
   _saveState() {
     const state = {
+      settings: this.settings,
       conversations: this.conversations.map(c => c.serialize())
     }
     localStorage.write(this.id, JSON.stringify(state));

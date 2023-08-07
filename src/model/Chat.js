@@ -1,4 +1,4 @@
-import { bubbleProviders, assert, toFileId, Bubble } from "@bubble-protocol/client";
+import { bubbleProviders, assert, toFileId, Bubble, ErrorCodes } from "@bubble-protocol/client";
 import localStorage from "./utils/LocalStorage";
 import { EventManager } from "./utils/EventManager";
 import { stateManager } from "../state-context";
@@ -26,7 +26,7 @@ const STATE = {
 export class Chat extends Bubble {
 
   state = STATE.uninitialised;
-  listeners = new EventManager(['new-message-notification', 'unread-change']);
+  listeners = new EventManager(['new-message-notification', 'unread-change', 'terminated']);
 
   id;
   chatType;
@@ -136,6 +136,10 @@ export class Chat extends Bubble {
         message.modified = message.created;
         this._setMessage(message);
       })
+      .catch(error => {
+        console.warn(this.id, 'failed to post message', error);
+        if (error.code === ErrorCodes.BUBBLE_ERROR_BUBBLE_TERMINATED) this.listeners.notifyListeners('terminated', this);
+      })
     message.pending = true;
     message.created = Date.now();
     message.modified = message.created;
@@ -154,7 +158,7 @@ export class Chat extends Bubble {
   }
 
   setReadTime(time) {
-    if (time > this.lastRead) {
+    if (this.unreadMsgs > 0 && time > this.lastRead) {
       this.lastRead = time;
       this._updateUnread();
     }
