@@ -131,8 +131,8 @@
   .chat-screen .chat-column {
     width: 100%;
   }
-  
-  .chat-screen .mobile-hidden {
+
+  .chat-screen .no-mobile {
     display: none;
   }
 

@@ -196,10 +196,6 @@
     overflow-y: scroll;
   }
 
-  .mobile-hidden {
-    display: none;
-  }
-
   .chat-frame .chat-header-menu {
     width: 32px;
     padding: 0;

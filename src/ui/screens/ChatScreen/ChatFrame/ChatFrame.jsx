@@ -10,6 +10,7 @@ import { DropdownMenu } from "../../../components/DropdownMenu/DropdownMenu";
 import { stateManager } from "../../../../state-context";
 import { PopularMoreVertical1 } from "../../../icons/PopularMoreVertical1";
 import { DeleteChatModal } from "../../../modals/DeleteChatModal";
+import { assert } from "@bubble-protocol/core";
 
 export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
 
@@ -96,6 +97,11 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
       : []
   if (chatIcons.length === 0) chatIcons = [<img key={0} className="chat-header-icon" src={defaultIcon} />];
   
+  function getTitle() {
+    if (!assert.isHexString(chatData.title) || chatData.title.length <= 16) return chatData.title;
+    const mobileMediaQuery = window.matchMedia('(max-width: 640px)');
+    return mobileMediaQuery.matches ? chatData.title.slice(0,6) + '..' + chatData.title.slice(-4) : chatData.title;
+  }
   
   return (
     <div className={"chat-frame " + className + (hide ? ' hide' : '')} >
@@ -109,7 +115,7 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
           </div>
         </div>
         <div className="chat-header-title-row">
-          <div className="chat-header-title">{chatData.title}</div>
+          <div className="chat-header-title">{getTitle()}</div>
           {chatData.members && chatData.members.length > 0 && <div className="chat-header-subtext">{chatData.members.length + ' member' + (chatData.members.length === 1 ? '' : 's')}</div>}
         </div>
         <div className="chat-header-menu">
