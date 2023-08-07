@@ -40,7 +40,7 @@ export class HushBubbleCentralWallet extends Wallet {
   }
 
   async disconnect() {
-    return this.provider.close()
+    return this.provider.state === 'closed' ? Promise.resolve() : this.provider.close()
       .then(() => this.state = WALLET_STATE.disconnected);
   }
 

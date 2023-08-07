@@ -17,8 +17,6 @@ export const Desktop = () => {
   const config = stateManager.useStateData('config')();
   const [mobileView, setMobileView] = useState('chat');
 
-  console.trace('online', online);
-
   useEffect(() => {
     if (!urlParams) return;
     if (urlParams.connect && !session.hasConnectionWith(urlParams.connect)) {

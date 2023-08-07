@@ -47,7 +47,6 @@ export const ChatScreen = ({mobileView, setMobileView, onTerminateChat, setModal
     if (mobileView === 'menu') setMobileView('chat');
   };
 
-
   return (
 
     <div className={"chat-screen" + (mobileView === 'menu' ? ' mobile-menu-visible' : '')} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} >

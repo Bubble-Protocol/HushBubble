@@ -51,6 +51,10 @@ export class Session {
       })
   }
 
+  async reconnect() {
+    this.conversations.map(c => c.reconnect());
+  }
+
   async close() {
     return Promise.all(this.conversations.map(c => c.close()));
   }
@@ -208,10 +212,10 @@ export class Session {
         const valid = this._validateConversation(rawC);
         if (valid) {
           const conversation = ChatFactory.constructChat(rawC.chatType, rawC.classType, new ContentId(rawC.bubbleId), this.myId, this.deviceKey);
+          this._addConversation(conversation);
           const promise = conversation.initialise()
             .then(() => {
               if (!conversation.isValid()) console.warn('conversation', conversation.id, 'is invalid', conversation);
-              else this._addConversation(conversation);
             })
             .catch(error => {
               console.warn('failed to initialise conversation', rawC.id, error);

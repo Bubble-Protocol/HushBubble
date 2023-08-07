@@ -1,4 +1,4 @@
-import { bubbleProviders, assert, toFileId, Bubble, ErrorCodes } from "@bubble-protocol/client";
+import { bubbleProviders, assert, toFileId, Bubble } from "@bubble-protocol/client";
 import localStorage from "./utils/LocalStorage";
 import { EventManager } from "./utils/EventManager";
 import { stateManager } from "../state-context";
@@ -18,11 +18,9 @@ const DEFAULT_METADATA = {
 }
 
 const STATE = {
-  invalid: 'invalid',
-  connecting: 'connecting',
-  open: 'open',
-  reconnecting: 'reconnecting',
-  failed: 'failed'
+  uninitialised: 'uninitialised',
+  initialised: 'initialised',
+  invalid: 'invalid'
 }
 
 export class Chat extends Bubble {
@@ -94,15 +92,27 @@ export class Chat extends Bubble {
 
   initialise(options) {
     return this._loadMessages(this.id)
-      .then(() => this.provider.open())
-      .then(() => super.initialise(options))
       .then(() => {
-        return this._subscribeToContent(true, true, options);
-      })
+        this.provider.open()
+          .then(() => super.initialise(options))
+          .then(() => {
+            return this._subscribeToContent(true, true, options);
+          })
+          .then(() => {
+            this.state = STATE.initialised;
+          })
+          .catch(console.warn);
+      });
+  }
+
+  reconnect() {
+    if (this.state !== STATE.initialised) return Promise.resolve();
+    if (this.provider.state !== 'closed') return Promise.resolve();
+    return this.provider.open()
       .then(() => {
-        this.state = STATE.initialised;
-        return this.metadata;
+        return this._subscribeToContent(true, true);
       })
+      .catch(console.warn);
   }
 
   join(options) {
@@ -188,6 +198,7 @@ export class Chat extends Bubble {
   }
 
   close() {
+    if (this.provider.state === 'closed') return Promise.resolve();
     return this.provider.close();
   }
 
