@@ -2,19 +2,22 @@
 
 pragma solidity ^0.8.0;
 
-import "./AccessControlledStorage.sol";
+import "./ChatBubble.sol";
 import "./AccessControlBits.sol";
 
 
-contract GroupBubble is AccessControlledStorage {
+contract GroupBubble is ChatBubble {
 
+  address owner = msg.sender;
   mapping(address => bool) users;
   bool terminated = false;
+  bytes32 terminateToken;
 
-  constructor(address[] memory _users) {
+  constructor(address[] memory _users, bytes32 _terminateToken) {
     for(uint i=0; i<_users.length; i++) {
       users[_users[i]] = true;
     }
+    terminateToken = _terminateToken;
   }
 
   function setUsers(address[] memory _users, bool state)  external {
@@ -31,8 +34,8 @@ contract GroupBubble is AccessControlledStorage {
     else return READ_BIT | WRITE_BIT | APPEND_BIT;
   }
 
-  function terminate() public {
-    require(users[msg.sender], "permission denied");
+  function terminate(bytes memory terminateKey) external override {
+    require(keccak256(terminateKey) == terminateToken, "permission denied");
     terminated = true;
   }
 

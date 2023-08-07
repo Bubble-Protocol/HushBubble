@@ -2,8 +2,12 @@ import { Chat } from "../Chat";
 
 export class PublicChat extends Chat {
 
-  constructor(bubbleId, myId, deviceKey) {
-    super('PublicChat', bubbleId, myId, deviceKey);
+  constructor(chatType, bubbleId, myId, deviceKey) {
+    super(chatType, 'PublicChat', bubbleId, myId, deviceKey);
+  }
+
+  getTerminateKey() {
+    return "0x00";
   }
 
 }

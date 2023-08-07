@@ -9,8 +9,9 @@ import { Button } from "../../../components/Button/Button";
 import { DropdownMenu } from "../../../components/DropdownMenu/DropdownMenu";
 import { stateManager } from "../../../../state-context";
 import { PopularMoreVertical1 } from "../../../icons/PopularMoreVertical1";
+import { DeleteChatModal } from "../../../modals/DeleteChatModal";
 
-export const ChatFrame = ({ chat, hide }) => {
+export const ChatFrame = ({ chat, hide, onTerminate, setModal }) => {
 
   const [messageText, setMessageText] = useState('');
   const myId = stateManager.useStateData('myId')();
@@ -65,13 +66,15 @@ export const ChatFrame = ({ chat, hide }) => {
   }, []);
 
 
-  // Functions
+  // Functions & Modals
 
   function postMessage() {
     chat.postMessage({text: messageText, from: myId.id}).then(() => setMessageText('')).catch(console.warn);
   }
 
-  
+  const deleteModal = <DeleteChatModal chat={chat} onDelete={onTerminate} onCancel={() => setModal()} onCompletion={() => setModal()} />;
+
+
   // Create messages view
   
   let lastDate = new Date(0);
@@ -87,7 +90,9 @@ export const ChatFrame = ({ chat, hide }) => {
 
   let chatIcons = chatData.icon 
     ? [<img key={0} className="chat-header-icon" src={chatData.icon} />] 
-    : chatData.members.filter(member => member.icon).slice(0,3).map((member, index) => <img key={index} className="chat-header-icon" src={member.icon} />)
+    : chatData.members 
+      ? chatData.members.filter(member => member.icon).slice(0,3).map((member, index) => <img key={index} className="chat-header-icon" src={member.icon} />)
+      : []
   if (chatIcons.length === 0) chatIcons = [<img key={0} className="chat-header-icon" src={defaultIcon} />];
   
   
@@ -104,10 +109,13 @@ export const ChatFrame = ({ chat, hide }) => {
         </div>
         <div className="chat-header-title-row">
           <div className="chat-header-title">{chatData.title}</div>
-          {chatData.members.length > 0 && <div className="chat-header-subtext">{chatData.members.length + ' member' + (chatData.members.length === 1 ? '' : 's')}</div>}
+          {chatData.members && chatData.members.length > 0 && <div className="chat-header-subtext">{chatData.members.length + ' member' + (chatData.members.length === 1 ? '' : 's')}</div>}
         </div>
         <div className="chat-header-menu">
-          <DropdownMenu direction="bottom-left" options={[{name: "Copy Chat Link", onClick: () => navigator.clipboard.writeText(config.appUrl+'?chat='+chatData.bubbleId.toString())}]} >
+          <DropdownMenu direction="bottom-left" options={[
+            {name: "Copy Chat Link", onClick: () => navigator.clipboard.writeText(config.appUrl+'?chat='+chat.getInvite())},
+            {name: "Delete Chat", onClick: () => setModal(deleteModal)}
+          ]} >
             <PopularMoreVertical1 className="icon-instance-node-3" />
           </DropdownMenu>
         </div>
@@ -137,5 +145,6 @@ export const ChatFrame = ({ chat, hide }) => {
 
 ChatFrame.propTypes = {
   chat: PropTypes.object.isRequired,
+  onTerminate: PropTypes.func.isRequired,
   hide: PropTypes.bool
 };

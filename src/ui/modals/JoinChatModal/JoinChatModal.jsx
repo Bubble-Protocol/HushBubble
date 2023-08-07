@@ -1,30 +1,33 @@
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Modal } from "../../components/Modal/Modal";
 import { Button } from "../../components/Button/Button";
 import { TextBox } from "../../components/TextBox";
-import { ContentId } from "@bubble-protocol/core";
+import { ErrorCodes } from "@bubble-protocol/core";
 
 export const JoinChatModal = ({ bubbleIn, onJoin, onCancel, onCompletion }) => {
   const [bubbleId, setBubbleId] = useState(bubbleIn);
   const [error, setError] = useState();
 
-  let contentId;
+  let invite = bubbleId;
   try {
-    let id = bubbleId;
-    try {
-      const url = new URL(bubbleId);
-      id = url.searchParams.get('chat');
-    }
-    catch(_) {}
-    contentId = new ContentId(id);
+    const url = new URL(bubbleId);
+    invite = url.searchParams.get('chat');
   }
   catch(_) {}
+
+  function join() {
+    onJoin(invite).then(onCompletion)
+      .catch(error => {
+        console.debug(error); 
+        if (error.code === ErrorCodes.BUBBLE_ERROR_BUBBLE_TERMINATED) setError(new Error('Chat no longer exists'));
+        else setError(error);
+      })
+  }
 
   return (
     <Modal 
     onCancel={onCancel}
-    centered={true}
     contentCentered={true}
     title="Join Chat"
     subtitle="Join a chat created by someone else." 
@@ -32,10 +35,10 @@ export const JoinChatModal = ({ bubbleIn, onJoin, onCancel, onCompletion }) => {
       <React.Fragment>
         <div className="step-frame">
           <p className="small-text">Paste the chat ID below to join</p>
-          <TextBox className="stretch" text={contentId ? contentId.toString() : bubbleId} onChange={setBubbleId} valid={contentId !== undefined} />
+          <TextBox text={invite} onChange={setBubbleId} valid={invite !== undefined} />
         </div>
-          {error && <p className="small-text error-text">{error.message}</p>}
-          <Button title="Join" onClick={() => onJoin(contentId).then(onCompletion).catch(error => { console.debug(error); setError(error) })} disabled={contentId === undefined} />
+        {error && <p className="small-text error-text">{error.message}</p>}
+        <Button title="Join" onClick={join} disabled={invite === undefined} />
       </React.Fragment>
     />
   );

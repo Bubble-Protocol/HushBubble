@@ -10,9 +10,7 @@ import { PopularPlus } from "../../../icons/PopularPlus";
 import { ArrowLeft } from "../../../icons/ArrowLeft/ArrowLeft";
 import { CopySelector } from "../../../components/CopySelector";
 import { BubbleSelector } from "../../../components/BubbleSelector";
-import { JoinChatModal } from "../../../modals/JoinChatModal";
 import { CreateChatModal } from "../../../modals/CreateChatModal";
-import { DeleteChatModal } from "../../../modals/DeleteChatModal";
 
 export const ChatSelectorColumn = ({chats, selectedChat, setSelectedChat, setModal}) => {
 
@@ -31,7 +29,6 @@ export const ChatSelectorColumn = ({chats, selectedChat, setSelectedChat, setMod
     return <CreateChatModal session={session} chains={config.chains} hosts={config.hosts} bubble={bubble} onCreate={session.createChat} onCancel={() => {setModal(null)}} onCompletion={() => {setModal(null); setCentrePanel('chat')}} />;
   } 
 
-
   return menuMinimized
     ?
       <div className="minimal-chat-column">
@@ -41,8 +38,8 @@ export const ChatSelectorColumn = ({chats, selectedChat, setSelectedChat, setMod
         <div className="dividing-line" />
         <div className="chat-list">
           {chats !== undefined &&
-            chats.map((c, index) => {
-              return <IconChatSelector key={index} chat={c} myId={myId} selected={index === selectedChat} onClick={() => setSelectedChat(index)} />
+            chats.map(c => {
+              return <IconChatSelector key={c.id} chat={c} myId={myId} selected={c === selectedChat} onClick={() => setSelectedChat(c)} />
             })
           }
         </div>
@@ -70,8 +67,8 @@ export const ChatSelectorColumn = ({chats, selectedChat, setSelectedChat, setMod
               <div className="dividing-line" />
               <div className="chat-list">
                 {chats !== undefined &&
-                  chats.map((c, index) => {
-                    return <ChatSelector key={index} chat={c} myId={myId} selected={index === selectedChat} onClick={() => setSelectedChat(index)} />
+                  chats.map(c => {
+                    return <ChatSelector key={c.id} chat={c} myId={myId} selected={c === selectedChat} onClick={() => setSelectedChat(c)} />
                   })
                 }
               </div>

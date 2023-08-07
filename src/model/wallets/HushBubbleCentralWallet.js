@@ -68,6 +68,11 @@ export class HushBubbleCentralWallet extends Wallet {
     return this._post('call', packet, options);
   }
 
+  async getCode(contract, options) {
+    const packet = {contract};
+    return this._post('getCode', packet, options);
+  }
+
   async encrypt() {
     throw new Error('RemoteWallet does not support the encrypt function');
   }

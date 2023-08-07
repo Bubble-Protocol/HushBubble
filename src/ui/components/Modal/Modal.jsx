@@ -3,9 +3,9 @@ import React from "react";
 import { PopularX } from "../../icons/PopularX";
 import "./style.css";
 
-export const Modal = ({ title, subtitle, contents, centered=true, contentCentered=false, onCancel }) => {
+export const Modal = ({ title, subtitle, contents, loading, centered=true, contentCentered=false, onCancel }) => {
   return (
-    <div className={"modal" + (centered ? " center-modal" : '')}>
+    <div className={"modal" + (centered ? " center-modal" : '') + (loading ? " loading" : '')}>
       <div className="title-frame">
         <div className="title-row">
           <div className="title">{title}</div>
@@ -20,6 +20,7 @@ export const Modal = ({ title, subtitle, contents, centered=true, contentCentere
       <div className={"modal-content" + (contentCentered ? " centered" : '')}>
         {contents}
       </div>
+      {loading && <div className="loading"><div className='loader' style={{width: 64, height: 64, opacity: "200%"}}></div></div>}
     </div>
   );
 };

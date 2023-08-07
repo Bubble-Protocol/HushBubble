@@ -4,13 +4,18 @@ import { ChatFrame } from "./ChatFrame";
 import { stateManager } from "../../../state-context.js";
 import { ChatSelectorColumn } from "./ChatSelectorColumn";
 
-export const ChatScreen = ({mobileView, setMobileView, setModal}) => {
+export const ChatScreen = ({mobileView, setMobileView, onTerminateChat, setModal}) => {
 
   const chats = stateManager.useStateData('chats')();
 
-  const [selectedChat, setSelectedChat] = useState(chats.length > 0 ? 0 : undefined);
-  if (selectedChat === undefined && chats.length > 0) setSelectedChat(0);
+  // Sort chats
+  const orderedChats = [...chats];
+  orderedChats.sort((a,b) => { return getLastMessageTime(b.getMessages()) - getLastMessageTime(a.getMessages()) });
+  
+  const [selectedChat, setSelectedChat] = useState(orderedChats.length > 0 ? orderedChats[0] : undefined);
+  if (selectedChat === undefined && orderedChats.length > 0) setSelectedChat(orderedChats[0]);
 
+  // Mobile swipe detection
   // Mobile swipe detection
 
   const [touchStart, setTouchStart] = useState(null)
@@ -43,18 +48,13 @@ export const ChatScreen = ({mobileView, setMobileView, setModal}) => {
   };
 
 
-  // Sort chats
-
-  const orderedChats = [...chats];
-  orderedChats.sort((a,b) => { return getLastMessageTime(b.getMessages()) - getLastMessageTime(a.getMessages()) });
-
   return (
 
     <div className={"chat-screen" + (mobileView === 'menu' ? ' mobile-menu-visible' : '')} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} >
 
       <ChatSelectorColumn chats={orderedChats} selectedChat={selectedChat} setSelectedChat={setSelectedChat} setModal={setModal} />
 
-      {chats.map((c, i) => c.state === 'invalid' ? null : <ChatFrame key={i} hide={i !== selectedChat} chat={c} />)}
+      {chats.map(c => c.state === 'invalid' ? null : <ChatFrame key={c.id} hide={c !== selectedChat} chat={c} onTerminate={onTerminateChat} setModal={setModal} />)}
       {selectedChat === undefined && <div className="chat-frame"></div>}
 
     </div>

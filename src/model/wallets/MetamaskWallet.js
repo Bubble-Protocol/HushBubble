@@ -101,7 +101,6 @@ export class MetamaskWallet extends Wallet {
   }
 
   async deploy(sourceCode, params=[], options={}) {
-    console.debug('wallet.deploy', params)
     if (this.state === WALLET_STATE.unavailable) throw new Error('wallet is not available');
     const web3 = new Web3(window.ethereum);
     const contract = new web3.eth.Contract(sourceCode.abi);
@@ -112,7 +111,7 @@ export class MetamaskWallet extends Wallet {
       );
   }
 
-  async send(contractAddress, abi, method, params=[], options={}) { console.debug('wallet.send', contractAddress, sourceCode, method, params)
+  async send(contractAddress, abi, method, params=[], options={}) { 
     const contract = new web3.eth.Contract(abi, contractAddress);
     return contract.methods[method](params).send({from: this.getAccount(), ...options});
   }
@@ -120,6 +119,10 @@ export class MetamaskWallet extends Wallet {
   async call(contractAddress, abi, method, params=[]) {
     const contract = new web3.eth.Contract(abi, contractAddress);
     return contract.methods[method](params).call({from: this.getAccount()});
+  }
+
+  async getCode(contractAddress) {
+    return web3.eth.getCode(contractAddress);
   }
 
   async encrypt(data) {
@@ -148,7 +151,7 @@ export class MetamaskWallet extends Wallet {
       if (error.code === 4902) {
         throw new Error('Add the chain to Metamask and try again');
       }
-      else console.debug('switchChain error:', error);
+      else console.warn('switchChain error:', error);
       throw error;
     }
   }

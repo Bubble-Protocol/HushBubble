@@ -10,8 +10,6 @@ import { setFaviconWithCount } from "./ui/utils/favicon";
 // Application
 //
 
-const APP_UID = "4cc22e0c9f762f7378a226f0b7f06d2101fe6f727995bcd331ed298addf3301b";
-
 const TRACE_ON = true;
 const DEBUG_ON = true;
 

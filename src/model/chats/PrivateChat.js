@@ -3,8 +3,12 @@ import { Chat } from "../Chat";
 
 export class PrivateChat extends Chat {
 
-  constructor(bubbleId, myId, deviceKey, otherUsers) {
-    super('PrivateChat', bubbleId, myId, deviceKey, new encryptionPolicies.AESGCMEncryptionPolicy(), new userManagers.MultiUserManager(deviceKey, otherUsers));
+  constructor(chatType, bubbleId, myId, deviceKey, encryptionKey, otherUsers) {
+    super(chatType, 'PrivateChat', bubbleId, myId, deviceKey, new encryptionPolicies.AESGCMEncryptionPolicy(encryptionKey), new userManagers.MultiUserManager(deviceKey, undefined, otherUsers));
+  }
+
+  getTerminateKey() {
+    return '0x'+this.encryptionPolicy.privateKey.toString('hex');
   }
 
 }

@@ -1,7 +1,9 @@
-import { bubbleProviders, assert, toFileId, Bubble } from "@bubble-protocol/client";
+import { bubbleProviders, assert, toFileId, Bubble, ErrorCodes } from "@bubble-protocol/client";
 import localStorage from "./utils/LocalStorage";
 import { EventManager } from "./utils/EventManager";
 import { stateManager } from "../state-context";
+import { fromBase64Url, toBase64Url } from "./utils/StringUtils";
+
 import { User } from "./User";
 
 const CONTENT = {
@@ -28,12 +30,18 @@ export class Chat extends Bubble {
   state = STATE.uninitialised;
   listeners = new EventManager(['new-message-notification', 'unread-change']);
 
-  user;
-  metadata;
+  id;
+  chatType;
+  classType;
+  myId;
+  metadata = DEFAULT_METADATA;
   messages = [];
   lastModTime = 1;
+  lastRead = 1;
+  unreadMsgs = 0;
   
-  constructor(classType, bubbleId, myId, deviceKey, encryptionPolicy, userManager) {
+  constructor(chatType, classType, bubbleId, myId, deviceKey, encryptionPolicy, userManager) {
+    assert.isNotNull(chatType, 'chatType');
     assert.isString(classType, 'classType');
     assert.isObject(myId, 'myId');
     assert.isObject(deviceKey, 'deviceKey');
@@ -42,9 +50,11 @@ export class Chat extends Bubble {
     const provider = new bubbleProviders.WebsocketBubbleProvider(bubbleId.provider, {sendTimeout: 10000});
 
     // construct the bubble
-    console.debug('Chat', classType, bubbleId, provider, deviceKey.signFunction, encryptionPolicy, userManager)
+    console.trace('constructing', classType, bubbleId, provider, deviceKey.signFunction, encryptionPolicy, userManager)
     super(bubbleId, provider, deviceKey.signFunction, encryptionPolicy, userManager);
     this.id = bubbleId.chain+'-'+bubbleId.contract;
+    this.chatType = chatType;
+    this.classType = classType;
     this.myId = myId;
 
     // register state variables
@@ -61,11 +71,13 @@ export class Chat extends Bubble {
     this.off = this.listeners.off.bind(this.listeners);
   }
 
-  create({metadata={}, options}) {
+  create({metadata, options}) {
     this._validateMetadata(metadata);
+    this.metadata = metadata;
+    stateManager.dispatch(this.id+'-metadata', this.metadata);
     return this.provider.open()
       .then(() => super.create(options))
-      .then(() => { console.debug(this.userManager)
+      .then(() => {
         return Promise.all([
           this._saveMetadata(metadata, options),
           this.mkdir(CONTENT.textChat, options),
@@ -94,7 +106,7 @@ export class Chat extends Bubble {
   }
 
   join(options) {
-    console.trace('joining conversation bubble');
+    console.trace('joining conversation bubble', this.contentId);
     return this.provider.open()
       .then(() => super.initialise(options))
       .then(() => {
@@ -106,7 +118,7 @@ export class Chat extends Bubble {
   }
 
   postMessage(message) {
-    console.trace('post message', this.id, message);
+    console.trace(this.id, 'post message', message);
     if (message.id === undefined) message.id = Date.now() + Math.floor(Math.random() * Math.pow(10, 6));
     this.write(CONTENT.textChat + '/' + message.id, JSON.stringify(message))
       .then(() => {
@@ -132,8 +144,10 @@ export class Chat extends Bubble {
   }
 
   setReadTime(time) {
-    this.lastRead = time;
-    this._updateUnread();
+    if (time > this.lastRead) {
+      this.lastRead = time;
+      this._updateUnread();
+    }
   }
 
   getMessages() {
@@ -141,7 +155,7 @@ export class Chat extends Bubble {
   }
 
   serialize() {
-    return {classType: this.classType, id: this.id, bubbleId: this.contentId.toString(), metadata: this.metadata}
+    return {chatType: this.chatType, classType: this.classType, id: this.id, bubbleId: this.contentId.toString(), metadata: this.metadata}
   }
 
   deserialize(data) {
@@ -158,6 +172,21 @@ export class Chat extends Bubble {
     return this.state !== STATE.invalid;
   }
 
+  getInvite() {
+    return toBase64Url(Buffer.from(JSON.stringify({
+      t: this.classType,
+      id: this.contentId.toString()
+    })))
+  }
+
+  static parseInvite(invite) {
+    return JSON.parse(fromBase64Url(invite));
+  }
+
+  getTerminateKey() {
+    throw new Error('Chat.getTerminateKey is a virtual function and must be implemented');
+  }
+
   close() {
     return this.provider.close();
   }
@@ -165,7 +194,7 @@ export class Chat extends Bubble {
   _validateMetadata(metadata) {
     assert.isObject(metadata, 'metadata');
     assert.isString(metadata.title, 'title');
-    assert.isArray(metadata.members, 'members');
+    if (metadata.members) assert.isArray(metadata.members, 'members');
   }
 
   _saveMetadata(metadata, options) {
@@ -173,25 +202,24 @@ export class Chat extends Bubble {
   }
 
   _handleMessageNotification(notification) {
-    console.trace('msg rxd', notification);
+    console.trace(this.id, 'msg rxd', notification);
     if (assert.isArray(notification.data)) {
       notification.data.forEach(msg => this._readMessage(msg));
     }
   }
 
   _handleMetadataChange(notification) { 
-    console.debug('raw metadata', notification)
+    console.trace(this.id, 'rxd new metadata', notification)
     const metadata = JSON.parse(notification.data);
-    console.debug('new metadata', metadata)
     this.metadata = {...DEFAULT_METADATA, ...metadata, bubbleId: this.contentId};
     stateManager.dispatch(this.id+'-metadata', this.metadata);
   }
 
   _readMessage(messageDetails, attempts=5) {
-    console.trace('reading message', messageDetails);
     return this.read(messageDetails.name)
       .then(messageJson => {
-        try { console.debug('_readMessage', messageJson);
+        try {
+          console.trace(this.id, 'message', messageJson);
           const message = JSON.parse(messageJson);
           message.created = messageDetails.created;
           message.modified = messageDetails.modified;
@@ -216,7 +244,8 @@ export class Chat extends Bubble {
   }
 
   _setMessage(message) {
-    message.from = new User(message.from)
+    message.from = new User(message.from);
+    message.conversationId = this.id;
     const index = this.messages.findIndex(m => m.id === message.id);
     if (index >=0) this.messages[index] = message;
     else this.messages.push(message);
@@ -225,15 +254,17 @@ export class Chat extends Bubble {
     localStorage.writeMessage(message);
     stateManager.dispatch(this.id+'-messages', this.messages);
     this.listeners.notifyListeners('new-message-notification');
+    this._updateUnread()
   }
 
   _loadMessages(conversationId) {
     return localStorage.queryMessagesByConversation(conversationId)
-      .then(messages => { console.debug('loaded messages', messages);
+      .then(messages => {
         messages.sort((a,b) => a.created - b.created);
         messages.forEach(m => {m.from = new User(m.from)});
         this.messages = messages;
         this.lastModTime = messages.reduce((time, m) => {return m.modified > time ? m.modified : time}, 0);
+        this.lastRead = this.lastModTime;
         stateManager.dispatch(this.id+'-messages', this.messages);
       })
   }
@@ -251,12 +282,13 @@ export class Chat extends Bubble {
   }
 
   _subscribeToContent(metadataRead, textChatList, options={}) {
-    console.trace('subscribing to content');
+    console.trace(this.id, 'subscribing to content');
     return Promise.all([
       this.subscribe(CONTENT.metadataFile, this._handleMetadataChange.bind(this), {...options, read: metadataRead}),
       this.subscribe(CONTENT.textChat, this._handleMessageNotification.bind(this), {...options, since: textChatList ? this.lastModTime : undefined}),
     ])
-    .then(subscriptions => { console.debug('subscriptions', subscriptions)
+    .then(subscriptions => { 
+      console.trace(this.id, 'subscriptions', subscriptions)
       if(metadataRead) this._handleMetadataChange(subscriptions[0]);
       if(textChatList) this._handleMessageNotification(subscriptions[1]);
     })
@@ -264,7 +296,6 @@ export class Chat extends Bubble {
 
   _updateUnread() {
     this.unreadMsgs = this._countUnreadMsgs();
-    console.debug(this.id+' unread', this.unreadMsgs)
     stateManager.dispatch(this.id+'-unread', this.unreadMsgs);
     this.listeners.notifyListeners('unread-change');
   }

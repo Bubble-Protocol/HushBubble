@@ -2,19 +2,32 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { Modal } from "../../components/Modal/Modal";
 import { Button } from "../../components/Button/Button";
-import { TextBox } from "../../components/TextBox";
 import { ModalHostInfo } from "../../components/ModalHostInfo";
 import { ModalHostCustomise } from "../../components/ModalHostCustomise";
-import { User } from "../../../model/User";
+import { SingleUserInput } from "./components/SingleUserInput";
 
-export const CreateChatModal = ({ chains, hosts, session, bubble, userIn='', onCreate, onCancel, onCompletion }) => {
+export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], onCreate, onCancel, onCompletion }) => {
+
+  for (let i=0; i<bubble.constructorParams.length; i++) {
+    switch (bubble.constructorParams[i]) {
+      case 'member0':
+        valuesIn[i] = {value: session.getUserId(), valid: true};
+        break;
+      case 'terminateToken':
+        valuesIn[i] = {valid: true};
+        break;
+      default:
+        valuesIn[i] = {value: valuesIn[i], valid: false};
+    }
+  }
+
   const defaultChain = chains.find(c => c.id === session.chain.id) || chains[0];
-  const [user, setUser] = useState(userIn);
+  const [state, setState] = useState('user-input');
+  const [values, setValues] = useState(valuesIn);
   const [hostValues, setHostValues] = useState({chain: defaultChain, host: hosts[0], url: "", urlValid: false});
   const [customise, setCustomised] = useState(false);
   const [createError, setCreateError] = useState();
 
-  console.debug('bubble', bubble)
   function getHost() {
     if (hostValues.url === "") return hostValues.host;
     const host = { name: hostValues.url, chains: {} }
@@ -22,28 +35,27 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, userIn='', onC
     return host;
   }
 
-  let userObj;
-  try {
-    let id = user;
-    try {
-      const url = new URL(id);
-      id = url.searchParams.get('connect');
+  function getTitle() {
+    for (let i=0; i<bubble.constructorParams.length; i++) {
+      if (bubble.constructorParams[i] === 'member1') return values[i].user.address;
     }
-    catch(_) {}
-    userObj = new User(id);
+    return 'Untitled'
   }
-  catch(_) {}
 
   function createChat() {
+    setState('creating');
+    const metadata = {};
+    bubble.constructorParams.forEach((p,i) => { metadata[p] = values[i].user || values[i].value })
     onCreate({
       chain: hostValues.chain, 
       host: getHost(), 
       bubbleType: bubble,
-      title: userObj.address,
-      users: [session.getUserId(), userObj]
+      title: getTitle(),
+      metadata
     })
     .then(onCompletion)
     .catch(error => {
+      setState('user-input');
       console.warn('failed to create chat', error);
       setCreateError(error)
     });
@@ -53,20 +65,22 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, userIn='', onC
     <Modal 
     onCancel={onCancel}
     title={bubble.title}
-    subtitle={bubble.details || bubble.description} 
+    subtitle={bubble.details || bubble.description}
+    loading={state === 'creating'}
     contents=
       <React.Fragment>
         {!customise && <ModalHostInfo chain={hostValues.chain} host={getHost()} onCustomise={() => setCustomised(true)} />}
         {customise && <ModalHostCustomise chainTitle="Blockchain" hostTitle="Host" values={hostValues} chains={chains} hosts={hosts} onChange={v => {setCreateError(); setHostValues(v)}} onCollapse={() => setCustomised(false)} /> }   
+        {
+          bubble.constructorParams.map((param, i) => 
+            {
+              return getConstructorParamUI(param, values[i], (v) => setValues([...values.slice(0,i), v, ...values.slice(i+1)]));
+            }
+          ).filter(Boolean)
+        }
         <div className="step-frame">
-          <p className="step-title">Users</p>
-          <p className="small-text">Members of your chat, other than you...</p>
-          <TextBox text={userObj ? userObj.address : user} onChange={v => {setCreateError(); setUser(v)}} valid={userObj !== undefined} />
-        </div>
-        <div className="step-frame">
-          <p className="small-text">Requires a blockchain transaction to deploy the chat smart contract.</p>
           {createError && <p className="small-text error-text">{createError.message}</p>}
-          <Button title="Create" onClick={createChat} disabled={(hostValues.url !== "" && !hostValues.urlValid) || userObj === undefined} />
+          <Button title="Create" onClick={createChat} disabled={(hostValues.url !== "" && !hostValues.urlValid) || !values.reduce((valid,value) => (valid && value.valid), true)} />
         </div>
       </React.Fragment>
     />
@@ -84,3 +98,12 @@ CreateChatModal.propTypes = {
   onCompletion: PropTypes.func.isRequired,
 };
 
+
+function getConstructorParamUI(param, initialValue, setValue) {
+  switch(param) {
+    case 'member1':
+      return <SingleUserInput key={param} title="User" subtitle="User to connect to..." value={initialValue} setValue={setValue} />
+    default:
+      return null;
+  }
+}

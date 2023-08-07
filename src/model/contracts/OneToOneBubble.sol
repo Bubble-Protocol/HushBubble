@@ -2,19 +2,21 @@
 
 pragma solidity ^0.8.0;
 
-import "./AccessControlledStorage.sol";
+import "./ChatBubble.sol";
 import "./AccessControlBits.sol";
 
 
-contract ConversationBubble is AccessControlledStorage {
+contract OneToOneBubble is ChatBubble {
 
   address u1;
   address u2;
   bool terminated = false;
+  bytes32 terminateToken;
 
-  constructor(address _user1, address _user2) {
+  constructor(address _user1, address _user2, bytes32 _terminateToken) {
     u1 = _user1;
     u2 = _user2;
+    terminateToken = _terminateToken;
   }
 
   function getAccessPermissions( address user, uint256 contentId ) external view override returns (uint256) {
@@ -24,8 +26,8 @@ contract ConversationBubble is AccessControlledStorage {
     else return READ_BIT | WRITE_BIT | APPEND_BIT;
   }
 
-  function terminate() public {
-    require(msg.sender == u1 || msg.sender == u2, "permission denied");
+  function terminate(bytes memory terminateKey) external override {
+    require(keccak256(terminateKey) == terminateToken, "permission denied");
     terminated = true;
   }
 

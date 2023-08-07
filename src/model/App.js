@@ -20,6 +20,7 @@ export class MessengerApp {
   constructor() {
     stateManager.register('app-state', this.state);
     stateManager.register('chats');
+    stateManager.register('chat-functions');
     stateManager.register('total-unread', 0);
     stateManager.register('new-message-notification');
     stateManager.register('online', window.navigator.onLine);
@@ -43,6 +44,9 @@ export class MessengerApp {
         stateManager.dispatch('myId', this.session.myId);
         stateManager.dispatch('chats', this.session.conversations);
         stateManager.dispatch('app-state', this.state);
+        stateManager.dispatch('chat-functions', {
+          onTerminate: this.session.terminateChat.bind(this.session)
+        });
       });
   }
 

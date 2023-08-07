@@ -17,12 +17,12 @@ export const Desktop = () => {
   const config = stateManager.useStateData('config')();
   const [mobileView, setMobileView] = useState('chat');
 
-  console.debug('Desktop', online);
+  console.trace('online', online);
 
   useEffect(() => {
     if (!urlParams) return;
-    if (urlParams.connect) {
-      setModal(<CreateChatModal session={session} chains={config.chains} hosts={config.hosts} bubble={config.bubbles[0]} userIn={urlParams.connect} onCreate={session.createChat} onCancel={() => setModal(null)} onCompletion={() => setModal(null)} />);
+    if (urlParams.connect && !session.hasConnectionWith(urlParams.connect)) {
+      setModal(<CreateChatModal session={session} chains={config.chains} hosts={config.hosts} bubble={config.bubbles[0]} valuesIn={[null, urlParams.connect]} onCreate={session.createChat} onCancel={() => setModal(null)} onCompletion={() => setModal(null)} />);
     }
     else if (urlParams.join) {
       setModal(<JoinChatModal onJoin={session.joinChat} bubbleIn={urlParams.join} onCompletion={() => setModal(null)} onCancel={() => setModal(null)} />);
@@ -54,7 +54,7 @@ export const Desktop = () => {
       {/* Content */}
       <div className="content">
 
-        {appState === 'initialised' && <ChatScreen mobileView={mobileView} setMobileView={setMobileView} setModal={setModal} />}
+        {appState === 'initialised' && <ChatScreen mobileView={mobileView} setMobileView={setMobileView} setModal={setModal} onTerminateChat={session.terminateChat} />}
 
       </div>
 
