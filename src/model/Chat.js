@@ -72,6 +72,7 @@ export class Chat extends Bubble {
   create({metadata, options}) {
     this._validateMetadata(metadata);
     this.metadata = metadata;
+    this.metadata.members = getMembers(metadata);
     stateManager.dispatch(this.id+'-metadata', this.metadata);
     return this.provider.open()
       .then(() => super.create(options))
@@ -208,7 +209,7 @@ export class Chat extends Bubble {
 
   _validateMetadata(metadata) {
     assert.isObject(metadata, 'metadata');
-    assert.isString(metadata.title, 'title');
+    if (metadata.title) assert.isString(metadata.title, 'title');
     if (metadata.members) assert.isArray(metadata.members, 'members');
   }
 
@@ -227,6 +228,7 @@ export class Chat extends Bubble {
     console.trace(this.id, 'rxd new metadata', notification)
     const metadata = JSON.parse(notification.data);
     this.metadata = {...DEFAULT_METADATA, ...metadata, bubbleId: this.contentId};
+    this.metadata.members = getMembers(metadata);
     stateManager.dispatch(this.id+'-metadata', this.metadata);
   }
 
@@ -328,3 +330,15 @@ export class Chat extends Bubble {
 
 }
 
+function getMembers(metadata) {
+  const members = [];
+  let found = true;
+  let index = 0;
+  while(found) {
+    if (metadata['member'+index]) members.push(metadata['member'+index]);
+    else found = false;
+    index++;
+  }
+  if (assert.isArray(metadata.members)) members.concat(metadata.members)
+  return members.sort().filter((m, i, members) => i===0 || m !== members[i-1]);
+}

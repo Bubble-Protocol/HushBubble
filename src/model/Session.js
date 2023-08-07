@@ -65,6 +65,7 @@ export class Session {
 
   async reconnect() {
     this.conversations.map(c => c.reconnect());
+    if (this.requestMonitor) this.requestMonitor.reconnect();
   }
 
   async close() {
@@ -75,7 +76,7 @@ export class Session {
     return this.myId 
   }
 
-  async createChat({chain, host, bubbleType, title, metadata={}}) {
+  async createChat({chain, host, bubbleType, metadata={}}) {
     assert.isObject(chain, 'chain');
     assert.isNumber(chain.id, 'chain.id');
     assert.isHexString(chain.publicBubble, 'chain.publicBubble');
@@ -115,7 +116,7 @@ export class Session {
         const conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.deviceKey, terminateKey, metadata);
         console.trace('creating off-chain bubble on host', conversation.contentId.provider);
         return conversation.create({
-          metadata: {title, ...metadata},
+          metadata: metadata,
           options: {silent: true}
         })
         .then(() => {

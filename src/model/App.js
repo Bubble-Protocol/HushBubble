@@ -53,7 +53,11 @@ export class MessengerApp {
   setOnlineStatus(online) {
     console.trace(online ? 'online' : 'offline');
     stateManager.dispatch('online', online);
-    if (online === true) this.session.reconnect();
+    if (online === true) this.checkConnections();
+  }
+
+  checkConnections() {
+    this.session.reconnect();
   }
 
   async close() {

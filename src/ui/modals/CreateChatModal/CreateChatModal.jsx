@@ -35,13 +35,6 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
     return host;
   }
 
-  function getTitle() {
-    for (let i=0; i<bubble.constructorParams.length; i++) {
-      if (bubble.constructorParams[i] === 'member1') return values[i].user.address;
-    }
-    return 'Untitled'
-  }
-
   function createChat() {
     setState('creating');
     const metadata = {};
@@ -50,7 +43,6 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
       chain: hostValues.chain, 
       host: getHost(), 
       bubbleType: bubble,
-      title: getTitle(),
       metadata
     })
     .then(onCompletion)

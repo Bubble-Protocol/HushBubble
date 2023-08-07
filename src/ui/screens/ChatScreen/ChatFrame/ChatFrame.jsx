@@ -98,9 +98,16 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
   if (chatIcons.length === 0) chatIcons = [<img key={0} className="chat-header-icon" src={defaultIcon} />];
   
   function getTitle() {
-    if (!assert.isHexString(chatData.title) || chatData.title.length <= 16) return chatData.title;
+    let title = chatData.title;
+    if (!title) {
+      if (!assert.isArray(chatData.members)) return 'Unknown';
+      if (chatData.members.length > 2) return 'Group';
+      const otherMember = chatData.members.find(m => m.id && m.id !== myId.id)
+      if (otherMember) title = otherMember.address;
+    }
+    if (!assert.isHexString(title) || title.length <= 16) return title;
     const mobileMediaQuery = window.matchMedia('(max-width: 640px)');
-    return mobileMediaQuery.matches ? chatData.title.slice(0,6) + '..' + chatData.title.slice(-4) : chatData.title;
+    return mobileMediaQuery.matches ? title.slice(0,6) + '..' + title.slice(-4) : title;
   }
   
   return (

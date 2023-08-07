@@ -37,6 +37,13 @@ window.addEventListener('online', () => messenger.setOnlineStatus(true));
 window.addEventListener('offline', () => messenger.setOnlineStatus(false));
 window.addEventListener('beforeunload', () => messenger.close());
 
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    // Primarily for mobiles, reconnect all websockets if needed
+    messenger.checkConnections();
+  }
+});
+
 
 //
 // UI

@@ -1,7 +1,6 @@
-import { ContentId, assert } from "@bubble-protocol/core";
+import { assert } from "@bubble-protocol/core";
 import { PrivateChat } from "./PrivateChat";
 import { PublicChat } from "./PublicChat"
-import { Chat } from "../Chat";
 import { ecdsa } from "@bubble-protocol/crypto";
 
 export const ChatFactory = {
