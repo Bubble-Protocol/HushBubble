@@ -12,7 +12,7 @@ import { CopySelector } from "../../../components/CopySelector";
 import { BubbleSelector } from "../../../components/BubbleSelector";
 import { CreateChatModal } from "../../../modals/CreateChatModal";
 
-export const ChatSelectorColumn = ({chats, selectedChat, setSelectedChat, setModal}) => {
+export const ChatSelectorColumn = ({className, chats, selectedChat, setSelectedChat, setModal}) => {
 
   const online = stateManager.useStateData('online')();
   const unread = stateManager.useStateData('total-unread')();
@@ -31,7 +31,7 @@ export const ChatSelectorColumn = ({chats, selectedChat, setSelectedChat, setMod
 
   return menuMinimized
     ?
-      <div className="minimal-chat-column">
+      <div className={"minimal-chat-column "+className}>
         <div className="inbox-icon">
           <Inbox />
         </div>
@@ -53,7 +53,7 @@ export const ChatSelectorColumn = ({chats, selectedChat, setSelectedChat, setMod
     <>
       {/* Chat Selector */}
       {centrePanel !== 'new-chat' &&
-        <div className="chat-column">
+        <div className={"chat-column "+className}>
             <div className="chat-column">
               <div className="title-item">
                 <div className="selector-content">
@@ -83,7 +83,7 @@ export const ChatSelectorColumn = ({chats, selectedChat, setSelectedChat, setMod
 
       {/* Join Chat */}
       {centrePanel === 'new-chat' &&
-        <div className="chat-column">
+        <div className={"chat-column "+className}>
           <div className="title-item">
             <div className="selector-content">
               <div className="selector-title-row">
@@ -110,6 +110,10 @@ export const ChatSelectorColumn = ({chats, selectedChat, setSelectedChat, setMod
 };
 
 ChatSelectorColumn.propTypes = {
-  date: PropTypes.any,
+  className: PropTypes.string,
+  chats: PropTypes.array.isRequired,
+  selectedChat: PropTypes.object,
+  setSelectedChat: PropTypes.func.isRequired,
+  setModal: PropTypes.func.isRequired
 };
 

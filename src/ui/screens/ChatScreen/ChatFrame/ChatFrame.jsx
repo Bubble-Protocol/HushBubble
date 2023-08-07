@@ -11,7 +11,7 @@ import { stateManager } from "../../../../state-context";
 import { PopularMoreVertical1 } from "../../../icons/PopularMoreVertical1";
 import { DeleteChatModal } from "../../../modals/DeleteChatModal";
 
-export const ChatFrame = ({ chat, hide, onTerminate, setModal }) => {
+export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
 
   const [messageText, setMessageText] = useState('');
   const myId = stateManager.useStateData('myId')();
@@ -98,7 +98,7 @@ export const ChatFrame = ({ chat, hide, onTerminate, setModal }) => {
   
   
   return (
-    <div className={"chat-frame" + (hide ? ' hide' : '')} >
+    <div className={"chat-frame " + className + (hide ? ' hide' : '')} >
 
       {/* Header */}
       <div className="chat-header">
@@ -145,6 +145,7 @@ export const ChatFrame = ({ chat, hide, onTerminate, setModal }) => {
 };
 
 ChatFrame.propTypes = {
+  className: PropTypes.string,
   chat: PropTypes.object.isRequired,
   onTerminate: PropTypes.func.isRequired,
   hide: PropTypes.bool

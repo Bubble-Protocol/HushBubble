@@ -125,3 +125,16 @@
   align-self: stretch;
   border-bottom: solid 1px #e8e8e8;
 }
+
+@media only screen and (max-width: 800px) {
+
+  .chat-screen .chat-column {
+    width: 100%;
+  }
+  
+  .chat-screen .mobile-hidden {
+    display: none;
+  }
+
+}
+

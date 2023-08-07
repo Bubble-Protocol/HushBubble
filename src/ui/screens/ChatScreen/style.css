@@ -13,16 +13,9 @@
 
 @media only screen and (max-width: 800px) {
 
-  .chat-screen {
-    touch-action: pan-y;
-    position: absolute;
-    left: calc(max(-100vw, -400px));
-    top: 0;
-    width: calc(100vw + min(100vw, 400px));
-  }
-
-  .mobile-menu-visible {
-    transform: translateX(calc(min(100vw, 400px)));
+  .mobile-hidden {
+    display: none;
+    border-radius: 200px;
   }
 
 }

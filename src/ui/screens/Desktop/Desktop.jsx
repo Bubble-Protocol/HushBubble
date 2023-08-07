@@ -15,7 +15,7 @@ export const Desktop = () => {
   const urlParams = stateManager.useStateData('url-params')();
   const session = stateManager.useStateData('session')();
   const config = stateManager.useStateData('config')();
-  const [mobileView, setMobileView] = useState('chat');
+  const [mobileView, setMobileView] = useState('menu');
 
   useEffect(() => {
     if (!urlParams) return;
