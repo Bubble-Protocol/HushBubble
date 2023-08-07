@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.0;
 
-import "./AccessControlledStorage.sol";
+import "./ChatBubble.sol";
 import "./AccessControlBits.sol";
 
 
-contract PublicBubble is AccessControlledStorage {
+contract PublicBubble is ChatBubble {
 
   address owner = msg.sender;
   bool terminated = false;
@@ -17,7 +17,7 @@ contract PublicBubble is AccessControlledStorage {
     else return READ_BIT | WRITE_BIT | APPEND_BIT;
   }
 
-  function terminate() external {
+  function terminate(bytes memory /*terminateKey*/) external override {
     require(msg.sender == owner, "permission denied");
     terminated = true;
   }

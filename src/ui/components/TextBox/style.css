@@ -1,4 +1,5 @@
 .textbox {
+  align-self: stretch;
   align-items: center;
   border: 1px solid;
   border-color: #a8a8a8;

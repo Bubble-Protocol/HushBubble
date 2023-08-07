@@ -10,6 +10,15 @@
   overflow: hidden;
 }
 
+.desktop .modalMask {
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
 .desktop .header {
   flex: 0;
   align-items: center;
@@ -113,6 +122,10 @@
   text-align: center;
 }
 
+.stretch {
+  justify-self: stretch;
+}
+
 .text-button {
   font-family: Arial, Helvetica, sans-serif;
   color: #225398;
@@ -153,8 +166,16 @@
   position: relative;
 }
 
+.desktop .button-like:hover {
+  cursor: pointer;
+}
+
 @media only screen and (max-width: 800px) {
 
+  .desktop {
+    touch-action: pan-y;
+  }
+  
   .desktop .mobile {
     display: inherit;
   }

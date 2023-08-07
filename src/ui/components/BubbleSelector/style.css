@@ -1,0 +1,87 @@
+
+.bubble-selector {
+  align-items: flex-start;
+  display: flex;
+  gap: 20px;
+  padding: 12px 20px;
+  position: relative;
+}
+
+.bubble-selector {
+  border-bottom: 1px solid #a8a8a8;
+}
+
+.bubble-selector:first-child {
+  border-top: 1px solid #a8a8a8;
+}
+
+.bubble-selector:hover {
+  cursor: pointer;
+  background-color: rgba(224, 250, 216, 0.70);
+}
+
+.selected {
+  background-color: rgba(224, 250, 216, 0.70);
+}
+
+.bubble-selector .disabled {
+  opacity: 50%;
+}
+
+.bubble-selector .disabled:hover {
+  cursor: default;
+  background-color: inherit;
+}
+
+.bubble-selector .selector-content {
+  align-items: flex-start;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  width: 298px;
+}
+
+.bubble-selector .selector-title {
+  color: #0f1217;
+  flex: 1;
+  font-family: "Work Sans", Helvetica;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bubble-selector .selector-text {
+  align-self: stretch;
+  color: #666666;
+  font-family: "Work Sans", Helvetica;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 22px;
+  position: relative;
+}
+
+.bubble-selector .bubble-selector {
+  align-items: flex-start;
+  display: flex;
+  gap: 20px;
+  height: 78px;
+  padding: 12px 20px;
+  position: relative;
+  width: 400px;
+}
+
+.bubble-selector .icon {
+  border-radius: 14px;
+  height: 28px;
+  min-width: 28px;
+  position: relative;
+}
+

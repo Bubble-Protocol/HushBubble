@@ -1,14 +1,18 @@
 import { ChatDateRow } from "./ChatDateRow";
 import { Message } from "../../../components/Message";
-import defaultIcon from "../../../assets/img/unknown-contact-icon.png";
+import defaultIcon from "../../../../assets/img/unknown-contact-icon.png";
 
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import "./style.css";
 import { Button } from "../../../components/Button/Button";
+import { DropdownMenu } from "../../../components/DropdownMenu/DropdownMenu";
 import { stateManager } from "../../../../state-context";
+import { PopularMoreVertical1 } from "../../../icons/PopularMoreVertical1";
+import { DeleteChatModal } from "../../../modals/DeleteChatModal";
+import { assert } from "@bubble-protocol/core";
 
-export const ChatFrame = ({ chat }) => {
+export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
 
   const [messageText, setMessageText] = useState('');
   const myId = stateManager.useStateData('myId')();
@@ -16,6 +20,7 @@ export const ChatFrame = ({ chat }) => {
   const messages = stateManager.useStateData(chat.id+'-messages')();
   const connectionState = stateManager.useStateData(chat.id+'-connection-state')();
   const online = stateManager.useStateData('online')();
+  const config = stateManager.useStateData('config')();
 
   // Setup scroll-to-bottom
 
@@ -62,13 +67,16 @@ export const ChatFrame = ({ chat }) => {
   }, []);
 
 
-  // Functions
+  // Functions & Modals
 
   function postMessage() {
     chat.postMessage({text: messageText, from: myId.id}).then(() => setMessageText('')).catch(console.warn);
+    chat.setReadTime(Date.now());
   }
 
-  
+  const deleteModal = <DeleteChatModal chat={chat} onDelete={onTerminate} onCancel={() => setModal()} onCompletion={() => setModal()} />;
+
+
   // Create messages view
   
   let lastDate = new Date(0);
@@ -84,25 +92,47 @@ export const ChatFrame = ({ chat }) => {
 
   let chatIcons = chatData.icon 
     ? [<img key={0} className="chat-header-icon" src={chatData.icon} />] 
-    : chatData.members.filter(member => member.icon).slice(0,3).map((member, index) => <img key={index} className="chat-header-icon" src={member.icon} />)
+    : chatData.members 
+      ? chatData.members.filter(member => member.icon).slice(0,3).map((member, index) => <img key={index} className="chat-header-icon" src={member.icon} />)
+      : []
   if (chatIcons.length === 0) chatIcons = [<img key={0} className="chat-header-icon" src={defaultIcon} />];
   
+  function getTitle() {
+    let title = chatData.title;
+    if (!title) {
+      if (!assert.isArray(chatData.members)) return 'Unknown';
+      if (chatData.members.length > 2) return 'Group';
+      const otherMember = chatData.members.find(m => m.id && m.id !== myId.id)
+      if (otherMember) title = otherMember.address;
+    }
+    if (!assert.isHexString(title) || title.length <= 16) return title;
+    const mobileMediaQuery = window.matchMedia('(max-width: 640px)');
+    return mobileMediaQuery.matches ? title.slice(0,6) + '..' + title.slice(-4) : title;
+  }
   
   return (
-    <div className="chat-frame" >
+    <div className={"chat-frame " + className + (hide ? ' hide' : '')} >
 
       {/* Header */}
       <div className="chat-header">
+        <div className="chat-header-menu-left mobile"></div>
         <div className="chat-header-icons no-mobile">
           <div className="chat-header-member-icons">
             {chatIcons}
           </div>
         </div>
         <div className="chat-header-title-row">
-          <div className="chat-header-title">{chatData.title || chatData.members[1].title || chatData.members[1].address}</div>
-          {chatData.members.length > 0 && <div className="chat-header-subtext">{chatData.members.length + ' member' + (chatData.members.length === 1 ? '' : 's')}</div>}
+          <div className="chat-header-title">{getTitle()}</div>
+          {chatData.members && chatData.members.length > 0 && <div className="chat-header-subtext">{chatData.members.length + ' member' + (chatData.members.length === 1 ? '' : 's')}</div>}
         </div>
-        <div className="chat-header-menu no-mobile" />
+        <div className="chat-header-menu">
+          <DropdownMenu direction="bottom-left" options={[
+            {name: "Copy Chat Link", onClick: () => navigator.clipboard.writeText(config.appUrl+'?chat='+chat.getInvite())},
+            {name: "Delete Chat", onClick: () => setModal(deleteModal)}
+          ]} >
+            <PopularMoreVertical1 className="icon-instance-node-3" />
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Content */}
@@ -128,5 +158,8 @@ export const ChatFrame = ({ chat }) => {
 };
 
 ChatFrame.propTypes = {
-  chat: PropTypes.object.isRequired
+  className: PropTypes.string,
+  chat: PropTypes.object.isRequired,
+  onTerminate: PropTypes.func.isRequired,
+  hide: PropTypes.bool
 };

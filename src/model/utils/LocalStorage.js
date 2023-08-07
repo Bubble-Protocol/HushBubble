@@ -109,7 +109,7 @@ class IndexedDbStorage {
       }
       const store = transaction.objectStore(this.storeName);
       const request = store.getAll();
-      request.onsuccess = event => { console.debug('onsuccess', event.target.result)
+      request.onsuccess = event => {
         event.target.result.forEach( item => {
           if (item.key !== "undefined") this.values[item.key] = item.value;
         })

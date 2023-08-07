@@ -10,8 +10,6 @@ import { setFaviconWithCount } from "./ui/utils/favicon";
 // Application
 //
 
-const APP_UID = "4cc22e0c9f762f7378a226f0b7f06d2101fe6f727995bcd331ed298addf3301b";
-
 const TRACE_ON = true;
 const DEBUG_ON = true;
 
@@ -21,12 +19,30 @@ console.debug = DEBUG_ON ? Function.prototype.bind.call(console.info, console, "
 
 await initialiseLocalStorage('BubbleChat');
 
+stateManager.register('url-params');
+
 const messenger = new MessengerApp(stateManager);
-messenger.initialise().catch(console.error);
+messenger.initialise()
+  .then(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const params = {
+      connect: urlParams.get('connect'), 
+      join: urlParams.get('chat')
+    }
+    stateManager.dispatch('url-params', params);
+  })
+  .catch(console.error);
 
 window.addEventListener('online', () => messenger.setOnlineStatus(true));
 window.addEventListener('offline', () => messenger.setOnlineStatus(false));
 window.addEventListener('beforeunload', () => messenger.close());
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    // Primarily for mobiles, reconnect all websockets if needed
+    messenger.checkConnections();
+  }
+});
 
 
 //
@@ -38,9 +54,9 @@ const root = ReactDOMClient.createRoot(app);
 
 setFaviconWithCount(0);
 
-function render() { 
+function render(params={}) { 
   root.render(
-    <Desktop />
+    <Desktop connect={params.connect} />
   );
 }
 

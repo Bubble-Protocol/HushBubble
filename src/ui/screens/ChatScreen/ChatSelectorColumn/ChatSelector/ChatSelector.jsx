@@ -6,7 +6,7 @@ Please share your feedback here: https://form.asana.com/?k=uvp-HPgd3_hyoXRBw1IcN
 import PropTypes from "prop-types";
 import React from "react";
 import "./style.css";
-import defaultIcon from "../../../../assets/img/unknown-contact-icon.png";
+import defaultIcon from "../../../../../assets/img/unknown-contact-icon.png";
 import { stateManager } from "../../../../../state-context";
 
 export const ChatSelector = ({
@@ -26,7 +26,6 @@ export const ChatSelector = ({
   const { title, members, icon } = chatData;
   const latestMessage = !messages ? {} : messages.length === 0 ? {} : messages.slice(-1)[0];
   const otherMember = !members || members.length === 0 ? {} : members[0].id === myId.id ? members[1] : members[0];
-
 
   return (
     <div className={"chat-selector" + (selected ? ' selected' : '') + (connectionState !== 'open' ? ' disabled' : '')} onClick={onClick}>

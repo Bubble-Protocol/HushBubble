@@ -41,6 +41,13 @@
   position: relative;
 }
 
+.chat-screen .icon-plus {
+  height: 36px !important;
+  margin-bottom: -6px !important;
+  margin-top: -6px !important;
+  min-width: 36px !important;
+  position: relative !important;
+}
 
 .chat-screen .selector-content {
   align-items: flex-start;
@@ -118,3 +125,16 @@
   align-self: stretch;
   border-bottom: solid 1px #e8e8e8;
 }
+
+@media only screen and (max-width: 800px) {
+
+  .chat-screen .chat-column {
+    width: 100%;
+  }
+
+  .chat-screen .no-mobile {
+    display: none;
+  }
+
+}
+
