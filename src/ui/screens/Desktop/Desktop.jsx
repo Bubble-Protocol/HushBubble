@@ -20,7 +20,7 @@ export const Desktop = () => {
   useEffect(() => {
     if (!urlParams) return;
     if (urlParams.connect && !session.hasConnectionWith(urlParams.connect)) {
-      setModal(<CreateChatModal session={session} chains={config.chains} hosts={config.hosts} bubble={config.bubbles[0]} valuesIn={[null, urlParams.connect]} onCreate={session.createChat} onCancel={() => setModal(null)} onCompletion={() => setModal(null)} />);
+      setModal(<CreateChatModal session={session} chains={config.chains} hosts={config.hosts} bubble={config.bubbles.find(b => b.id.category === 'one-to-one')} valuesIn={[null, urlParams.connect]} onCreate={session.createChat} onCancel={() => setModal(null)} onCompletion={() => setModal(null)} />);
     }
     else if (urlParams.join) {
       setModal(<JoinChatModal onJoin={session.joinChat} bubbleIn={urlParams.join} onCompletion={() => setModal(null)} onCancel={() => setModal(null)} />);
