@@ -142,7 +142,7 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
         <div className="chat-header-menu">
           <DropdownMenu direction="bottom-left" options={[
             {name: "Copy Chat Link", onClick: () => navigator.clipboard.writeText(config.appUrl+'?chat='+chat.getInvite())},
-            chat.chatType.actions.canLeave ? {name: "Leave Chat", onClick: () => setModal(leaveModal)} : null,
+            chat.chatType.actions.canLeave || chatState !== 'open' ? {name: "Leave Chat", onClick: () => setModal(leaveModal)} : null,
             {name: "Delete Chat", onClick: () => setModal(deleteModal)}
           ].filter(Boolean)} >
             <PopularMoreVertical1 className="icon-instance-node-3" />
