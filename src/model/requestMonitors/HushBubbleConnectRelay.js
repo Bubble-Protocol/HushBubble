@@ -22,6 +22,7 @@ export class HushBubbleConnectRelay {
   }
 
   monitor() {
+    console.trace('monitoring for new connections on HushBubble connect relay', this.monitoredDir);
     return this.bubble.provider.open()
       .then(() => this.bubble.mkdir(this.monitoredDir, {silent: true}))
       .then(() => this.bubble.subscribe(this.monitoredDir, this._handleNotification.bind(this), {list: true}))
