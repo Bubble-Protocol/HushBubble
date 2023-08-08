@@ -130,6 +130,7 @@ export class Chat extends Bubble {
         return this._subscribeToContent(true, true, options);
       })
       .then(() => {
+        this._setState(STATE.initialised);
         return this.metadata;
       })
       .catch(error => {

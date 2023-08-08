@@ -49,6 +49,7 @@ export class MessengerApp {
           join: this.session.joinChat.bind(this.session),
           terminate: this.session.terminateChat.bind(this.session),
           manageMembers: this.session.manageMembers.bind(this.session),
+          leave: this.session.leaveChat.bind(this.session),
         });
       });
   }

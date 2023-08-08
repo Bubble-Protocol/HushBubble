@@ -28,7 +28,9 @@ export const DEFAULT_BUBBLES = [
     sourceCode: publicChatSourceCode.default, 
     constructorParams: [], 
     metadata: {title: 'title', icon: 'icon'},
-    actions: {},
+    actions: {
+      canLeave: true
+    },
     icon: globeIcon
   },
   {
@@ -40,6 +42,7 @@ export const DEFAULT_BUBBLES = [
     constructorParams: ['members.address', 'terminateToken'], 
     metadata: {title: 'title', icon: 'icon'},
     actions: {
+      canLeave: true,
       addMembers: {method: 'setUsers', params: ['members.address', 'true']},
       removeMembers: {method: 'setUsers', params: ['members.address', 'false']},
     },

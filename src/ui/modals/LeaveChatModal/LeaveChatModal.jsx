@@ -23,19 +23,22 @@ export const LeaveChatModal = ({ chat, onLeave, onCancel, onCompletion }) => {
     onCancel={onCancel}
     contentCentered={true}
     title="Leave Chat"
-    subtitle="Leaving this chat will delete all chat data from this device. The chat itself and any other members will not be affected."
+    subtitle="Leaving this chat will delete all its data from this device. The chat bubble itself will remain open.  All other members will be unaffected and will not know you have left."
     loading={state === 'leaving'}
     contents=
       <React.Fragment>
         <div className="step-frame">
+        </div>
+        <div className="step-frame">
           {!error && <p className="small-text">Are you sure you want to leave this chat?</p>}
+          {!error && <p className="small-text">You can rejoin the chat any time if you have the chat link.</p>}
           {error && <p className="small-text error-text">{error.message}</p>}
         </div>
         <div className="step-frame">
           <Button title="Leave" onClick={leaveChat} />
-          <div className="text-button" onClick={onCancel}>Cancel</div>
         </div>
-      </React.Fragment>
+        <div className="text-button" onClick={onCancel}>Cancel</div>
+        </React.Fragment>
     />
   );
 };

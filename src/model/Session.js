@@ -228,6 +228,13 @@ export class Session {
     }
   }
 
+  leaveChat(chat) {
+    return Promise.resolve()
+      .then(() => {
+        this._removeChat(chat);
+      })
+  }
+
   hasConnectionWith(id) {
     try {
       const user = new User(id);

@@ -12,6 +12,7 @@ import { PopularMoreVertical1 } from "../../../icons/PopularMoreVertical1";
 import { DeleteChatModal } from "../../../modals/DeleteChatModal";
 import { assert } from "@bubble-protocol/core";
 import { ManageMemberModal } from "../../../modals/ManageMemberModal";
+import { LeaveChatModal } from "../../../modals/LeaveChatModal";
 
 export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
 
@@ -77,6 +78,7 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
     chat.setReadTime(Date.now());
   }
 
+  const leaveModal = <LeaveChatModal chat={chat} onLeave={chatFunctions.leave} onCancel={() => setModal()} onCompletion={() => setModal()} />;
   const deleteModal = <DeleteChatModal chat={chat} onDelete={chatFunctions.terminate} onCancel={() => setModal()} onCompletion={() => setModal()} />;
   const manageMemberModal = <ManageMemberModal chat={chat} onSave={chatFunctions.manageMembers} onCancel={() => setModal()} onCompletion={() => setModal()} />;
 
@@ -140,8 +142,9 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
         <div className="chat-header-menu">
           <DropdownMenu direction="bottom-left" options={[
             {name: "Copy Chat Link", onClick: () => navigator.clipboard.writeText(config.appUrl+'?chat='+chat.getInvite())},
+            chat.chatType.actions.canLeave ? {name: "Leave Chat", onClick: () => setModal(leaveModal)} : null,
             {name: "Delete Chat", onClick: () => setModal(deleteModal)}
-          ]} >
+          ].filter(Boolean)} >
             <PopularMoreVertical1 className="icon-instance-node-3" />
           </DropdownMenu>
         </div>
