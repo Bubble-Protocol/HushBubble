@@ -273,7 +273,6 @@ export class Session {
   }
 
   _handleChatTerminated(conversation) {
-    conversation.close();
     this.conversations = this.conversations.filter(c => c !== conversation);
     this._saveState();
     stateManager.dispatch('chats', this.conversations);

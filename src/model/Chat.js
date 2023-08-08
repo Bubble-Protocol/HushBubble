@@ -19,8 +19,10 @@ const DEFAULT_METADATA = {
 
 const STATE = {
   uninitialised: 'uninitialised',
-  initialised: 'initialised',
-  invalid: 'invalid'
+  initialised: 'open',
+  notMember: 'no longer a member',
+  invalid: 'corrupted',
+  terminated: 'terminated'
 }
 
 export class Chat extends Bubble {
@@ -56,6 +58,7 @@ export class Chat extends Bubble {
     this.myId = myId;
 
     // register state variables
+    stateManager.register(this.id+'-state', this.state);
     stateManager.register(this.id+'-connection-state', this.provider.state);
     stateManager.register(this.id+'-metadata', {bubbleId: bubbleId, ...DEFAULT_METADATA});
     stateManager.register(this.id+'-messages', []);
@@ -85,7 +88,7 @@ export class Chat extends Bubble {
         return this._subscribeToContent(false, false, options);
       })
       .then(() => {
-        this.state = STATE.initialised;
+        this._setState(STATE.initialised);
         return this.contentId;
       })
   }
@@ -99,10 +102,12 @@ export class Chat extends Bubble {
             return this._subscribeToContent(true, true, options);
           })
           .then(() => {
-            this.state = STATE.initialised;
+            this._setState(STATE.initialised);
           })
-          .catch(console.warn);
-      });
+          .catch(error => {
+            this._handleError(error);
+          })
+        });
   }
 
   reconnect() {
@@ -112,7 +117,9 @@ export class Chat extends Bubble {
       .then(() => {
         return this._subscribeToContent(true, true);
       })
-      .catch(console.warn);
+      .catch(error => {
+        this._handleError(error);
+      })
   }
 
   join(options) {
@@ -124,6 +131,9 @@ export class Chat extends Bubble {
       })
       .then(() => {
         return this.metadata;
+      })
+      .catch(error => {
+        this._handleError(error);
       })
   }
 
@@ -137,8 +147,8 @@ export class Chat extends Bubble {
         this._setMessage(message);
       })
       .catch(error => {
-        console.warn(this.id, 'failed to post message', error);
-        if (error.code === ErrorCodes.BUBBLE_ERROR_BUBBLE_TERMINATED) this.listeners.notifyListeners('terminated', this);
+        console.warn(this.id, 'failed to post message');
+        this._handleError(error);
       })
     message.pending = true;
     message.created = Date.now();
@@ -201,6 +211,11 @@ export class Chat extends Bubble {
     return this.provider.close();
   }
 
+  _setState(state) {
+    this.state = state;
+    stateManager.dispatch(this.id+'-state', state);
+  }
+
   _validateMetadata(metadata) {
     assert.isObject(metadata, 'metadata');
     if (metadata.title) assert.isString(metadata.title, 'title');
@@ -251,6 +266,9 @@ export class Chat extends Bubble {
             setTimeout(() => this._readMessage(messageDetails, --attempts), 1000);
           }
         }
+        else{
+          this._handleError(error);
+        }
       })
   }
 
@@ -287,8 +305,9 @@ export class Chat extends Bubble {
         this.listeners.notifyListeners('available', true)
       })
       .catch(error => {
-        console.warn('bubble failed to resubscribe after reconnection', error);
-        this.provider.close();
+        console.warn('bubble failed to resubscribe after reconnection');
+        this._handleError(error);
+        if (this.provider.state !== 'closed') this.provider.close();
       });
   }
 
@@ -321,6 +340,18 @@ export class Chat extends Bubble {
     return count;  
   }
 
+  _handleError(error) {
+    console.warn(this.id, error);
+    if (error.code === ErrorCodes.BUBBLE_ERROR_BUBBLE_TERMINATED) {
+      this._setState(STATE.terminated);
+      if (this.provider.state !== 'closed') this.provider.close();
+      this.listeners.notifyListeners('terminated', this);
+    }
+    else if(error.code === ErrorCodes.BUBBLE_ERROR_PERMISSION_DENIED) {
+      this._setState(STATE.notMember);
+      if (this.provider.state !== 'closed') this.provider.close();
+    }
+  }
 
 }
 

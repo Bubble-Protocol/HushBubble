@@ -19,6 +19,7 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
   const myId = stateManager.useStateData('myId')();
   const chatData = stateManager.useStateData(chat.id+'-metadata')();
   const messages = stateManager.useStateData(chat.id+'-messages')();
+  const chatState = stateManager.useStateData(chat.id+'-state')();
   const connectionState = stateManager.useStateData(chat.id+'-connection-state')();
   const online = stateManager.useStateData('online')();
   const config = stateManager.useStateData('config')();
@@ -112,6 +113,9 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
     const mobileMediaQuery = window.matchMedia('(max-width: 640px)');
     return mobileMediaQuery.matches ? title.slice(0,6) + '..' + title.slice(-4) : title;
   }
+
+  const enabled = chatState === 'open' && connectionState === 'open';
+  const stateText = chatState !== 'open' ? chatState : connectionState;
   
   return (
     <div className={"chat-frame " + className + (hide ? ' hide' : '')} >
@@ -153,10 +157,17 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
       {/* Footer */}
       <div className="chat-footer">
         <div className="chat-footer-contents">
-          <input type="text" className="chat-text-box" value={connectionState === 'open' ? messageText : "Connection is unavailable"} onChange={e => setMessageText(e.target.value)} onKeyDown={e => e.key === 'Enter' && online && connectionState === 'open' && postMessage()} placeholder="Type something..." />
+          <input 
+            type="text" 
+            className="chat-text-box" 
+            value={enabled ? messageText : ''} 
+            onChange={e => setMessageText(e.target.value)} 
+            onKeyDown={e => e.key === 'Enter' && online && enabled && postMessage()} 
+            placeholder={enabled ? "Type something..." : stateText} 
+          />
           <div className="chat-entry-menu">
             <div className="spacer" />
-            <Button title="Send" onClick={postMessage} disabled={!online || connectionState !== 'open'} />
+            <Button title="Send" onClick={postMessage} disabled={!online || !enabled} />
           </div>
         </div>
       </div>

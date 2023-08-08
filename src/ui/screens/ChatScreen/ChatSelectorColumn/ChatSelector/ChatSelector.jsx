@@ -19,6 +19,7 @@ export const ChatSelector = ({
   const chatData = stateManager.useStateData(chat.id+'-metadata')();
   const messages = stateManager.useStateData(chat.id+'-messages')();
   const notifications = stateManager.useStateData(chat.id+'-unread')();
+  const chatState = stateManager.useStateData(chat.id+'-state')();
   const connectionState = stateManager.useStateData(chat.id+'-connection-state')();
 
   // Calculate fields
@@ -27,8 +28,11 @@ export const ChatSelector = ({
   const latestMessage = !messages ? {} : messages.length === 0 ? {} : messages.slice(-1)[0];
   const otherMember = !members || members.length === 0 ? {} : members[0].id === myId.id ? members[1] : members[0];
 
+  const enabled = chatState === 'open' && connectionState === 'open';
+  const stateText = chatState !== 'open' ? chatState : connectionState;
+
   return (
-    <div className={"chat-selector" + (selected ? ' selected' : '') + (connectionState !== 'open' ? ' disabled' : '')} onClick={onClick}>
+    <div className={"chat-selector" + (selected ? ' selected' : '') + (!enabled ? ' disabled' : '')} onClick={onClick}>
       <img className="contact-icon" src={icon || otherMember.icon || defaultIcon} />
       <div className="content">
         <div className="title-row">
@@ -40,7 +44,7 @@ export const ChatSelector = ({
             </div>
           )}
         </div>
-        <p className="text">{connectionState !== 'open' ? connectionState : (latestMessage.text || '')}</p>
+        <p className="text">{!enabled ? stateText : (latestMessage.text || '')}</p>
       </div>
     </div>
   );
