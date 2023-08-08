@@ -5,13 +5,21 @@ import { Button } from "../../components/Button/Button";
 import { ModalHostInfo } from "../../components/ModalHostInfo";
 import { ModalHostCustomise } from "../../components/ModalHostCustomise";
 import { SingleUserInput } from "./components/SingleUserInput";
+import { TextInput } from "./components/TextInput";
+import { IconInput } from "./components/IconInput";
+import defaultIcon from "../../../assets/img/unknown-contact-icon.png";
 
 export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], onCreate, onCancel, onCompletion }) => {
 
-  for (let i=0; i<bubble.constructorParams.length; i++) {
-    switch (bubble.constructorParams[i]) {
+  const params = bubble.constructorParams.concat(Object.values(bubble.metadata)).map(p => p.split('.')[0]).sort().filter((p, i, params) => i===0 || p !== params[i-1]);
+
+  for (let i=0; i<params.length; i++) {
+    switch (params[i]) {
       case 'member0':
         valuesIn[i] = {value: session.getUserId(), valid: true};
+        break;
+      case 'icon':
+        valuesIn[i] = {value: valuesIn[i] || defaultIcon, valid: true};
         break;
       case 'terminateToken':
         valuesIn[i] = {valid: true};
@@ -37,13 +45,15 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
 
   function createChat() {
     setState('creating');
-    const metadata = {};
-    bubble.constructorParams.forEach((p,i) => { metadata[p] = values[i].user || values[i].value })
+    const createParams = {};
+    params.forEach((p,i) => { 
+      createParams[p] = values[i].user || values[i].value 
+    })
     onCreate({
       chain: hostValues.chain, 
       host: getHost(), 
       bubbleType: bubble,
-      metadata
+      params: createParams
     })
     .then(onCompletion)
     .catch(error => {
@@ -64,7 +74,7 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
         {!customise && <ModalHostInfo chain={hostValues.chain} host={getHost()} onCustomise={() => setCustomised(true)} />}
         {customise && <ModalHostCustomise chainTitle="Blockchain" hostTitle="Host" values={hostValues} chains={chains} hosts={hosts} onChange={v => {setCreateError(); setHostValues(v)}} onCollapse={() => setCustomised(false)} /> }   
         {
-          bubble.constructorParams.map((param, i) => 
+          params.map((param, i) => 
             {
               return getConstructorParamUI(param, values[i], (v) => setValues([...values.slice(0,i), v, ...values.slice(i+1)]));
             }
@@ -93,6 +103,10 @@ CreateChatModal.propTypes = {
 
 function getConstructorParamUI(param, initialValue, setValue) {
   switch(param) {
+    case 'title':
+      return <TextInput key={param} title="Title" subtitle="The name of the chat" value={initialValue} setValue={setValue} />
+    case 'icon':
+      return <IconInput key={param} title="Icon" value={initialValue} setValue={setValue} />
     case 'member1':
       return <SingleUserInput key={param} title="User" subtitle="User to connect to..." value={initialValue} setValue={setValue} />
     default:

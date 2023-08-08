@@ -280,7 +280,7 @@ export class Chat extends Bubble {
         messages.sort((a,b) => a.created - b.created);
         messages.forEach(m => {m.from = new User(m.from)});
         this.messages = messages;
-        this.lastModTime = messages.reduce((time, m) => {return m.modified > time ? m.modified : time}, 0);
+        this.lastModTime = messages.reduce((time, m) => {return m.modified > time ? m.modified : time}, 1);
         this.lastRead = this.lastModTime;
         stateManager.dispatch(this.id+'-messages', this.messages);
       })
@@ -335,10 +335,10 @@ function getMembers(metadata) {
   let found = true;
   let index = 0;
   while(found) {
-    if (metadata['member'+index]) members.push(metadata['member'+index]);
+    if (metadata['member'+index]) members.push(new User(metadata['member'+index]));
     else found = false;
     index++;
   }
-  if (assert.isArray(metadata.members)) members.concat(metadata.members)
-  return members.sort().filter((m, i, members) => i===0 || m !== members[i-1]);
+  if (assert.isArray(metadata.members)) members.concat(metadata.members.map(m => new User(m)));
+  return members.sort().filter((m, i, members) => i===0 || m.id !== members[i-1].id);
 }

@@ -2,7 +2,7 @@ import * as oneToOneChatSourceCode from "../contracts/OneToOneBubble.json";
 import * as publicChatSourceCode from "../contracts/PublicBubble.json";
 import * as groupChatSourceCode from "../contracts/GroupBubble.json";
 import simpleChatIcon from "../../assets/img/users.png";
-import { ecdsa } from "@bubble-protocol/crypto";
+import globeIcon from "../../assets/img/globe.png";
 
 
 export const DEFAULT_BUBBLES = [
@@ -13,13 +13,24 @@ export const DEFAULT_BUBBLES = [
     id: {category: 'one-to-one', bytecodeHash: '6a50777810fb784389b557b9058fd0d5eea28466d0711fca6a31a36252a356e9'}, 
     classType: 'PrivateChat', 
     sourceCode: oneToOneChatSourceCode.default, 
-    constructorParams: ['member0', 'member1', 'terminateToken'], 
+    constructorParams: ['member0.address', 'member1.address', 'terminateToken'],
+    metadata: {member0: 'member0.publicKey', member1: 'member1.publicKey'},
     icon: simpleChatIcon
   },
-  {id: {category: 'group', contractHash: ''}, title: "Group Chat", description: "Group chat where everyone is equal", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, disabled: true},
-  {id: {category: 'group', contractHash: ''}, title: "Moderated Group Chat", description: "Group chat with admin controls", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, disabled: true},
-  {id: {category: 'group', contractHash: ''}, title: "NFT Chat", description: "Chat with other NFT owners", sourceCode: groupChatSourceCode.default, disabled: true},
-  {id: {category: 'public', contractHash: ''}, title: "Public Chat", description: "Anyone can join", classType: 'PublicChat', sourceCode: publicChatSourceCode.default, constructorParams: [], disabled: true},
-  {id: {category: 'public', contractHash: ''}, title: "Public Event", description: "Group chat with public read", sourceCode: groupChatSourceCode.default, disabled: true},
-  {id: {category: 'custom', contractHash: ''}, title: "Custom Chat", description: "Your chat, your rules", sourceCode: groupChatSourceCode.default, disabled: true},
+  {
+    title: "Public Chat", 
+    description: "Anyone can join", 
+    details: "Unencrypted public chat with no restrictions.\n\nNote, public chats are owned by the wallet that creates them, so until the wallet connectivity feature is released all users will have full control, including the power to delete the chat.", 
+    id: {category: 'public', bytecodeHash: '1cc04f1670339fb356fae402c8b20a69ec585d90526d4798a30d793102e2d776'}, 
+    classType: 'PublicChat', 
+    sourceCode: publicChatSourceCode.default, 
+    constructorParams: [], 
+    metadata: {title: 'title', icon: 'icon'},
+    icon: globeIcon
+  },
+  {id: {category: 'group', bytecodeHash: ''}, title: "Group Chat", description: "Group chat where everyone is equal", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, disabled: true},
+  {id: {category: 'group', bytecodeHash: ''}, title: "Moderated Group Chat", description: "Group chat with admin controls", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, disabled: true},
+  {id: {category: 'group', bytecodeHash: ''}, title: "NFT Chat", description: "Chat with other NFT owners", sourceCode: groupChatSourceCode.default, disabled: true},
+  {id: {category: 'public', bytecodeHash: ''}, title: "Public Event", description: "Group chat with public read", sourceCode: groupChatSourceCode.default, disabled: true},
+  {id: {category: 'custom', bytecodeHash: ''}, title: "Custom Chat", description: "Your chat, your rules", sourceCode: groupChatSourceCode.default, disabled: true},
 ]

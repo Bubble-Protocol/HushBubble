@@ -76,7 +76,7 @@ export class Session {
     return this.myId 
   }
 
-  async createChat({chain, host, bubbleType, metadata={}}) {
+  async createChat({chain, host, bubbleType, params={}}) {
     assert.isObject(chain, 'chain');
     assert.isNumber(chain.id, 'chain.id');
     assert.isHexString(chain.publicBubble, 'chain.publicBubble');
@@ -88,13 +88,16 @@ export class Session {
     assert.isObject(bubbleType.sourceCode, 'bubbleType.sourceCode');
     assert.isArray(bubbleType.sourceCode.abi, 'bubbleType.sourceCode.abi');
     assert.isHexString(bubbleType.sourceCode.bin || bubbleType.sourceCode.bytecode, 'bubbleType.sourceCode.bin (or bubbleType.sourceCode.bytecode)');
-    assert.isObject(metadata, 'metadata');
+    assert.isObject(params, 'params');
 
     console.trace("deploying", bubbleType.classType, "to chain", chain.id, "and provider", host.name);
 
-    if (assert.isArray(metadata.members)) metadata.members = metadata.members.map(u => new User(u));
+    if (assert.isArray(params.members)) params.members = params.members.map(u => new User(u));
 
     const terminateKey = new ecdsa.Key().privateKey;
+    params.terminateKey = terminateKey;
+    const constructorParams = ChatFactory.getParamsAsArray(bubbleType.constructorParams, params);
+    const metadata = ChatFactory.getParams(bubbleType.metadata, params);
 
     // test provider exists then deploy encrypted application bubble (application id has access, use application key as encryption key)
     return testProviderExists(chain.id, host.chains[chain.id].url, chain.publicBubble)
@@ -103,8 +106,8 @@ export class Session {
       })
       .then(() => {
         console.trace('deploying chat contract');
-        return this.wallet.deploy(bubbleType.sourceCode, ChatFactory.getConstructorParams(bubbleType.constructorParams, metadata, terminateKey));
-        // return "0x2e37F1E6aEdEcEEa2e6A4b4aC5C75Dd26a2c8877";
+        return this.wallet.deploy(bubbleType.sourceCode, constructorParams);
+        // return "0xC6509dFdE9c071e13847A98EaA568E698e782c42";
       })
       .then(contractAddress => {
         console.trace('contract deployed with address', contractAddress);

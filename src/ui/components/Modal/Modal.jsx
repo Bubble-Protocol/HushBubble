@@ -4,6 +4,8 @@ import { PopularX } from "../../icons/PopularX";
 import "./style.css";
 
 export const Modal = ({ title, subtitle, contents, loading, centered=true, contentCentered=false, onCancel }) => {
+  const subtitleLines = !subtitle ? [] : subtitle.split('\n');
+  console.debug(subtitleLines)
   return (
     <div className={"modal" + (centered ? " center-modal" : '') + (loading ? " loading" : '')}>
       <div className="title-frame">
@@ -13,7 +15,16 @@ export const Modal = ({ title, subtitle, contents, loading, centered=true, conte
         </div>
         { subtitle && 
           <div className="subtitle-frame">
-            <p className="subtitle-text">{subtitle}</p>
+            <p className="subtitle-text">
+              {
+                subtitleLines.map((line,i) => 
+                  <React.Fragment key={i}>
+                    {line}
+                    {(i < subtitleLines.length-1) && <br/>}
+                  </React.Fragment>
+                )
+              }
+            </p>
           </div>
         }
       </div>

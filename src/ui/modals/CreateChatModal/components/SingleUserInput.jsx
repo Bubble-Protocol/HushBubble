@@ -24,8 +24,6 @@ export const SingleUserInput = ({ title, subtitle, value, setValue }) => {
     if (newValue.valid) setValue(newValue);
   }, [])
 
-  console.debug(value, valid)
-
   return (
     <div className="step-frame">
       <p className="step-title">{title}</p>

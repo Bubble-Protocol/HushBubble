@@ -1,0 +1,28 @@
+.icon-chooser {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+  padding: 4px;
+}
+
+.icon-chooser .icon {
+  border: 2px solid;
+  border-color: #ffffff;
+  border-radius: 26px;
+  height: 42px;
+  width: 42px;
+}
+
+.icon-chooser .small-text {
+  flex: 1;
+  color: #666666;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+.icon-chooser .icon:hover, .icon-chooser .small-text:hover {
+  cursor: pointer;
+}
