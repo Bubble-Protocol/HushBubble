@@ -96,7 +96,7 @@ export const ChatSelectorColumn = ({className, chats, selectedChat, setSelectedC
           <div className="bubble-list">
             <CopySelector title="Your Connection Link" subtitle="Share this link to allow others to send you connection requests." value={config.appUrl + '?connect=' + myId.id} />
             {
-              config.bubbles.map((bubble, index) => {
+              config.bubbles.filter(b => b.actions.canConstruct).map((bubble, index) => {
                 return <BubbleSelector key={index} title={bubble.title} icon={bubble.icon} description={bubble.description || ""} disabled={!online || bubble.disabled} onClick={() => setModal(createChatModal(bubble))} />
               })
             }
