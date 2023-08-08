@@ -33,6 +33,7 @@
   padding: 4px 16px;
   justify-content: center;
   gap: 16px;
+  position: relative;
 }
 
 .message .remote-message {
@@ -54,6 +55,9 @@
   line-height: 22px;
   position: relative;
   white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
 }
 
 .message .message-time {
