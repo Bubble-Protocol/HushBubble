@@ -68,6 +68,10 @@
   overflow: hidden;
 }
 
+.chat-frame .dashed-icon-button:hover {
+  cursor: pointer;
+}
+
 .chat-frame .chat-header-title-row {
   flex: 1;
   align-self: stretch;

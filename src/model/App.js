@@ -45,7 +45,10 @@ export class MessengerApp {
         stateManager.dispatch('chats', this.session.conversations);
         stateManager.dispatch('app-state', this.state);
         stateManager.dispatch('chat-functions', {
-          onTerminate: this.session.terminateChat.bind(this.session)
+          create: this.session.createChat.bind(this.session),
+          join: this.session.joinChat.bind(this.session),
+          terminate: this.session.terminateChat.bind(this.session),
+          manageMembers: this.session.manageMembers.bind(this.session),
         });
       });
   }

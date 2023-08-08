@@ -5,13 +5,12 @@ import "./style.css";
 
 export const Modal = ({ title, subtitle, contents, loading, centered=true, contentCentered=false, onCancel }) => {
   const subtitleLines = !subtitle ? [] : subtitle.split('\n');
-  console.debug(subtitleLines)
   return (
     <div className={"modal" + (centered ? " center-modal" : '') + (loading ? " loading" : '')}>
       <div className="title-frame">
         <div className="title-row">
           <div className="title">{title}</div>
-          <div onClick={onCancel}><PopularX className="close-icon"/></div>
+          <div onClick={onCancel}><PopularX className="close-icon" box={true}/></div>
         </div>
         { subtitle && 
           <div className="subtitle-frame">

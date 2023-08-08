@@ -2,10 +2,12 @@ import { assert } from "@bubble-protocol/core";
 import { PrivateChat } from "./PrivateChat";
 import { PublicChat } from "./PublicChat"
 import { ecdsa } from "@bubble-protocol/crypto";
+import { DEFAULT_CONFIG } from "../config";
 
 export const ChatFactory = {
 
   constructChat: (chatType, classType, bubbleId, myId, deviceKey, terminateKey, options={}) => {
+    chatType = getChatTypeObject(chatType);
     switch (classType) {
       case undefined:
       case 'PublicChat': return new PublicChat(chatType, bubbleId, myId, deviceKey);
@@ -39,6 +41,8 @@ export const ChatFactory = {
 
 function getParam(param, metadata) {
   switch(param) {
+    case 'true': return true;
+    case 'false': return false;
     case 'member0': return metadata.member0 || metadata.members[0];
     case 'member0.address': return metadata.member0 ? metadata.member0.address : metadata.members[0].address;
     case 'member0.publicKey': return metadata.member0 ? metadata.member0.publicKey : metadata.members[0].publicKey;
@@ -62,4 +66,11 @@ function getParam(param, metadata) {
       return '0x'+ecdsa.hash(metadata.terminateKey, 'hex');
     default: throw new Error('Invalid constructor parameter type '+param)
   }
+}
+
+function getChatTypeObject(chatTypeId) {
+  if (!chatTypeId.bytecodeHash) return DEFAULT_CONFIG.bubbles.find(b => b.id.category === 'public'); // temporary to handle HushBubble Public Chat Channel
+  const chatTypeObj = DEFAULT_CONFIG.bubbles.find(b => b.id.bytecodeHash === chatTypeId.bytecodeHash);
+  if (!chatTypeObj) throw new Error('Invalid chat type');
+  return chatTypeObj;
 }

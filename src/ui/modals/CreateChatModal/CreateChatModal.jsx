@@ -18,6 +18,9 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
       case 'member0':
         valuesIn[i] = {value: session.getUserId(), valid: true};
         break;
+      case 'members':
+        valuesIn[i] = {value: [session.getUserId()], valid: true};
+        break;
       case 'icon':
         valuesIn[i] = {value: valuesIn[i] || defaultIcon, valid: true};
         break;

@@ -1,16 +1,17 @@
 import { ChatDateRow } from "./ChatDateRow";
 import { Message } from "../../../components/Message";
 import defaultIcon from "../../../../assets/img/unknown-contact-icon.png";
-
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import "./style.css";
 import { Button } from "../../../components/Button/Button";
 import { DropdownMenu } from "../../../components/DropdownMenu/DropdownMenu";
 import { stateManager } from "../../../../state-context";
+import { PopularPlus } from "../../../icons/PopularPlus";
 import { PopularMoreVertical1 } from "../../../icons/PopularMoreVertical1";
 import { DeleteChatModal } from "../../../modals/DeleteChatModal";
 import { assert } from "@bubble-protocol/core";
+import { ManageMemberModal } from "../../../modals/ManageMemberModal";
 
 export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
 
@@ -21,6 +22,7 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
   const connectionState = stateManager.useStateData(chat.id+'-connection-state')();
   const online = stateManager.useStateData('online')();
   const config = stateManager.useStateData('config')();
+  const chatFunctions = stateManager.useStateData('chat-functions')();
 
   // Setup scroll-to-bottom
 
@@ -74,7 +76,8 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
     chat.setReadTime(Date.now());
   }
 
-  const deleteModal = <DeleteChatModal chat={chat} onDelete={onTerminate} onCancel={() => setModal()} onCompletion={() => setModal()} />;
+  const deleteModal = <DeleteChatModal chat={chat} onDelete={chatFunctions.terminate} onCancel={() => setModal()} onCompletion={() => setModal()} />;
+  const manageMemberModal = <ManageMemberModal chat={chat} onSave={chatFunctions.manageMembers} onCancel={() => setModal()} onCompletion={() => setModal()} />;
 
 
   // Create messages view
@@ -120,6 +123,11 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
           <div className="chat-header-member-icons">
             {chatIcons}
           </div>
+          {chat.chatType.actions.addMembers !== undefined &&
+            <div className="dashed-icon-button">
+              <PopularPlus className="icon-instance-node" color="#0F1217" onClick={() => setModal(manageMemberModal)} />
+            </div>
+          }
         </div>
         <div className="chat-header-title-row">
           <div className="chat-header-title">{getTitle()}</div>

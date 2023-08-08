@@ -72,7 +72,6 @@ export class Chat extends Bubble {
   create({metadata, options}) {
     this._validateMetadata(metadata);
     this.metadata = metadata;
-    this.metadata.members = getMembers(metadata);
     stateManager.dispatch(this.id+'-metadata', this.metadata);
     return this.provider.open()
       .then(() => super.create(options))
@@ -148,11 +147,6 @@ export class Chat extends Bubble {
     return Promise.resolve();
   }
 
-  addUser(publicKey, options) {
-    if (!this.contentManager || !assert.isFunction(this.contentManager.addUser)) throw new Error('not a multi-user chat');
-    return this.contentManager.addUser(this, publicKey, {...options, userMetadata: this.userMetadata});
-  }
-
   setMetadata(metadata) {
     this._validateMetadata(metadata);
     this._saveMetadata(metadata);
@@ -170,7 +164,7 @@ export class Chat extends Bubble {
   }
 
   serialize() {
-    return {chatType: this.chatType, classType: this.classType, id: this.id, bubbleId: this.contentId.toString(), metadata: this.metadata}
+    return {chatType: this.chatType.id, classType: this.classType, id: this.id, bubbleId: this.contentId.toString(), metadata: this.metadata}
   }
 
   deserialize(data) {
@@ -331,7 +325,7 @@ export class Chat extends Bubble {
 }
 
 function getMembers(metadata) {
-  const members = [];
+  let members = [];
   let found = true;
   let index = 0;
   while(found) {
@@ -339,6 +333,6 @@ function getMembers(metadata) {
     else found = false;
     index++;
   }
-  if (assert.isArray(metadata.members)) members.concat(metadata.members.map(m => new User(m)));
-  return members.sort().filter((m, i, members) => i===0 || m.id !== members[i-1].id);
+  if (assert.isArray(metadata.members)) members = members.concat(metadata.members.map(m => new User(m)));
+  return members.sort((a,b) => a.id === b.id ? 0 : 1).filter((m, i, members) => i===0 || m.id !== members[i-1].id);
 }

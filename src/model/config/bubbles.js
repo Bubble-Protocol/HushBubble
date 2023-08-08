@@ -3,6 +3,7 @@ import * as publicChatSourceCode from "../contracts/PublicBubble.json";
 import * as groupChatSourceCode from "../contracts/GroupBubble.json";
 import simpleChatIcon from "../../assets/img/users.png";
 import globeIcon from "../../assets/img/globe.png";
+import groupIcon from "../../assets/img/group.png";
 
 
 export const DEFAULT_BUBBLES = [
@@ -15,6 +16,7 @@ export const DEFAULT_BUBBLES = [
     sourceCode: oneToOneChatSourceCode.default, 
     constructorParams: ['member0.address', 'member1.address', 'terminateToken'],
     metadata: {member0: 'member0.publicKey', member1: 'member1.publicKey'},
+    actions: {},
     icon: simpleChatIcon
   },
   {
@@ -26,9 +28,23 @@ export const DEFAULT_BUBBLES = [
     sourceCode: publicChatSourceCode.default, 
     constructorParams: [], 
     metadata: {title: 'title', icon: 'icon'},
+    actions: {},
     icon: globeIcon
   },
-  {id: {category: 'group', bytecodeHash: ''}, title: "Group Chat", description: "Group chat where everyone is equal", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, disabled: true},
+  {
+    title: "Group Chat", 
+    description: "Group chat where everyone is equal", 
+    id: {category: 'group', bytecodeHash: 'eca0e2dbb39f268cfff4c54f90d8c0d3e8e69aa731e7deee941cd08b47345d3b'},
+    classType: 'PrivateChat', 
+    sourceCode: groupChatSourceCode.default, 
+    constructorParams: ['members.address', 'terminateToken'], 
+    metadata: {title: 'title', icon: 'icon'},
+    actions: {
+      addMembers: {method: 'setUsers', params: ['members.address', 'true']},
+      removeMembers: {method: 'setUsers', params: ['members.address', 'false']},
+    },
+    icon: groupIcon
+  },
   {id: {category: 'group', bytecodeHash: ''}, title: "Moderated Group Chat", description: "Group chat with admin controls", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, disabled: true},
   {id: {category: 'group', bytecodeHash: ''}, title: "NFT Chat", description: "Chat with other NFT owners", sourceCode: groupChatSourceCode.default, disabled: true},
   {id: {category: 'public', bytecodeHash: ''}, title: "Public Event", description: "Group chat with public read", sourceCode: groupChatSourceCode.default, disabled: true},

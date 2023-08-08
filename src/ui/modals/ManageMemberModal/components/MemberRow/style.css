@@ -1,0 +1,34 @@
+.member-row {
+  flex: 1;
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+.member-row .member-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 21px;
+}
+
+.member-row .member-title {
+  flex: 1;
+  display: flex;
+  padding: 0px 8px;
+  color: #0F1217;
+  font-family: Arial;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.member-row:hover {
+  cursor: pointer;
+}
+

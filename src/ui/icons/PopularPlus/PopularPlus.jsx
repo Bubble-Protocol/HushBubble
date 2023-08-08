@@ -6,14 +6,14 @@ Please share your feedback here: https://form.asana.com/?k=uvp-HPgd3_hyoXRBw1IcN
 import PropTypes from "prop-types";
 import React from "react";
 
-export const PopularPlus = ({ color = "#999999", className, onClick }) => {
+export const PopularPlus = ({ color = "#999999", size = 36, className, onClick }) => {
   return (
     <svg
       className={`popular-plus ${className}`}
       fill="none"
-      height="36"
+      height={size}
       viewBox="0 0 36 36"
-      width="36"
+      width={size}
       xmlns="http://www.w3.org/2000/svg"
       onClick={onClick}
     >

@@ -92,12 +92,16 @@ export class Session {
 
     console.trace("deploying", bubbleType.classType, "to chain", chain.id, "and provider", host.name);
 
-    if (assert.isArray(params.members)) params.members = params.members.map(u => new User(u));
-
+    // get smart contract constructor parameters
     const terminateKey = new ecdsa.Key().privateKey;
     params.terminateKey = terminateKey;
     const constructorParams = ChatFactory.getParamsAsArray(bubbleType.constructorParams, params);
+
+    // get metadata and initialise the member array
     const metadata = ChatFactory.getParams(bubbleType.metadata, params);
+    metadata.members = getMembers(this.myId, metadata);
+
+    console.debug(metadata, metadata.members);
 
     // test provider exists then deploy encrypted application bubble (application id has access, use application key as encryption key)
     return testProviderExists(chain.id, host.chains[chain.id].url, chain.publicBubble)
@@ -134,13 +138,6 @@ export class Session {
         }
         return conversation.contentId;
       })
-  }
-
-  _removeChat(conversation) {
-    if (!this.conversations.includes(conversation)) return Promise.reject(new Error('no such chat'));
-    this.conversations = this.conversations.filter(c => c !== conversation);
-    this._saveState();
-    stateManager.dispatch('chats', this.conversations)
   }
 
   async terminateChat(conversation) {
@@ -185,6 +182,52 @@ export class Session {
     })
   }
 
+  manageMembers({chat, addedMembers, removedMembers}) {
+    try {
+      assert.isInstanceOf(chat, Chat, 'chat');
+      assert.isArray(addedMembers, 'addedMembers');
+      assert.isArray(removedMembers, 'removedMembers');
+      const newMembers = chat.metadata.members.filter(m => !removedMembers.includes(m)).concat(addedMembers);
+      console.trace(chat.id, 'setting new members', newMembers);
+      return Promise.resolve()
+      .then(() => {
+        console.trace(chat.id, 'adding new members')
+        return addedMembers.length === 0 ? Promise.resolve() : 
+          this.wallet.send(
+            chat.contentId.contract, 
+            chat.chatType.sourceCode.abi,
+            chat.chatType.actions.addMembers.method,
+            ChatFactory.getParamsAsArray(chat.chatType.actions.addMembers.params, {members: addedMembers})
+          )
+      })
+      .then(() => {
+        console.trace(chat.id, 'removing old members')
+        return removedMembers.length === 0 ? Promise.resolve() : 
+          this.wallet.send(
+            chat.contentId.contract, 
+            chat.chatType.sourceCode.abi,
+            chat.chatType.actions.removeMembers.method,
+            ChatFactory.getParamsAsArray(chat.chatType.actions.removeMembers.params, {members: removedMembers})
+          )
+      })
+      .then(() => {
+        console.trace(chat.id, "writing new users' metadata files")
+        return Promise.all(addedMembers.map(m => chat.userManager.addUser(m.publicKey)));
+      })
+      .then(() => {
+        console.trace(chat.id, "removing old users' metadata files")
+        return Promise.all(removedMembers.map(m => chat.userManager.removeUser(m.publicKey, {silent: true})));
+      })
+      .then(() => {
+        console.trace(chat.id, 'saving new metadata to bubble')
+        return chat.setMetadata({...chat.metadata, members: newMembers});
+      })
+    }
+    catch(error) {
+      return Promise.reject(error);
+    }
+  }
+
   hasConnectionWith(id) {
     try {
       const user = new User(id);
@@ -209,6 +252,13 @@ export class Session {
     conversation.on('unread-change', this._handleUnreadChange.bind(this));
     conversation.on('terminated', this._handleChatTerminated.bind(this));
     this.conversations.push(conversation);
+  }
+
+  _removeChat(conversation) {
+    if (!this.conversations.includes(conversation)) return Promise.reject(new Error('no such chat'));
+    this.conversations = this.conversations.filter(c => c !== conversation);
+    this._saveState();
+    stateManager.dispatch('chats', this.conversations)
   }
 
   _handleNewMessage() {
@@ -242,16 +292,21 @@ export class Session {
         console.trace('loaded chat', rawC);
         const valid = this._validateConversation(rawC);
         if (valid) {
-          const conversation = ChatFactory.constructChat(rawC.chatType, rawC.classType, new ContentId(rawC.bubbleId), this.myId, this.deviceKey);
-          this._addConversation(conversation);
-          const promise = conversation.initialise()
-            .then(() => {
-              if (!conversation.isValid()) console.warn('conversation', conversation.id, 'is invalid', conversation);
-            })
-            .catch(error => {
-              console.warn('failed to initialise conversation', rawC.id, error);
-          });
-          promises.push(promise);
+          try {
+            const conversation = ChatFactory.constructChat(rawC.chatType, rawC.classType, new ContentId(rawC.bubbleId), this.myId, this.deviceKey);
+            this._addConversation(conversation);
+            const promise = conversation.initialise()
+              .then(() => {
+                if (!conversation.isValid()) console.warn('conversation', conversation.id, 'is invalid', conversation);
+              })
+              .catch(error => {
+                console.warn('failed to initialise conversation', rawC.id, error);
+            });
+            promises.push(promise);
+          }
+          catch(error) {
+            console.warn('failed to construct chat', rawC, error)
+          }
         }
       })
       if (promises.length > 0) return Promise.all(promises).then(() => true);
@@ -262,7 +317,7 @@ export class Session {
   _validateConversation(rawC) {
     try {
       new ContentId(rawC.bubbleId);
-      if (rawC.id === '84531-0x2e37F1E6aEdEcEEa2e6A4b4aC5C75Dd26a2c8877') return false;
+      if (rawC.id === '84531-0x1287afe7Fe61A9A7e5F846673051b00ecb82379a') return false;
       return true;
     }
     catch(error) { 
@@ -279,4 +334,18 @@ export class Session {
     localStorage.write(this.id, JSON.stringify(state));
   }
 
+}
+
+
+function getMembers(myId, metadata) {
+  const members = [myId];
+  let found = true;
+  let index = 0;
+  while(found) {
+    if (metadata['member'+index]) members.push(new User(metadata['member'+index]));
+    else found = false;
+    index++;
+  }
+  if (assert.isArray(metadata.members)) members.concat(metadata.members.map(m => new User(m)));
+  return members.sort().filter((m, i, members) => i===0 || m.id !== members[i-1].id);
 }
