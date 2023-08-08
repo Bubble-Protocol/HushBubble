@@ -133,7 +133,7 @@ export class Session {
         })
       })
       .then(conversation => {
-        if (conversation.chatType.category === 'one-to-one' && this.requestMonitor) {
+        if (conversation.chatType.id.category === 'one-to-one' && this.requestMonitor) {
           this.requestMonitor.notify(conversation.userManager.users[0].publicKey, conversation.getInvite());
         }
         return conversation.contentId;
