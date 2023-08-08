@@ -229,6 +229,7 @@ export class Session {
   }
 
   leaveChat(chat) {
+    console.trace('leaving chat', chat.id);
     return Promise.resolve()
       .then(() => {
         this._removeChat(chat);
@@ -262,6 +263,7 @@ export class Session {
   }
 
   _removeChat(conversation) {
+    console.trace('removing chat', conversation.id);
     if (!this.conversations.includes(conversation)) return Promise.reject(new Error('no such chat'));
     this.conversations = this.conversations.filter(c => c !== conversation);
     this._saveState();
@@ -282,6 +284,7 @@ export class Session {
   _handleChatTerminated(conversation) {
     this.conversations = this.conversations.filter(c => c !== conversation);
     this._saveState();
+    localStorage.deleteMessagesByConversation(conversation.id);
     stateManager.dispatch('chats', this.conversations);
   }
 

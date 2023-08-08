@@ -20,6 +20,7 @@ export async function initialiseLocalStorage(id) {
   localStorage.remove = storage.remove.bind(storage);
   localStorage.writeMessage = storage.writeMessage.bind(storage);
   localStorage.queryMessagesByConversation = storage.queryMessagesByConversation.bind(storage);
+  localStorage.deleteMessagesByConversation = storage.deleteMessagesByConversation.bind(storage);
   return storage.initialise();
 }
 
@@ -98,6 +99,10 @@ class IndexedDbStorage {
   
   queryMessagesByConversation(conversationId) {
     return this._queryMessages("by_conversation", conversationId);
+  }
+  
+  deleteMessagesByConversation(conversationId) {
+    return this._deleteMessages("by_conversation", conversationId);
   }
   
   _load(resolve, reject) {
@@ -184,6 +189,26 @@ class IndexedDbStorage {
       request.onerror = event => reject(event.target.error);
     })
   };
+
+  _deleteMessages(index, value) {
+    return new Promise((resolve, reject) => {
+      let transaction = this.db.transaction(this.messageTable, 'readonly');
+      transaction.onerror = (event) => reject(event.target.error);
+      let request = transaction.objectStore(this.messageTable).index(index).openCursor(IDBKeyRange.only(value));
+
+      request.onsuccess = function() {
+          let cursor = request.result;
+          if (cursor) {
+              cursor.delete();
+              cursor.continue();
+          } else {
+              resolve();
+          }
+      };
+
+      request.onerror = event => reject(event.target.error);
+    })
+  }
   
 }
 
