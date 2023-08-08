@@ -34,6 +34,23 @@ export const DEFAULT_BUBBLES = [
     icon: simpleChatIcon
   },
   {
+    title: "Private Group Chat", 
+    description: "End-to-end encrypted group chat where everyone is equal", 
+    details: "End-to-end encrypted group chat where all members have the same permissions and any member can add and remove others. All but one members must leave the group before it can be deleted. No-one, not even HushBubble, can read your messages.", 
+    id: {category: 'group', bytecodeHash: 'eca0e2dbb39f268cfff4c54f90d8c0d3e8e69aa731e7deee941cd08b47345d3b'},
+    classType: 'PrivateChat', 
+    sourceCode: groupChatSourceCode.default, 
+    constructorParams: ['members.address', 'terminateToken'], 
+    metadata: {title: 'title', icon: 'icon'},
+    actions: {
+      canConstruct: true,
+      canLeave: true,
+      addMembers: {method: 'setUsers', params: ['members.address', 'true']},
+      removeMembers: {method: 'setUsers', params: ['members.address', 'false']},
+    },
+    icon: groupIcon
+  },
+  {
     title: "Public Chat", 
     description: "Anyone can join", 
     details: "Unencrypted public chat with no restrictions.\n\nNote, public chats are owned by the wallet that creates them, so until the wallet connectivity feature is released all users will have full control, including the power to delete the chat.", 
@@ -47,22 +64,6 @@ export const DEFAULT_BUBBLES = [
       canLeave: true
     },
     icon: globeIcon
-  },
-  {
-    title: "Group Chat", 
-    description: "Group chat where everyone is equal", 
-    id: {category: 'group', bytecodeHash: 'eca0e2dbb39f268cfff4c54f90d8c0d3e8e69aa731e7deee941cd08b47345d3b'},
-    classType: 'PrivateChat', 
-    sourceCode: groupChatSourceCode.default, 
-    constructorParams: ['members.address', 'terminateToken'], 
-    metadata: {title: 'title', icon: 'icon'},
-    actions: {
-      canConstruct: true,
-      canLeave: true,
-      addMembers: {method: 'setUsers', params: ['members.address', 'true']},
-      removeMembers: {method: 'setUsers', params: ['members.address', 'false']},
-    },
-    icon: groupIcon
   },
   {id: {category: 'group', bytecodeHash: ''}, title: "Moderated Group Chat", description: "Group chat with admin controls", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
   {id: {category: 'group', bytecodeHash: ''}, title: "NFT Chat", description: "Chat with other NFT owners", sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
