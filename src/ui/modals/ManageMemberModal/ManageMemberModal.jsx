@@ -4,6 +4,7 @@ import { Modal } from "../../components/Modal/Modal";
 import { Button } from "../../components/Button/Button";
 import { stateManager } from "../../../state-context";
 import { MemberRow } from "./components/MemberRow/MemberRow";
+import { assert } from "@bubble-protocol/core";
 
 export const ManageMemberModal = ({ chat, onSave, onCancel, onCompletion }) => {
 
@@ -46,6 +47,7 @@ export const ManageMemberModal = ({ chat, onSave, onCancel, onCompletion }) => {
   }
 
   function isAlreadyMember(m) {
+    if (!assert.isObject(m)) return false;
     return !!chat.metadata.members.find(cm => cm.id === m.id); 
   }
 
@@ -55,7 +57,8 @@ export const ManageMemberModal = ({ chat, onSave, onCancel, onCompletion }) => {
 
   const contacts = 
     chats.filter(c => c.chatType.id.category === 'one-to-one' && !isAlreadyMember(getOtherMember(c)))
-    .map(c => getOtherMember(c));
+    .map(c => getOtherMember(c))
+    .filter(Boolean);
 
   return (
     <Modal 
