@@ -135,6 +135,7 @@ export class Chat extends Bubble {
       })
       .catch(error => {
         this._handleError(error);
+        throw error;
       })
   }
 
@@ -366,5 +367,5 @@ function getMembers(metadata) {
     index++;
   }
   if (assert.isArray(metadata.members)) members = members.concat(metadata.members.map(m => new User(m)));
-  return members.sort((a,b) => a.id === b.id ? 0 : 1).filter((m, i, members) => i===0 || m.id !== members[i-1].id);
+  return members.sort((a,b) => a.id.localeCompare(b.id)).filter((m, i, members) => i===0 || m.id !== members[i-1].id);
 }
