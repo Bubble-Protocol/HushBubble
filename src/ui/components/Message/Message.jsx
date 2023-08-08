@@ -7,6 +7,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import "./style.css";
 import defaultIcon from "../../../assets/img/unknown-contact-icon.png";
+import Linkify from 'react-linkify';
 
 export const Message = ({
   date,
@@ -21,7 +22,7 @@ export const Message = ({
       {iconVisible && <div className="chat-icon-container">{remote && <img className="chat-icon" src={icon} />}</div>}
       <div className={"chat-message" + (!remote ? ' local-message' : ' remote-message')}>
         {remote && <div className="message-time no-mobile">{icon !== defaultIcon ? '' : formatTitle(title)+' / '}</div>}
-        <div className="message-text">{text}</div>
+        <div className="message-text"><Linkify>{text}</Linkify></div>
         {<div className="message-time no-mobile">{formatTime(date)}</div>}
         <div className="mobile-meta mobile">
           {remote && <div className="message-time">{icon !== defaultIcon ? '' : formatTitle(title)}</div>}
