@@ -8,7 +8,7 @@ import { PublicChat } from "./chats/PublicChat";
 import { ChatFactory } from "./chats/ChatFactory";
 import { ecdsa } from "@bubble-protocol/crypto";
 import { Chat } from "./Chat";
-import { HushBubbleConnectRelay } from "./requestMonitors/HushBubbleConnectRelay";
+import { HushBubbleConnectRelay } from "./connectionRelays/HushBubbleConnectRelay";
 
 const CONSTRUCTION_STATE = {
   closed: 'closed',
@@ -20,7 +20,7 @@ const CONSTRUCTION_STATE = {
 }
 
 const DEFAULT_SETTINGS = {
-  monitorForRequests: true
+  connectionRelay: 'HushBubbleConnectRelay'
 }
 
 export class Session {
@@ -57,15 +57,15 @@ export class Session {
       })
       .then(() => {
         if (this.settings.monitorForRequests) {
-          this.requestMonitor = new HushBubbleConnectRelay(this.deviceKey, this.joinChat.bind(this));
-          return this.requestMonitor.monitor();
+          this.connectionRelay = new HushBubbleConnectRelay(this.deviceKey, this.joinChat.bind(this));
+          return this.connectionRelay.monitor();
         }
       })
   }
 
   async reconnect() {
     this.conversations.map(c => c.reconnect());
-    if (this.requestMonitor) this.requestMonitor.reconnect();
+    if (this.connectionRelay) this.connectionRelay.reconnect();
   }
 
   async close() {
@@ -133,8 +133,8 @@ export class Session {
         })
       })
       .then(conversation => {
-        if (conversation.chatType.id.category === 'one-to-one' && this.requestMonitor) {
-          this.requestMonitor.notify(conversation.userManager.users[0].publicKey, conversation.getInvite());
+        if (conversation.chatType.id.category === 'one-to-one' && this.connectionRelay) {
+          this.connectionRelay.notify(conversation.userManager.users[0].publicKey, conversation.getInvite());
         }
         return conversation.contentId;
       })
