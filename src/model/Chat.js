@@ -141,6 +141,7 @@ export class Chat extends Bubble {
 
   postMessage(message) {
     console.trace(this.id, 'post message', message);
+    message.from = this.myId.id;
     if (message.id === undefined) message.id = Date.now() + Math.floor(Math.random() * Math.pow(10, 6));
     this.write(CONTENT.textChat + '/' + message.id, JSON.stringify(message))
       .then(() => {

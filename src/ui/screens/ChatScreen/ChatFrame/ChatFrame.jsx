@@ -74,7 +74,7 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
   // Functions & Modals
 
   function postMessage() {
-    chat.postMessage({text: messageText, from: myId.id}).then(() => setMessageText('')).catch(console.warn);
+    chat.postMessage({text: messageText}).then(() => setMessageText('')).catch(console.warn);
     chat.setReadTime(Date.now());
   }
 
