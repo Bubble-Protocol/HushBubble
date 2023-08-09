@@ -2,7 +2,7 @@ import Web3 from 'web3';
 import { ecies } from '@bubble-protocol/crypto';
 import { assert } from '@bubble-protocol/core';
 import { toEthereumSignature } from '@bubble-protocol/client';
-import { Wallet } from './Wallet';
+import { Wallet } from '../Wallet';
 
 const web3 = new Web3(window.ethereum);
 

@@ -1,6 +1,6 @@
 import { ecdsa } from '@bubble-protocol/crypto';
 import { Bubble, bubbleProviders, toFileId } from '@bubble-protocol/client';
-import { Wallet } from './Wallet';
+import { Wallet } from '../Wallet';
 
 const CHAIN = 84531;
 const URL = "wss://vault.bubbleprotocol.com/v2/base-goerli";
