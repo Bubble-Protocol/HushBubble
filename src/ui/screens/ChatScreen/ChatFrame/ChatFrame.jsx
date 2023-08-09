@@ -14,7 +14,7 @@ import { assert } from "@bubble-protocol/core";
 import { ManageMemberModal } from "../../../modals/ManageMemberModal";
 import { LeaveChatModal } from "../../../modals/LeaveChatModal";
 
-export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
+export const ChatFrame = ({ className, chat, hide, setModal }) => {
 
   const [messageText, setMessageText] = useState('');
   const myId = stateManager.useStateData('myId')();
@@ -22,6 +22,7 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
   const messages = stateManager.useStateData(chat.id+'-messages')();
   const chatState = stateManager.useStateData(chat.id+'-state')();
   const connectionState = stateManager.useStateData(chat.id+'-connection-state')();
+  const capabilities = stateManager.useStateData(chat.id+'-capabilities')();
   const online = stateManager.useStateData('online')();
   const config = stateManager.useStateData('config')();
   const chatFunctions = stateManager.useStateData('chat-functions')();
@@ -129,7 +130,7 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
           <div className="chat-header-member-icons">
             {chatIcons}
           </div>
-          {chat.chatType.actions.addMembers !== undefined &&
+          {capabilities.canManageMembers &&
             <div className="dashed-icon-button">
               <PopularPlus className="icon-instance-node" color="#0F1217" onClick={() => setModal(manageMemberModal)} />
             </div>
@@ -142,8 +143,8 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
         <div className="chat-header-menu">
           <DropdownMenu direction="bottom-left" options={[
             {name: "Copy Chat Link", onClick: () => navigator.clipboard.writeText(config.appUrl+'?chat='+chat.getInvite())},
-            chat.chatType.actions.canLeave || chatState !== 'open' ? {name: "Leave Chat", onClick: () => setModal(leaveModal)} : null,
-            {name: "Delete Chat", onClick: () => setModal(deleteModal)}
+            capabilities.canLeave || chatState !== 'open' ? {name: "Leave Chat", onClick: () => setModal(leaveModal)} : null,
+            capabilities.canDelete ? {name: "Delete Chat", onClick: () => setModal(deleteModal)} : null
           ].filter(Boolean)} >
             <PopularMoreVertical1 className="icon-instance-node-3" />
           </DropdownMenu>
@@ -163,14 +164,15 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
           <input 
             type="text" 
             className="chat-text-box" 
-            value={enabled ? messageText : ''} 
+            value={enabled && capabilities.canWrite ? messageText : ''} 
             onChange={e => setMessageText(e.target.value)} 
-            onKeyDown={e => e.key === 'Enter' && online && enabled && postMessage()} 
-            placeholder={enabled ? "Type something..." : stateText} 
+            onKeyDown={e => e.key === 'Enter' && postMessage()}
+            disabled={!online || !enabled || !capabilities.canWrite}
+            placeholder={!enabled ? stateText : capabilities.canWrite ? "Type something..." : "You do not have permission to write to this chat."} 
           />
           <div className="chat-entry-menu">
             <div className="spacer" />
-            <Button title="Send" onClick={postMessage} disabled={!online || !enabled} />
+            <Button title="Send" onClick={postMessage} disabled={!online || !enabled || !capabilities.canWrite} />
           </div>
         </div>
       </div>
@@ -182,6 +184,5 @@ export const ChatFrame = ({ className, chat, hide, onTerminate, setModal }) => {
 ChatFrame.propTypes = {
   className: PropTypes.string,
   chat: PropTypes.object.isRequired,
-  onTerminate: PropTypes.func.isRequired,
   hide: PropTypes.bool
 };

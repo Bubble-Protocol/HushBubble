@@ -9,6 +9,7 @@ import { ChatFactory } from "./chats/ChatFactory";
 import { ecdsa } from "@bubble-protocol/crypto";
 import { Chat } from "./Chat";
 import { HushBubbleConnectRelay } from "./connectionRelays/HushBubbleConnectRelay";
+import { ParamFactory } from "./chats/ParamFactory";
 
 const CONSTRUCTION_STATE = {
   closed: 'closed',
@@ -49,14 +50,14 @@ export class Session {
     return this._loadState()
       .then(exists => {
         if (!exists) {
-          const bubbleType = DEFAULT_CONFIG.bubbles.find(b => b.classType === 'PublicChat');
-          this._addConversation(new PublicChat(bubbleType.id, DEFAULT_CONFIG.bubbleId, this.myId, this.deviceKey));
+          const bubbleType = DEFAULT_CONFIG.bubbles.find(b => b.id.category === 'original-hushbubble-public-chat');
+          this._addConversation(new PublicChat(bubbleType, DEFAULT_CONFIG.bubbleId, this.myId, this.deviceKey));
           this._saveState();
           return this.conversations[0].initialise();
         }
       })
       .then(() => {
-        if (this.settings.monitorForRequests) {
+        if (this.settings.connectionRelay) {
           this.connectionRelay = new HushBubbleConnectRelay(this.deviceKey, this.joinChat.bind(this));
           return this.connectionRelay.monitor();
         }
@@ -95,10 +96,10 @@ export class Session {
     // get smart contract constructor parameters
     const terminateKey = new ecdsa.Key().privateKey;
     params.terminateKey = terminateKey;
-    const constructorParams = ChatFactory.getParamsAsArray(bubbleType.constructorParams, params);
+    const constructorParams = ParamFactory.getParamsAsArray(bubbleType.constructorParams, params);
 
     // get metadata and initialise the member array
-    const metadata = ChatFactory.getParams(bubbleType.metadata, params);
+    const metadata = ParamFactory.getParams(bubbleType.metadata, params);
     metadata.members = getMembers(this.myId, metadata);
 
     console.debug(metadata, metadata.members);
@@ -123,6 +124,7 @@ export class Session {
         const conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.deviceKey, terminateKey, metadata);
         console.trace('creating off-chain bubble on host', conversation.contentId.provider);
         return conversation.create({
+          wallet: this.wallet,
           metadata: metadata,
           options: {silent: true}
         })
@@ -175,7 +177,7 @@ export class Session {
           return Promise.reject(new Error('Invite is invalid', {cause: error}));
         }
         if (this.conversations.find(c => c.id === conversation.id)) return Promise.reject(new Error('You are already a member of this chat'));
-        return conversation.join()
+        return conversation.join(this.wallet)
           .then(() => {
             this._addNewConversation(conversation);
           });
@@ -197,7 +199,7 @@ export class Session {
             chat.contentId.contract, 
             chat.chatType.sourceCode.abi,
             chat.chatType.actions.addMembers.method,
-            ChatFactory.getParamsAsArray(chat.chatType.actions.addMembers.params, {members: addedMembers})
+            ParamFactory.getParamsAsArray(chat.chatType.actions.addMembers.params, {members: addedMembers})
           )
       })
       .then(() => {
@@ -207,7 +209,7 @@ export class Session {
             chat.contentId.contract, 
             chat.chatType.sourceCode.abi,
             chat.chatType.actions.removeMembers.method,
-            ChatFactory.getParamsAsArray(chat.chatType.actions.removeMembers.params, {members: removedMembers})
+            ParamFactory.getParamsAsArray(chat.chatType.actions.removeMembers.params, {members: removedMembers})
           )
       })
       .then(() => {
@@ -304,7 +306,7 @@ export class Session {
           try {
             const conversation = ChatFactory.constructChat(rawC.chatType, rawC.classType, new ContentId(rawC.bubbleId), this.myId, this.deviceKey);
             this._addConversation(conversation);
-            const promise = conversation.initialise()
+            const promise = conversation.initialise(this.wallet)
               .then(() => {
                 if (!conversation.isValid()) console.warn('conversation', conversation.id, 'is invalid', conversation);
               })
@@ -326,7 +328,7 @@ export class Session {
   _validateConversation(rawC) {
     try {
       new ContentId(rawC.bubbleId);
-      if (rawC.id === '84531-0x1287afe7Fe61A9A7e5F846673051b00ecb82379a') return false;
+      if (rawC.id === '84531-0xd3b1E1954cf652D9094834E2cA19885ccDAadfF9') return false;
       return true;
     }
     catch(error) { 

@@ -5,6 +5,7 @@ import { stateManager } from "../state-context";
 import { fromBase64Url, toBase64Url } from "./utils/StringUtils";
 
 import { User } from "./User";
+import { ParamFactory } from "./chats/ParamFactory";
 
 const CONTENT = {
   metadataFile: toFileId(101),
@@ -15,6 +16,14 @@ const DEFAULT_METADATA = {
   title: undefined,
   icon: undefined,
   members: []
+}
+
+const DEFAULT_CAPABILITIES = {
+  canConstruct: true,
+  canDelete: true,
+  canLeave: true,
+  canWrite: true,
+  canManageMembers: false
 }
 
 const STATE = {
@@ -50,12 +59,18 @@ export class Chat extends Bubble {
     const provider = new bubbleProviders.WebsocketBubbleProvider(bubbleId.provider, {sendTimeout: 10000});
 
     // construct the bubble
-    console.trace('constructing', classType, bubbleId, provider, deviceKey.signFunction, encryptionPolicy, userManager)
+    console.trace('constructing', classType, bubbleId, chatType, provider, deviceKey.signFunction, encryptionPolicy, userManager)
     super(bubbleId, provider, deviceKey.signFunction, encryptionPolicy, userManager);
     this.id = bubbleId.chain+'-'+bubbleId.contract;
     this.chatType = chatType;
     this.classType = classType;
     this.myId = myId;
+    this.capabilities = {
+      ...DEFAULT_CAPABILITIES,
+      canConstruct: chatType.actions.canConstruct,
+      canLeave: chatType.actions.canLeave,
+      canManageMembers: chatType.actions.addMembers !== undefined
+    };
 
     // register state variables
     stateManager.register(this.id+'-state', this.state);
@@ -63,6 +78,7 @@ export class Chat extends Bubble {
     stateManager.register(this.id+'-metadata', {bubbleId: bubbleId, ...DEFAULT_METADATA});
     stateManager.register(this.id+'-messages', []);
     stateManager.register(this.id+'-unread', 0);
+    stateManager.register(this.id+'-capabilities', this.capabilities);
 
     // setup listeners
     provider.on('event', (_, state) => stateManager.dispatch(this.id+'-connection-state', state))
@@ -72,7 +88,7 @@ export class Chat extends Bubble {
     this.off = this.listeners.off.bind(this.listeners);
   }
 
-  create({metadata, options}) {
+  create({wallet, metadata, options}) {
     this._validateMetadata(metadata);
     this.metadata = metadata;
     stateManager.dispatch(this.id+'-metadata', this.metadata);
@@ -88,12 +104,13 @@ export class Chat extends Bubble {
         return this._subscribeToContent(false, false, options);
       })
       .then(() => {
+        this._checkConditionalActions(wallet);
         this._setState(STATE.initialised);
         return this.contentId;
       })
   }
 
-  initialise(options) {
+  initialise(wallet, options) {
     return this._loadMessages(this.id)
       .then(() => {
         this.provider.open()
@@ -102,6 +119,7 @@ export class Chat extends Bubble {
             return this._subscribeToContent(true, true, options);
           })
           .then(() => {
+            this._checkConditionalActions(wallet);
             this._setState(STATE.initialised);
           })
           .catch(error => {
@@ -122,7 +140,7 @@ export class Chat extends Bubble {
       })
   }
 
-  join(options) {
+  join(wallet, options) {
     console.trace('joining conversation bubble', this.contentId);
     return this.provider.open()
       .then(() => super.initialise(options))
@@ -130,6 +148,7 @@ export class Chat extends Bubble {
         return this._subscribeToContent(true, true, options);
       })
       .then(() => {
+        this._checkConditionalActions(wallet);
         this._setState(STATE.initialised);
         return this.metadata;
       })
@@ -217,6 +236,20 @@ export class Chat extends Bubble {
   _setState(state) {
     this.state = state;
     stateManager.dispatch(this.id+'-state', state);
+  }
+
+  _checkConditionalActions(wallet) {
+    if (this.chatType.actions.canWrite) {
+      const params = ParamFactory.getParamsAsArray(this.chatType.actions.canWrite.params, {myId: this.myId})
+      console.trace('reading write capability from contract', this.chatType.actions.canWrite.method, params)
+      wallet.call(this.contentId.contract, this.chatType.sourceCode.abi, this.chatType.actions.canWrite.method, params)
+        .then(result => {
+          this.capabilities.canWrite = result;
+          this.capabilities.canManageMembers = result && this.capabilities.canManageMembers;
+          this.capabilities.canDelete = result && this.capabilities.canDelete;
+          stateManager.dispatch(this.id+'-capabilities', {...this.capabilities});
+        })
+    }
   }
 
   _validateMetadata(metadata) {

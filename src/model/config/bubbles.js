@@ -1,9 +1,11 @@
 import * as oneToOneChatSourceCode from "../contracts/OneToOneBubble.json";
 import * as publicChatSourceCode from "../contracts/PublicBubble.json";
+import * as publicEventChatSourceCode from "../contracts/PublicEventBubble.json";
 import * as groupChatSourceCode from "../contracts/GroupBubble.json";
 import simpleChatIcon from "../../assets/img/users.png";
 import globeIcon from "../../assets/img/globe.png";
 import groupIcon from "../../assets/img/group.png";
+import publicEventIcon from "../../assets/img/volume.png";
 
 
 export const DEFAULT_BUBBLES = [
@@ -16,7 +18,10 @@ export const DEFAULT_BUBBLES = [
     sourceCode: publicChatSourceCode.default, 
     constructorParams: [], 
     metadata: {title: 'title', icon: 'icon'},
-    actions: {},
+    actions: {
+      canConstruct: false,
+      canLeave: false,
+    },
     icon: simpleChatIcon
   },
   {
@@ -30,6 +35,7 @@ export const DEFAULT_BUBBLES = [
     metadata: {member0: 'member0.publicKey', member1: 'member1.publicKey'},
     actions: {
       canConstruct: true,
+      canLeave: false,
     },
     icon: simpleChatIcon
   },
@@ -65,8 +71,25 @@ export const DEFAULT_BUBBLES = [
     },
     icon: globeIcon
   },
+  {
+    title: "Public Event", 
+    description: "Group chat with public read", 
+    details: "Unencrypted public chat with write permission limited to users you grant access.", 
+    id: {category: 'public', bytecodeHash: '41ef5d0a546851b6277619540ba5bf19629374d1157dfde59c84518013b7724d'}, 
+    classType: 'PublicChat', 
+    sourceCode: publicEventChatSourceCode.default, 
+    constructorParams: ['members.address'], 
+    metadata: {title: 'title', icon: 'icon'},
+    actions: {
+      canConstruct: true,
+      canLeave: true,
+      addMembers: {method: 'setUsers', params: ['members.address', 'true']},
+      removeMembers: {method: 'setUsers', params: ['members.address', 'false']},
+      canWrite: {method: 'isUser', params: ['my.checksum-address']}
+    },
+    icon: publicEventIcon
+  },
   {id: {category: 'group', bytecodeHash: ''}, title: "Moderated Group Chat", description: "Group chat with admin controls", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
   {id: {category: 'group', bytecodeHash: ''}, title: "NFT Chat", description: "Chat with other NFT owners", sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
-  {id: {category: 'public', bytecodeHash: ''}, title: "Public Event", description: "Group chat with public read", sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
   {id: {category: 'custom', bytecodeHash: ''}, title: "Custom Chat", description: "Your chat, your rules", sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
 ]

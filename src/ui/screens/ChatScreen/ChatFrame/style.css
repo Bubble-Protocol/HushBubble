@@ -173,6 +173,10 @@
   outline: none;
 }
 
+.chat-frame input:disabled {
+  background-color: inherit;
+}
+
 .chat-frame .chat-entry-menu {
   align-items: center;
   align-self: stretch;
