@@ -9,8 +9,8 @@ import "@openzeppelin/contracts/interfaces/IERC1155.sol";
 
 contract ERC1155Bubble is ChatBubble {
 
-  IERC1155 nftContract;
-  uint256 nftId;
+  IERC1155 public nftContract;
+  uint256 public nftId;
   address owner = msg.sender;
   address proxyOwner; // TODO, when wallet integration is complete, no need for proxy owner
   bool terminated = false;

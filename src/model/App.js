@@ -4,6 +4,7 @@ import localStorage from "./utils/LocalStorage";
 import { ecdsa } from "@bubble-protocol/crypto";
 import { HushBubbleCentralWallet } from "./wallets/HushBubbleCentralWallet";
 import { Session } from "./Session";
+import { MetamaskWallet } from "./wallets/MetamaskWallet";
 
 const STATE = {
   uninitialised: 'uninitialised',
@@ -14,6 +15,7 @@ export class MessengerApp {
 
   state = STATE.uninitialised;
   wallet;
+  externalWallet;
   deviceKey;
   newMsgCount = 0;
 
@@ -21,11 +23,16 @@ export class MessengerApp {
     stateManager.register('app-state', this.state);
     stateManager.register('chats');
     stateManager.register('chat-functions');
+    stateManager.register('external-wallet');
     stateManager.register('total-unread', 0);
     stateManager.register('new-message-notification');
     stateManager.register('online', window.navigator.onLine);
     stateManager.register('myId', undefined);
     stateManager.register('config', DEFAULT_CONFIG);
+    stateManager.register('wallet-functions', {
+      connect: this.connectWallet.bind(this),
+      disconnect: this.disconnectWallet.bind(this)
+    });
   }
 
   initialise() {
@@ -67,6 +74,24 @@ export class MessengerApp {
   async close() {
     if (this.session) this.session.close();
     if (this.wallet) this.wallet.disconnect();
+  }
+
+  connectWallet() {
+    if (this.externalWallet) return Promise.resolve();
+    const wallet = new MetamaskWallet();
+    wallet.connect()
+      .then(() => {
+        this.externalWallet = wallet;
+        stateManager.dispatch('external-wallet', this.externalWallet);
+      })
+  }
+
+  disconnectWallet() {
+    if (!this.externalWallet) return Promise.resolve();
+    this.externalWallet.disconnect()
+      .then(() => {
+        stateManager.dispatch('external-wallet', undefined);
+      })
   }
 
   _loadState() {

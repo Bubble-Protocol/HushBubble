@@ -16,7 +16,7 @@ export const DEFAULT_BUBBLES = [
     title: "Public Chat", // Original HushBubble Public Chat (cannot construct)
     description: "Anyone can join", 
     details: "Unencrypted public chat with no restrictions.\n\nNote, public chats are owned by the wallet that creates them, so until the wallet connectivity feature is released all users will have full control, including the power to delete the chat.", 
-    id: {category: 'original-hushbubble-public-chat', bytecodeHash: '39bef1777deb3dfb14f64b9f81ced092c501fee72f90e93d03bb95ee89df9837'}, 
+    id: {category: 'original-hushbubble-public-chat', bytecodeHash: ''}, 
     classType: 'PublicChat', 
     sourceCode: publicChatSourceCode.default, 
     constructorParams: [], 
@@ -93,7 +93,7 @@ export const DEFAULT_BUBBLES = [
     title: "NFT Chat (ERC721)", 
     description: "Chat with other NFT owners", 
     details: "Only owners of the specified ERC721 contract can access the chat.", 
-    id: {category: 'public', bytecodeHash: '39bef1777deb3dfb14f64b9f81ced092c501fee72f90e93d03bb95ee89df9837'}, 
+    id: {category: 'public', bytecodeHash: ''}, 
     classType: 'PublicChat', 
     sourceCode: erc721ChatSourceCode.default, 
     constructorParams: [
@@ -102,6 +102,7 @@ export const DEFAULT_BUBBLES = [
     ], 
     metadata: {title: 'title', icon: 'icon'},
     actions: {
+      requiresDelegate: true,
       canConstruct: true,
       canDelete: {method: 'canDelete', params: ['my.address']},
     },
@@ -121,6 +122,7 @@ export const DEFAULT_BUBBLES = [
     ], 
     metadata: {title: 'title', icon: 'icon'},
     actions: {
+      requiresDelegate: true,
       canConstruct: true,
       canDelete: {method: 'canDelete', params: ['my.address']},
     },

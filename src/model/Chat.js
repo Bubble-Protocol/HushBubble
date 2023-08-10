@@ -3,6 +3,7 @@ import localStorage from "./utils/LocalStorage";
 import { EventManager } from "./utils/EventManager";
 import { stateManager } from "../state-context";
 import { fromBase64Url, toBase64Url } from "./utils/StringUtils";
+import { toDelegateSignFunction } from "@bubble-protocol/client";
 
 import { User } from "./User";
 import { ParamFactory } from "./chats/ParamFactory";
@@ -49,11 +50,17 @@ export class Chat extends Bubble {
   lastRead = 1;
   unreadMsgs = 0;
   
-  constructor(chatType, classType, bubbleId, myId, deviceKey, encryptionPolicy, userManager) {
+  constructor(chatType, classType, bubbleId, myId, deviceKey, encryptionPolicy, userManager, delegation) {
     assert.isNotNull(chatType, 'chatType');
     assert.isString(classType, 'classType');
     assert.isObject(myId, 'myId');
     assert.isObject(deviceKey, 'deviceKey');
+
+    // handle any delegation
+    if (delegation) {
+      deviceKey = {...deviceKey, signFunction: toDelegateSignFunction(deviceKey.signFunction, delegation)};
+      console.debug('deviceKey', deviceKey)
+    }
 
     // construct the provider
     const provider = new bubbleProviders.WebsocketBubbleProvider(bubbleId.provider, {sendTimeout: 10000});
@@ -65,6 +72,8 @@ export class Chat extends Bubble {
     this.chatType = chatType;
     this.classType = classType;
     this.myId = myId;
+    this.delegation = delegation;
+
     this.capabilities = {
       ...DEFAULT_CAPABILITIES,
       ...chatType.actions,
@@ -195,7 +204,7 @@ export class Chat extends Bubble {
   }
 
   serialize() {
-    return {chatType: this.chatType.id, classType: this.classType, id: this.id, bubbleId: this.contentId.toString(), metadata: this.metadata}
+    return {chatType: this.chatType.id, classType: this.classType, id: this.id, bubbleId: this.contentId.toString(), metadata: this.metadata, delegation: this.delegation}
   }
 
   deserialize(data) {

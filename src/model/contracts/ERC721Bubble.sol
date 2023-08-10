@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/interfaces/IERC721.sol";
 
 contract ERC721Bubble is ChatBubble {
 
-  IERC721 nftContract;
+  IERC721 public nftContract;
   address owner = msg.sender;
   address proxyOwner; // TODO, when wallet integration is complete, no need for proxy owner
   bool terminated = false;

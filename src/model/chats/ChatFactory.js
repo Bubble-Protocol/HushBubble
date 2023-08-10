@@ -4,12 +4,12 @@ import { PublicChat } from "./PublicChat"
 
 export const ChatFactory = {
 
-  constructChat: (chatType, classType, bubbleId, myId, deviceKey, terminateKey, options={}) => {
+  constructChat: (chatType, classType, bubbleId, myId, deviceKey, terminateKey, delegation, options={}) => {
     chatType = getChatTypeObject(chatType);
     switch (classType) {
       case undefined:
-      case 'PublicChat': return new PublicChat(chatType, bubbleId, myId, deviceKey);
-      case 'PrivateChat': return new PrivateChat(chatType, bubbleId, myId, deviceKey, terminateKey, options.member1 ? [options.member1] : undefined);
+      case 'PublicChat': return new PublicChat(chatType, bubbleId, myId, deviceKey, delegation);
+      case 'PrivateChat': return new PrivateChat(chatType, bubbleId, myId, deviceKey, terminateKey, options.member1 ? [options.member1] : undefined, delegation);
       default: throw new Error('Invalid bubble class type');
     }
   }
