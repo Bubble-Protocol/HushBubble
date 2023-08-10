@@ -154,8 +154,7 @@ export class Session {
     let invite, bubbleId, classType;
     try {
       invite = Chat.parseInvite(inviteStr);
-      bubbleId = new ContentId(invite.id);
-      classType = invite.t;
+      bubbleId = new ContentId(invite.id || invite);
     }
     catch(error) {
       console.warn(error);
@@ -170,7 +169,7 @@ export class Session {
         if (!bubbleType) throw new Error('Chat type is not supported');
         let conversation;
         try {
-          conversation = ChatFactory.constructChat(bubbleType.id, classType, bubbleId, this.myId, this.deviceKey);
+          conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.deviceKey);
         }
         catch(error) {
           console.warn(error);

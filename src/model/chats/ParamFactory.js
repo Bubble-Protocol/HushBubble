@@ -39,7 +39,6 @@ function getParam(param, paramValues) {
     case 'member1.address': return paramValues.member1 ? paramValues.member1.address : paramValues.members[1].address;
     case 'member1.publicKey': return paramValues.member1 ? paramValues.member1.publicKey : paramValues.members[1].publicKey;
     case 'member1.id': return paramValues.member1 ? paramValues.member1.id : paramValues.members[1].id;
-    case 'members': return paramValues.members;
     case 'members.address': return paramValues.members.map(m => m.address);
     case 'members.publicKey': return paramValues.members.map(m => m.publicKey);
     case 'members.id': return paramValues.members.map(m => m.id);
@@ -54,6 +53,8 @@ function getParam(param, paramValues) {
     case 'terminateToken': 
       assert.isHex32(paramValues.terminateKey, 'terminateKey');
       return '0x'+ecdsa.hash(paramValues.terminateKey, 'hex');
-    default: throw new Error('Invalid constructor parameter type '+param)
+    default:
+      if (paramValues[param] === undefined) throw new Error('Missing constructor parameter: '+param)
+      return paramValues[param];
   }
 }

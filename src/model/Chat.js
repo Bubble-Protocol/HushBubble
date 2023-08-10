@@ -67,8 +67,7 @@ export class Chat extends Bubble {
     this.myId = myId;
     this.capabilities = {
       ...DEFAULT_CAPABILITIES,
-      canConstruct: chatType.actions.canConstruct,
-      canLeave: chatType.actions.canLeave,
+      ...chatType.actions,
       canManageMembers: chatType.actions.addMembers !== undefined
     };
 
