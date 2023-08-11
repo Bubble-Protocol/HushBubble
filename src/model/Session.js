@@ -3,6 +3,7 @@ import { DEFAULT_CONFIG } from "./config";
 import { User } from "./User";
 import { stateManager } from "../state-context";
 import { ContentId, assert } from "@bubble-protocol/core";
+import { Delegation } from "@bubble-protocol/client";
 import { testProviderExists } from "./utils/BubbleUtils";
 import { PublicChat } from "./chats/PublicChat";
 import { ChatFactory } from "./chats/ChatFactory";
@@ -96,6 +97,7 @@ export class Session {
     // get smart contract constructor parameters
     const terminateKey = new ecdsa.Key().privateKey;
     params.terminateKey = terminateKey;
+    params.myId = this.myId;
     const constructorParams = ParamFactory.getParamsAsArray(bubbleType.constructorParams, params);
 
     // get metadata and initialise the member array
@@ -110,7 +112,7 @@ export class Session {
         if (this.wallet.getChain() !== chain.id) return this.wallet.switchChain(chain.id)
       })
       .then(() => {
-        console.trace('deploying chat contract');
+        console.trace('deploying chat contract', bubbleType.title, constructorParams);
         return this.wallet.deploy(bubbleType.sourceCode, constructorParams);
         // return "0xC6509dFdE9c071e13847A98EaA568E698e782c42";
       })
@@ -121,7 +123,7 @@ export class Session {
           contract: contractAddress,
           provider: host.chains[chain.id].url
         });
-        const conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.deviceKey, terminateKey, metadata);
+        const conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.deviceKey, terminateKey, undefined, metadata);
         console.trace('creating off-chain bubble on host', conversation.contentId.provider);
         return conversation.create({
           wallet: this.wallet,
@@ -149,13 +151,13 @@ export class Session {
       .then(() => this._removeChat(conversation));
   }
 
-  async joinChat(inviteStr) {
+  async joinChat(inviteStr, delegation) {
     assert.isString(inviteStr, "invite");
-    let invite, bubbleId, classType;
+    let invite, bubbleId, bubbleProvider;
     try {
       invite = Chat.parseInvite(inviteStr);
-      bubbleId = new ContentId(invite.id);
-      classType = invite.t;
+      bubbleId = new ContentId(invite.id || invite);
+      bubbleProvider = new URL(bubbleId.provider);
     }
     catch(error) {
       console.warn(error);
@@ -168,9 +170,15 @@ export class Session {
         let bubbleType = DEFAULT_CONFIG.bubbles.find(b => b.id.bytecodeHash === codeHash);
         // if (!bubbleType) bubbleType = DEFAULT_CONFIG.bubbles.find(b => b.classType === classType);
         if (!bubbleType) throw new Error('Chat type is not supported');
+        console.debug('requires delegate?', delegation, bubbleType);
+        if (bubbleType.actions.requiresDelegate && !delegation) {
+          const delegation = new Delegation(this.myId.address, 'never');
+          delegation.permitAccessToBubble({...bubbleId, provider: bubbleProvider.hostname});
+          throw {code: 'requires-delegate', message: 'bubble requires delegate', delegateRequest: {delegation}};
+        }
         let conversation;
         try {
-          conversation = ChatFactory.constructChat(bubbleType.id, classType, bubbleId, this.myId, this.deviceKey);
+          conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.deviceKey, undefined, delegation);
         }
         catch(error) {
           console.warn(error);
@@ -304,7 +312,7 @@ export class Session {
         const valid = this._validateConversation(rawC);
         if (valid) {
           try {
-            const conversation = ChatFactory.constructChat(rawC.chatType, rawC.classType, new ContentId(rawC.bubbleId), this.myId, this.deviceKey);
+            const conversation = ChatFactory.constructChat(rawC.chatType, rawC.classType, new ContentId(rawC.bubbleId), this.myId, this.deviceKey, undefined, rawC.delegation);
             this._addConversation(conversation);
             const promise = conversation.initialise(this.wallet)
               .then(() => {

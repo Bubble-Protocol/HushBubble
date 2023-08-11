@@ -2,10 +2,13 @@ import * as oneToOneChatSourceCode from "../contracts/OneToOneBubble.json";
 import * as publicChatSourceCode from "../contracts/PublicBubble.json";
 import * as publicEventChatSourceCode from "../contracts/PublicEventBubble.json";
 import * as groupChatSourceCode from "../contracts/GroupBubble.json";
+import * as erc721ChatSourceCode from "../contracts/ERC721Bubble.json";
+import * as erc1155ChatSourceCode from "../contracts/ERC1155Bubble.json";
 import simpleChatIcon from "../../assets/img/users.png";
 import globeIcon from "../../assets/img/globe.png";
 import groupIcon from "../../assets/img/group.png";
 import publicEventIcon from "../../assets/img/volume.png";
+import nftIcon from "../../assets/img/nft.png";
 
 
 export const DEFAULT_BUBBLES = [
@@ -13,14 +16,14 @@ export const DEFAULT_BUBBLES = [
     title: "Public Chat", // Original HushBubble Public Chat (cannot construct)
     description: "Anyone can join", 
     details: "Unencrypted public chat with no restrictions.\n\nNote, public chats are owned by the wallet that creates them, so until the wallet connectivity feature is released all users will have full control, including the power to delete the chat.", 
-    id: {category: 'original-hushbubble-public-chat', bytecodeHash: '39bef1777deb3dfb14f64b9f81ced092c501fee72f90e93d03bb95ee89df9837'}, 
+    id: {category: 'original-hushbubble-public-chat', bytecodeHash: ''}, 
     classType: 'PublicChat', 
     sourceCode: publicChatSourceCode.default, 
     constructorParams: [], 
     metadata: {title: 'title', icon: 'icon'},
     actions: {
       canConstruct: false,
-      canLeave: false,
+      canDelete: false
     },
     icon: simpleChatIcon
   },
@@ -50,7 +53,6 @@ export const DEFAULT_BUBBLES = [
     metadata: {title: 'title', icon: 'icon'},
     actions: {
       canConstruct: true,
-      canLeave: true,
       addMembers: {method: 'setUsers', params: ['members.address', 'true']},
       removeMembers: {method: 'setUsers', params: ['members.address', 'false']},
     },
@@ -67,7 +69,6 @@ export const DEFAULT_BUBBLES = [
     metadata: {title: 'title', icon: 'icon'},
     actions: {
       canConstruct: true,
-      canLeave: true
     },
     icon: globeIcon
   },
@@ -82,14 +83,51 @@ export const DEFAULT_BUBBLES = [
     metadata: {title: 'title', icon: 'icon'},
     actions: {
       canConstruct: true,
-      canLeave: true,
       addMembers: {method: 'setUsers', params: ['members.address', 'true']},
       removeMembers: {method: 'setUsers', params: ['members.address', 'false']},
       canWrite: {method: 'isUser', params: ['my.checksum-address']}
     },
     icon: publicEventIcon
   },
+  {
+    title: "NFT Chat (ERC721)", 
+    description: "Chat with other NFT owners", 
+    details: "Only owners of the specified ERC721 contract can access the chat.", 
+    id: {category: 'public', bytecodeHash: '82529b8fe9aab266baedd7be8feb501bfa1aa0f954411c23dff1884bf1d5cd43'}, 
+    classType: 'PublicChat', 
+    sourceCode: erc721ChatSourceCode.default, 
+    constructorParams: [
+      {id: 'nft-contract', type: 'address', title: 'NFT Contract', subtitle: 'The ERC721 contract that controls the members of this chat'}, 
+      'my.address'
+    ], 
+    metadata: {title: 'title', icon: 'icon'},
+    actions: {
+      requiresDelegate: true,
+      canConstruct: true,
+      canDelete: {method: 'canDelete', params: ['my.address']},
+    },
+    icon: nftIcon
+  },
+  {
+    title: "NFT Chat (ERC1155)", 
+    description: "Chat with other NFT owners", 
+    details: "Only owners of the specified ERC1155 contract and token ID can access the chat.", 
+    id: {category: 'public', bytecodeHash: '39bef1777deb3dfb14f64b9f81ced092c501fee72f90e93d03bb95ee89df9837'}, 
+    classType: 'PublicChat', 
+    sourceCode: erc1155ChatSourceCode.default, 
+    constructorParams: [
+      {id: 'nft-contract', type: 'address', title: 'NFT Contract', subtitle: 'The ERC1155 contract that controls the members of this chat'}, 
+      {id: 'nft-id', type: 'uint256', title: 'NFT ID', subtitle: 'The ID of the token within the ERC1155 contract'}, 
+      'my.address'
+    ], 
+    metadata: {title: 'title', icon: 'icon'},
+    actions: {
+      requiresDelegate: true,
+      canConstruct: true,
+      canDelete: {method: 'canDelete', params: ['my.address']},
+    },
+    icon: nftIcon
+  },
   {id: {category: 'group', bytecodeHash: ''}, title: "Moderated Group Chat", description: "Group chat with admin controls", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
-  {id: {category: 'group', bytecodeHash: ''}, title: "NFT Chat", description: "Chat with other NFT owners", sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
   {id: {category: 'custom', bytecodeHash: ''}, title: "Custom Chat", description: "Your chat, your rules", sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
 ]
