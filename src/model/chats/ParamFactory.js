@@ -54,6 +54,7 @@ function getParam(param, paramValues) {
       assert.isHex32(paramValues.terminateKey, 'terminateKey');
       return '0x'+ecdsa.hash(paramValues.terminateKey, 'hex');
     default:
+      if (assert.isObject(param)) return getParam(param.id, paramValues);
       if (paramValues[param] === undefined) throw new Error('Missing constructor parameter: '+param)
       return paramValues[param];
   }

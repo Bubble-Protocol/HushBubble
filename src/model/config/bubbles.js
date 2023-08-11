@@ -93,12 +93,12 @@ export const DEFAULT_BUBBLES = [
     title: "NFT Chat (ERC721)", 
     description: "Chat with other NFT owners", 
     details: "Only owners of the specified ERC721 contract can access the chat.", 
-    id: {category: 'public', bytecodeHash: ''}, 
+    id: {category: 'public', bytecodeHash: '82529b8fe9aab266baedd7be8feb501bfa1aa0f954411c23dff1884bf1d5cd43'}, 
     classType: 'PublicChat', 
     sourceCode: erc721ChatSourceCode.default, 
     constructorParams: [
       {id: 'nft-contract', type: 'address', title: 'NFT Contract', subtitle: 'The ERC721 contract that controls the members of this chat'}, 
-      'members.address'
+      'my.address'
     ], 
     metadata: {title: 'title', icon: 'icon'},
     actions: {
@@ -118,7 +118,7 @@ export const DEFAULT_BUBBLES = [
     constructorParams: [
       {id: 'nft-contract', type: 'address', title: 'NFT Contract', subtitle: 'The ERC1155 contract that controls the members of this chat'}, 
       {id: 'nft-id', type: 'uint256', title: 'NFT ID', subtitle: 'The ID of the token within the ERC1155 contract'}, 
-      'members.address'
+      'my.address'
     ], 
     metadata: {title: 'title', icon: 'icon'},
     actions: {

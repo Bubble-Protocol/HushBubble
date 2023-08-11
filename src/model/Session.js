@@ -97,6 +97,7 @@ export class Session {
     // get smart contract constructor parameters
     const terminateKey = new ecdsa.Key().privateKey;
     params.terminateKey = terminateKey;
+    params.myId = this.myId;
     const constructorParams = ParamFactory.getParamsAsArray(bubbleType.constructorParams, params);
 
     // get metadata and initialise the member array
@@ -111,7 +112,7 @@ export class Session {
         if (this.wallet.getChain() !== chain.id) return this.wallet.switchChain(chain.id)
       })
       .then(() => {
-        console.trace('deploying chat contract');
+        console.trace('deploying chat contract', bubbleType.title, constructorParams);
         return this.wallet.deploy(bubbleType.sourceCode, constructorParams);
         // return "0xC6509dFdE9c071e13847A98EaA568E698e782c42";
       })

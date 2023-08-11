@@ -17,6 +17,7 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
 
   for (let i=0; i<params.length; i++) {
     switch (params[i]) {
+      case 'my':
       case 'member0':
         valuesIn[i] = {value: session.getUserId(), valid: true};
         break;
