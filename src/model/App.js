@@ -2,7 +2,6 @@ import { DEFAULT_CONFIG } from "./config";
 import { stateManager } from "../state-context";
 import localStorage from "./utils/LocalStorage";
 import { ecdsa } from "@bubble-protocol/crypto";
-import { HushBubbleCentralWallet } from "./wallets/HushBubbleCentralWallet";
 import { Session } from "./Session";
 import { MetamaskWallet } from "./wallets/MetamaskWallet";
 
@@ -15,15 +14,15 @@ export class MessengerApp {
 
   state = STATE.uninitialised;
   wallet;
-  externalWallet;
   deviceKey;
   newMsgCount = 0;
 
   constructor() {
     stateManager.register('app-state', this.state);
+    stateManager.register('wallet');
+    stateManager.register('session');
     stateManager.register('chats');
     stateManager.register('chat-functions');
-    stateManager.register('external-wallet');
     stateManager.register('total-unread', 0);
     stateManager.register('new-message-notification');
     stateManager.register('online', window.navigator.onLine);
@@ -31,7 +30,8 @@ export class MessengerApp {
     stateManager.register('config', DEFAULT_CONFIG);
     stateManager.register('wallet-functions', {
       connect: this.connectWallet.bind(this),
-      disconnect: this.disconnectWallet.bind(this)
+      disconnect: this.disconnectWallet.bind(this),
+      delegate: this.disconnectWallet.bind(this)
     });
   }
 
@@ -41,16 +41,58 @@ export class MessengerApp {
       this.deviceKey = new ecdsa.Key();
       this._saveState();
     }
-    this.wallet = new HushBubbleCentralWallet(this.deviceKey);
-    this.wallet.connect().catch(error => console.warn('failed to connect wallet', error));
-    this.session = new Session(DEFAULT_CONFIG.chains[4], this.wallet, this.deviceKey);
-    stateManager.register('session', this.session);
-    return this.session.open()
+    this.state = STATE.initialised;
+    stateManager.dispatch('app-state', this.state);
+    return Promise.resolve();
+  }
+
+  setOnlineStatus(online) {
+    console.trace(online ? 'online' : 'offline');
+    stateManager.dispatch('online', online);
+    if (online === true) this.checkConnections();
+  }
+
+  checkConnections() {
+    if (this.session) this.session.reconnect();
+  }
+
+  async close() {
+    if (this.session) this.session.close();
+    if (this.wallet) this.wallet.disconnect();
+  }
+
+  async connectWallet(delegate) {
+    console.trace('connect wallet', delegate ? delegate : '', this.session)
+    if (this.wallet && this.session) return Promise.resolve();
+    else if (this.wallet) return this._openSession(delegate);
+    else {
+      const wallet = new MetamaskWallet();
+      return wallet.connect()
+        .then(() => {
+          this.wallet = wallet;
+          stateManager.dispatch('wallet', this.wallet);
+          return this._openSession();
+        })
+    }
+  }
+
+  async disconnectWallet() {
+    if (!this.wallet) return Promise.resolve();
+    return this.wallet.disconnect()
       .then(() => {
-        this.state = STATE.initialised;
+        stateManager.dispatch('wallet', undefined);
+        return this._closeSession();
+      })
+  }
+
+  async _openSession(delegate) {
+    const session = new Session(DEFAULT_CONFIG.chains[4], this.wallet, this.deviceKey);
+    return session.open(delegate)
+      .then(() => {
+        this.session = session;
+        stateManager.dispatch('session', this.session);
         stateManager.dispatch('myId', this.session.myId);
         stateManager.dispatch('chats', this.session.conversations);
-        stateManager.dispatch('app-state', this.state);
         stateManager.dispatch('chat-functions', {
           create: this.session.createChat.bind(this.session),
           join: this.session.joinChat.bind(this.session),
@@ -61,36 +103,12 @@ export class MessengerApp {
       });
   }
 
-  setOnlineStatus(online) {
-    console.trace(online ? 'online' : 'offline');
-    stateManager.dispatch('online', online);
-    if (online === true) this.checkConnections();
-  }
-
-  checkConnections() {
-    this.session.reconnect();
-  }
-
-  async close() {
-    if (this.session) this.session.close();
-    if (this.wallet) this.wallet.disconnect();
-  }
-
-  connectWallet() {
-    if (this.externalWallet) return Promise.resolve();
-    const wallet = new MetamaskWallet();
-    wallet.connect()
+  _closeSession() {
+    if (!this.session) return Promise.resolve();
+    return this.session.close()
       .then(() => {
-        this.externalWallet = wallet;
-        stateManager.dispatch('external-wallet', this.externalWallet);
-      })
-  }
-
-  disconnectWallet() {
-    if (!this.externalWallet) return Promise.resolve();
-    this.externalWallet.disconnect()
-      .then(() => {
-        stateManager.dispatch('external-wallet', undefined);
+        this.session = undefined;
+        stateManager.dispatch('session', this.session);
       })
   }
 

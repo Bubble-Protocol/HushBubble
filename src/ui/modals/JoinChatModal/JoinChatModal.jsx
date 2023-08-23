@@ -11,7 +11,7 @@ export const JoinChatModal = ({ bubbleIn, onJoin, onCancel, onCompletion }) => {
   const [delegateRequest, setDelegateRequest] = useState();
   const [error, setError] = useState();
   const walletFunctions = stateManager.useStateData('wallet-functions')();
-  const wallet = stateManager.useStateData('external-wallet')();
+  const wallet = stateManager.useStateData('wallet')();
 
   let invite = bubbleId;
   try {

@@ -164,7 +164,8 @@ export class MetamaskWallet extends Wallet {
     const account = this.getAccount();
     return (hash) => {
       hash = hash.slice(0,2) === '0x' ? hash.slice(2) : hash;
-      return web3.eth.personal.sign(hash, account, '')
+      console.trace('signing message', hash, 'with account', account);
+      return web3.eth.personal.sign(hash, account, 'Login to HushBubble')
         .then(toEthereumSignature);
     }
   }

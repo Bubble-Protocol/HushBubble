@@ -5,7 +5,6 @@ import { stateManager } from "../state-context";
 import { ContentId, assert } from "@bubble-protocol/core";
 import { Delegation } from "@bubble-protocol/client";
 import { testProviderExists } from "./utils/BubbleUtils";
-import { PublicChat } from "./chats/PublicChat";
 import { ChatFactory } from "./chats/ChatFactory";
 import { ecdsa } from "@bubble-protocol/crypto";
 import { Chat } from "./Chat";
@@ -29,37 +28,49 @@ export class Session {
 
   constructionState = CONSTRUCTION_STATE.closed;
   id;
-  deviceKey;
+  sessionKey;
+  keyDelegation;
   settings = DEFAULT_SETTINGS;
   conversations = [];
 
 
-  constructor(chain, wallet, deviceKey) {
+  constructor(chain, wallet) {
     this.chain = chain;
     this.wallet = wallet;
-    this.deviceKey = deviceKey;
-    this.myId = new User(this.deviceKey.cPublicKey);
-    this.id = chain.id+'-default';
+    this.id = chain.id+'-'+wallet.getAccount();
     this.joinChat = this.joinChat.bind(this);
     this.createChat = this.createChat.bind(this);
     this.terminateChat = this.terminateChat.bind(this);
   }
 
-  async open() {
+  async open(delegate) {
     console.trace('opening session', this);
     this.state = CONSTRUCTION_STATE.new;
     return this._loadState()
       .then(exists => {
         if (!exists) {
-          const bubbleType = DEFAULT_CONFIG.bubbles.find(b => b.id.category === 'original-hushbubble-public-chat');
-          this._addConversation(new PublicChat(bubbleType, DEFAULT_CONFIG.bubbleId, this.myId, this.deviceKey));
+          this.sessionKey = new ecdsa.Key();
           this._saveState();
-          return this.conversations[0].initialise();
+        }
+        if (this.wallet.getChain() !== this.chain.id) return this.wallet.switchChain(this.chain.id)
+      })
+      .then(() => {
+        if (!this.keyDelegation) {
+          if (!assert.isInstanceOf(delegate, Delegation)) {
+            const delegation = new Delegation(this.myId.address, 'never');
+            delegation.permitAccessToAllBubbles();
+            throw {code: 'requires-delegate', message: 'session requires delegate', delegateRequest: {delegation}};
+          }
+          return delegate.sign(this.wallet.getSignFunction())
+            .then(() => {
+              this.keyDelegation = delegate;
+              this._saveState();
+            })
         }
       })
       .then(() => {
         if (this.settings.connectionRelay) {
-          this.connectionRelay = new HushBubbleConnectRelay(this.deviceKey, this.joinChat.bind(this));
+          this.connectionRelay = new HushBubbleConnectRelay(this.sessionKey, this.joinChat.bind(this));
           return this.connectionRelay.monitor();
         }
       })
@@ -72,6 +83,17 @@ export class Session {
 
   async close() {
     return Promise.all(this.conversations.map(c => c.close()));
+  }
+
+  delegate() {
+    if (this.keyDelegation) return Promise.reject('session already has a signed delegate');
+    const delegation = new Delegation(this.myId.address, 'never');
+    delegation.permitAccessToAllBubbles();
+    return delegation.sign(this.wallet.getSignFunction())
+      .then(() => {
+        this.keyDelegation = delegation;
+        this._saveState();
+      })
   }
 
   getUserId() { 
@@ -123,7 +145,7 @@ export class Session {
           contract: contractAddress,
           provider: host.chains[chain.id].url
         });
-        const conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.deviceKey, terminateKey, undefined, metadata);
+        const conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.sessionKey, terminateKey, undefined, metadata);
         console.trace('creating off-chain bubble on host', conversation.contentId.provider);
         return conversation.create({
           wallet: this.wallet,
@@ -178,7 +200,7 @@ export class Session {
         }
         let conversation;
         try {
-          conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.deviceKey, undefined, delegation);
+          conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.sessionKey, undefined, delegation);
         }
         catch(error) {
           console.warn(error);
@@ -305,6 +327,11 @@ export class Session {
     }
     else {
       const state = JSON.parse(json);
+      if (state.sessionKey) {
+        this.sessionKey = new ecdsa.Key(state.sessionKey);
+        this.myId = new User(this.sessionKey.cPublicKey);
+      }
+      this.keyDelegation = state.keyDelegation;
       this.settings = state.settings || DEFAULT_SETTINGS;
       const promises = [];
       state.conversations.forEach(rawC => {
@@ -312,7 +339,7 @@ export class Session {
         const valid = this._validateConversation(rawC);
         if (valid) {
           try {
-            const conversation = ChatFactory.constructChat(rawC.chatType, rawC.classType, new ContentId(rawC.bubbleId), this.myId, this.deviceKey, undefined, rawC.delegation);
+            const conversation = ChatFactory.constructChat(rawC.chatType, rawC.classType, new ContentId(rawC.bubbleId), this.myId, this.sessionKey, undefined, rawC.delegation);
             this._addConversation(conversation);
             const promise = conversation.initialise(this.wallet)
               .then(() => {
@@ -347,6 +374,8 @@ export class Session {
 
   _saveState() {
     const state = {
+      sessionKey: this.sessionKey.privateKey,
+      keyDelegation: this.keyDelegation,
       settings: this.settings,
       conversations: this.conversations.map(c => c.serialize())
     }

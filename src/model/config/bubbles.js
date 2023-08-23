@@ -16,7 +16,7 @@ export const DEFAULT_BUBBLES = [
     title: "Public Chat", // Original HushBubble Public Chat (cannot construct)
     description: "Anyone can join", 
     details: "Unencrypted public chat with no restrictions.\n\nNote, public chats are owned by the wallet that creates them, so until the wallet connectivity feature is released all users will have full control, including the power to delete the chat.", 
-    id: {category: 'original-hushbubble-public-chat', bytecodeHash: ''}, 
+    id: {category: 'original-hushbubble-public-chat', bytecodeHash: '629fcda48da3757fb83407ab90325b6170f44b8727efdc4b836712f1a7a1921f'}, 
     classType: 'PublicChat', 
     sourceCode: publicChatSourceCode.default, 
     constructorParams: [], 

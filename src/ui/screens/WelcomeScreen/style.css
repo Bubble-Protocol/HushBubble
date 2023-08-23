@@ -1,0 +1,28 @@
+.welcome-screen {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  height: 100%;
+  max-width: 100%;
+}
+
+.connect-text {
+  color: #c2c2c2;
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.error-text {
+  color: #bb0101;
+  font-size: 16px;
+  font-weight: 200;
+}
+
+.connect-text:hover {
+  cursor: pointer;
+}
