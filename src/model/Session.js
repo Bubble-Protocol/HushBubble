@@ -27,6 +27,7 @@ const DEFAULT_SETTINGS = {
 export class Session {
 
   constructionState = CONSTRUCTION_STATE.closed;
+  account;
   id;
   sessionKey;
   keyDelegation;
@@ -37,7 +38,7 @@ export class Session {
   constructor(chain, wallet) {
     this.chain = chain;
     this.wallet = wallet;
-    this.id = chain.id+'-'+wallet.getAccount();
+    this.id = chain.id+'-'+this.wallet.getAccount();
     this.joinChat = this.joinChat.bind(this);
     this.createChat = this.createChat.bind(this);
     this.terminateChat = this.terminateChat.bind(this);
@@ -50,6 +51,7 @@ export class Session {
       .then(exists => {
         if (!exists) {
           this.sessionKey = new ecdsa.Key();
+          this.myId = new User({account: this.wallet.getAccount(), delegate: this.sessionKey.cPublicKey});
           this._saveState();
         }
         if (this.wallet.getChain() !== this.chain.id) return this.wallet.switchChain(this.chain.id)
@@ -57,7 +59,7 @@ export class Session {
       .then(() => {
         if (!this.keyDelegation) {
           if (!assert.isInstanceOf(delegate, Delegation)) {
-            const delegation = new Delegation(this.myId.address, 'never');
+            const delegation = new Delegation(this.myId.delegate.address, 'never');
             delegation.permitAccessToAllBubbles();
             throw {code: 'requires-delegate', message: 'session requires delegate', delegateRequest: {delegation}};
           }
@@ -83,17 +85,6 @@ export class Session {
 
   async close() {
     return Promise.all(this.conversations.map(c => c.close()));
-  }
-
-  delegate() {
-    if (this.keyDelegation) return Promise.reject('session already has a signed delegate');
-    const delegation = new Delegation(this.myId.address, 'never');
-    delegation.permitAccessToAllBubbles();
-    return delegation.sign(this.wallet.getSignFunction())
-      .then(() => {
-        this.keyDelegation = delegation;
-        this._saveState();
-      })
   }
 
   getUserId() { 
@@ -124,9 +115,10 @@ export class Session {
 
     // get metadata and initialise the member array
     const metadata = ParamFactory.getParams(bubbleType.metadata, params);
-    metadata.members = getMembers(this.myId, metadata);
-
     console.debug(metadata, metadata.members);
+    if (metadata.member0) metadata.member0 = new User(metadata.member0);
+    if (metadata.member1) metadata.member1 = new User(metadata.member1);
+    metadata.members = getMembers(this.myId, metadata);
 
     // test provider exists then deploy encrypted application bubble (application id has access, use application key as encryption key)
     return testProviderExists(chain.id, host.chains[chain.id].url, chain.publicBubble)
@@ -136,7 +128,7 @@ export class Session {
       .then(() => {
         console.trace('deploying chat contract', bubbleType.title, constructorParams);
         return this.wallet.deploy(bubbleType.sourceCode, constructorParams);
-        // return "0xC6509dFdE9c071e13847A98EaA568E698e782c42";
+        // return "0xe58F956AbCe562A8C3aCb93c2aB5d43e39f85645";
       })
       .then(contractAddress => {
         console.trace('contract deployed with address', contractAddress);
@@ -145,7 +137,7 @@ export class Session {
           contract: contractAddress,
           provider: host.chains[chain.id].url
         });
-        const conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.sessionKey, terminateKey, undefined, metadata);
+        const conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.sessionKey, terminateKey, this.keyDelegation, metadata);
         console.trace('creating off-chain bubble on host', conversation.contentId.provider);
         return conversation.create({
           wallet: this.wallet,
@@ -168,7 +160,8 @@ export class Session {
 
   async terminateChat(conversation) {
     const terminateKey = conversation.getTerminateKey();
-    return this.wallet.send(conversation.contentId.contract, DEFAULT_CONFIG.bubbles[0].sourceCode.abi, 'terminate', [terminateKey])
+    console.trace('terminating contract', conversation.contentId.contract, 'with key', terminateKey, 'and abi', conversation.chatType.sourceCode.abi);
+    return this.wallet.send(conversation.contentId.contract, conversation.chatType.sourceCode.abi, 'terminate', [terminateKey])
       .then(() => conversation.terminate())
       .then(() => this._removeChat(conversation));
   }
@@ -192,9 +185,10 @@ export class Session {
         let bubbleType = DEFAULT_CONFIG.bubbles.find(b => b.id.bytecodeHash === codeHash);
         // if (!bubbleType) bubbleType = DEFAULT_CONFIG.bubbles.find(b => b.classType === classType);
         if (!bubbleType) throw new Error('Chat type is not supported');
+        let delegation = this.keyDelegation;
         console.debug('requires delegate?', delegation, bubbleType);
         if (bubbleType.actions.requiresDelegate && !delegation) {
-          const delegation = new Delegation(this.myId.address, 'never');
+          delegation = new Delegation(this.myId.address, 'never');
           delegation.permitAccessToBubble({...bubbleId, provider: bubbleProvider.hostname});
           throw {code: 'requires-delegate', message: 'bubble requires delegate', delegateRequest: {delegation}};
         }
@@ -271,7 +265,7 @@ export class Session {
   hasConnectionWith(id) {
     try {
       const user = new User(id);
-      return 0 <= this.conversations.findIndex(c => c.metadata.title === user.address);
+      return 0 <= this.conversations.findIndex(c => c.metadata.title === user.getAccount());
     }
     catch(_) {
       return false;
@@ -329,7 +323,7 @@ export class Session {
       const state = JSON.parse(json);
       if (state.sessionKey) {
         this.sessionKey = new ecdsa.Key(state.sessionKey);
-        this.myId = new User(this.sessionKey.cPublicKey);
+        this.myId = new User({account: this.wallet.getAccount(), delegate: this.sessionKey.cPublicKey});
       }
       this.keyDelegation = state.keyDelegation;
       this.settings = state.settings || DEFAULT_SETTINGS;

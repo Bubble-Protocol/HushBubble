@@ -56,6 +56,7 @@ export const Desktop = () => {
         {session && 
           <div className="user-menu">
             <DropdownMenu direction="bottom-left" options={[
+              {name: session.myId.account.slice(0,6)+'..'+session.myId.account.slice(-4)},
               {name: "Disconnect", onClick: wallet.disconnect},
               {name: "About HushBubble", onClick: () => window.open('https://bubbleprotocol.com/chat/about.html')}
             ]} >

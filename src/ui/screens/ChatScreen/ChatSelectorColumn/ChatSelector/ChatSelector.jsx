@@ -36,7 +36,7 @@ export const ChatSelector = ({
       <img className="contact-icon" src={icon || otherMember.icon || defaultIcon} />
       <div className="content">
         <div className="title-row">
-          <div className="title">{formatTitle(title || otherMember.title || otherMember.address)}</div>
+          <div className="title">{title || (!otherMember || otherMember.getKnownAs ? otherMember.getKnownAs() : 'Unknown')}</div>
           {notifications === 0 && <div className="time">{formatTime(latestMessage.modified)}</div>}
           {notifications > 0 && (
             <div className="notification">
@@ -63,12 +63,6 @@ ChatSelector.propTypes = {
 //
 // Format functions
 //
-
-function formatTitle(title) {
-  if (title && title.length === 42 && title.slice(0,2) === '0x') return title.slice(2,6)+'..'+title.slice(-4);
-  else return title;
-}
-
 
 function formatTime(time) {
   if (!time) return '';

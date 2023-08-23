@@ -33,6 +33,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  color: #0f1217;
 }
 
 .dropdown-menu-container .li:not(:last-child) {
@@ -46,7 +47,6 @@
 
 .dropdown-menu-container .icon-text {
   flex: 1;
-  color: #0f1217;
   align-items: center;
   display: flex;
   gap: 8px;
@@ -55,6 +55,15 @@
   letter-spacing: 0;
   line-height: normal;
   white-space: nowrap;
+}
+
+.dropdown-menu-container .no-click {
+  cursor: default;
+  color: #6e7683;
+}
+
+.dropdown-menu-container .no-click:hover {
+  background-color: inherit;
 }
 
 .dropdown-menu-container img {

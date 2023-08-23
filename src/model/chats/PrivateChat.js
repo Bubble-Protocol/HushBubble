@@ -3,8 +3,8 @@ import { Chat } from "../Chat";
 
 export class PrivateChat extends Chat {
 
-  constructor(chatType, bubbleId, myId, deviceKey, encryptionKey, otherUsers, delegation) {
-    super(chatType, 'PrivateChat', bubbleId, myId, deviceKey, new encryptionPolicies.AESGCMEncryptionPolicy(encryptionKey), new userManagers.MultiUserManager(deviceKey, undefined, otherUsers), delegation);
+  constructor(chatType, bubbleId, myId, sessionKey, encryptionKey, otherUsers, delegation) {
+    super(chatType, 'PrivateChat', bubbleId, myId, sessionKey, new encryptionPolicies.AESGCMEncryptionPolicy(encryptionKey), new userManagers.MultiUserManager(sessionKey, undefined, otherUsers), delegation);
   }
 
   getTerminateKey() {

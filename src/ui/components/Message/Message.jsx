@@ -21,11 +21,11 @@ export const Message = ({
     <div className={"message"+ (!remote ? ' right' : '')}>
       {iconVisible && <div className="chat-icon-container">{remote && <img className="chat-icon" src={icon} />}</div>}
       <div className={"chat-message" + (!remote ? ' local-message' : ' remote-message')}>
-        {remote && <div className="message-time no-mobile">{icon !== defaultIcon ? '' : formatTitle(title)+' / '}</div>}
+        {remote && <div className="message-time no-mobile">{icon !== defaultIcon ? '' : title+' / '}</div>}
         <div className="message-text"><Linkify>{text}</Linkify></div>
         {<div className="message-time no-mobile">{formatTime(date)}</div>}
         <div className="mobile-meta mobile">
-          {remote && <div className="message-time">{icon !== defaultIcon ? '' : formatTitle(title)}</div>}
+          {remote && <div className="message-time">{icon !== defaultIcon ? '' : title}</div>}
           {<div className="message-time">{formatTime(date)}</div>}
         </div>
       </div>
@@ -39,11 +39,6 @@ Message.propTypes = {
   text: PropTypes.string,
 };
 
-
-function formatTitle(title) {
-  if (title && title.length === 42 && title.slice(0,2) === '0x') return title.slice(2,6)+'..'+title.slice(-4);
-  else return title;
-}
 
 function formatTime(messageDate) {
   return messageDate.toLocaleTimeString().slice(0,-3);

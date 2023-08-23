@@ -168,7 +168,7 @@ export class Chat extends Bubble {
 
   postMessage(message) {
     console.trace(this.id, 'post message', message);
-    message.from = this.myId.id;
+    message.from = this.myId.getId();
     if (message.id === undefined) message.id = Date.now() + Math.floor(Math.random() * Math.pow(10, 6));
     this.write(CONTENT.textChat + '/' + message.id, JSON.stringify(message))
       .then(() => {
@@ -377,8 +377,9 @@ export class Chat extends Bubble {
   _countUnreadMsgs() {
     let count = 0;
     let index = this.messages.length-1;
+    const myId = this.myId.getId();
     while (index >= 0 && this.messages[index].modified > this.lastRead) {
-      if (this.messages[index].from.id !== this.myId.id) count++;
+      if (this.messages[index].from.id !== myId) count++;
       index--;
     }
     return count;  

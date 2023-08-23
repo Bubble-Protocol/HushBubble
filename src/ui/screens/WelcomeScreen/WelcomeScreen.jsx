@@ -13,7 +13,10 @@ export const WelcomeScreen = () => {
     wallet.connect()
       .catch(error => {
         if (error.code === 'requires-delegate' && error.delegateRequest) setDelegateRequest(error.delegateRequest);
-        else setError(error);
+        else {
+          console.warn(error, error.cause);
+          setError(error);
+        }
       });
   }
 

@@ -34,8 +34,8 @@ export const DEFAULT_BUBBLES = [
     id: {category: 'one-to-one', bytecodeHash: '6a50777810fb784389b557b9058fd0d5eea28466d0711fca6a31a36252a356e9'}, 
     classType: 'PrivateChat', 
     sourceCode: oneToOneChatSourceCode.default, 
-    constructorParams: ['member0.address', 'member1.address', 'terminateToken'],
-    metadata: {member0: 'member0.publicKey', member1: 'member1.publicKey'},
+    constructorParams: ['member0.account', 'member1.account', 'terminateToken'],
+    metadata: {member0: 'member0.id', member1: 'member1.id'},
     actions: {
       canConstruct: true,
       canLeave: false,
@@ -49,12 +49,12 @@ export const DEFAULT_BUBBLES = [
     id: {category: 'group', bytecodeHash: 'eca0e2dbb39f268cfff4c54f90d8c0d3e8e69aa731e7deee941cd08b47345d3b'},
     classType: 'PrivateChat', 
     sourceCode: groupChatSourceCode.default, 
-    constructorParams: ['members.address', 'terminateToken'], 
+    constructorParams: ['members.account', 'terminateToken'], 
     metadata: {title: 'title', icon: 'icon'},
     actions: {
       canConstruct: true,
-      addMembers: {method: 'setUsers', params: ['members.address', 'true']},
-      removeMembers: {method: 'setUsers', params: ['members.address', 'false']},
+      addMembers: {method: 'setUsers', params: ['members.account', 'true']},
+      removeMembers: {method: 'setUsers', params: ['members.account', 'false']},
     },
     icon: groupIcon
   },
@@ -79,13 +79,13 @@ export const DEFAULT_BUBBLES = [
     id: {category: 'public', bytecodeHash: '41ef5d0a546851b6277619540ba5bf19629374d1157dfde59c84518013b7724d'}, 
     classType: 'PublicChat', 
     sourceCode: publicEventChatSourceCode.default, 
-    constructorParams: ['members.address'], 
+    constructorParams: ['members.account'], 
     metadata: {title: 'title', icon: 'icon'},
     actions: {
       canConstruct: true,
-      addMembers: {method: 'setUsers', params: ['members.address', 'true']},
-      removeMembers: {method: 'setUsers', params: ['members.address', 'false']},
-      canWrite: {method: 'isUser', params: ['my.checksum-address']}
+      addMembers: {method: 'setUsers', params: ['members.account', 'true']},
+      removeMembers: {method: 'setUsers', params: ['members.account', 'false']},
+      canWrite: {method: 'isUser', params: ['my.checksum-account']}
     },
     icon: publicEventIcon
   },
@@ -104,7 +104,7 @@ export const DEFAULT_BUBBLES = [
     actions: {
       requiresDelegate: true,
       canConstruct: true,
-      canDelete: {method: 'canDelete', params: ['my.address']},
+      canDelete: {method: 'canDelete', params: ['my.account']},
     },
     icon: nftIcon
   },
@@ -118,13 +118,13 @@ export const DEFAULT_BUBBLES = [
     constructorParams: [
       {id: 'nft-contract', type: 'address', title: 'NFT Contract', subtitle: 'The ERC1155 contract that controls the members of this chat'}, 
       {id: 'nft-id', type: 'uint256', title: 'NFT ID', subtitle: 'The ID of the token within the ERC1155 contract'}, 
-      'my.address'
+      'my.account'
     ], 
     metadata: {title: 'title', icon: 'icon'},
     actions: {
       requiresDelegate: true,
       canConstruct: true,
-      canDelete: {method: 'canDelete', params: ['my.address']},
+      canDelete: {method: 'canDelete', params: ['my.account']},
     },
     icon: nftIcon
   },

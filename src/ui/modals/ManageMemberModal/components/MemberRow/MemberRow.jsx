@@ -12,7 +12,7 @@ export const MemberRow = ({ member, modType, modified, toggleModified }) => {
   return (
     <div className="member-row" onClick={toggleModified} >
       <img className="member-icon" src={member.icon || defaultIcon} />
-      <div className="member-title">{member.name || member.address || member.id}</div>
+      <div className="member-title">{member.title || member.account || member.getKnownAs()}</div>
       {modified && modType === 'add' && <PopularCheck size={28} color="#10CA0D" className="icon-button" />}
       {modified && modType === 'remove' && <PopularX size={28} color="#DB0707" className="icon-button" />}
       {!modified && <PopularMinus size={28} className="icon-button" />}

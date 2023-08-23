@@ -21,7 +21,7 @@ export const DropdownMenu = ({ children, direction='top-left', options=[] }) => 
       {isOpen && (
         <div className={"dropdown-menu"+(direction ? " dropdown-"+direction : '')} onMouseLeave={() => setIsOpen(false)}>
           {options.map((option, i) => (
-            <div className="li" onClick={() => clickOption(option)} key={i}>
+            <div className={"li"+(option.onClick ? '' : ' no-click')} onClick={() => clickOption(option)} key={i}>
               <div className="icon-text">
                 {hasIcon && option.icon && <img src={option.icon} /> }
                 {hasIcon && !option.icon && <div className="blank-img" /> }

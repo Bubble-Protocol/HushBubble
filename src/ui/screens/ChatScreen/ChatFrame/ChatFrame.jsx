@@ -94,7 +94,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
       messageElements.push(<ChatDateRow key={'date-'+index} date={date} />);
       lastDate = date;
     };
-    messageElements.push(<Message key={index} date={date} text={msg.text} icon={msg.from.icon} title={msg.from.title || msg.from.address} remote={msg.from.id !== myId.id} />);
+    messageElements.push(<Message key={index} date={date} text={msg.text} icon={msg.from.icon} title={msg.from.getKnownAs()} remote={msg.from.id !== myId.id} />);
   })
 
   let chatIcons = chatData.icon 
@@ -110,7 +110,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
       if (!assert.isArray(chatData.members)) return 'Unknown';
       if (chatData.members.length > 2) return 'Group';
       const otherMember = chatData.members.find(m => m.id && m.id !== myId.id)
-      if (otherMember) title = otherMember.address;
+      if (otherMember) title = otherMember.getKnownAs();
     }
     if (!assert.isHexString(title) || title.length <= 16) return title;
     const mobileMediaQuery = window.matchMedia('(max-width: 640px)');
