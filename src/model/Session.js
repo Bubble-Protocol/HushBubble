@@ -166,7 +166,7 @@ export class Session {
       .then(() => this._removeChat(conversation));
   }
 
-  async joinChat(inviteStr, delegation) {
+  async joinChat(inviteStr) {
     assert.isString(inviteStr, "invite");
     let invite, bubbleId, bubbleProvider;
     try {
@@ -185,16 +185,9 @@ export class Session {
         let bubbleType = DEFAULT_CONFIG.bubbles.find(b => b.id.bytecodeHash === codeHash);
         // if (!bubbleType) bubbleType = DEFAULT_CONFIG.bubbles.find(b => b.classType === classType);
         if (!bubbleType) throw new Error('Chat type is not supported');
-        let delegation = this.keyDelegation;
-        console.debug('requires delegate?', delegation, bubbleType);
-        if (bubbleType.actions.requiresDelegate && !delegation) {
-          delegation = new Delegation(this.myId.address, 'never');
-          delegation.permitAccessToBubble({...bubbleId, provider: bubbleProvider.hostname});
-          throw {code: 'requires-delegate', message: 'bubble requires delegate', delegateRequest: {delegation}};
-        }
         let conversation;
         try {
-          conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.sessionKey, undefined, delegation);
+          conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, this.myId, this.sessionKey, undefined, this.keyDelegation);
         }
         catch(error) {
           console.warn(error);
