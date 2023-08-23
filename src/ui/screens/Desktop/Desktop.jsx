@@ -7,6 +7,8 @@ import { PopularMoreVertical1 } from "../../icons/PopularMoreVertical1/PopularMo
 import { JoinChatModal } from "../../modals/JoinChatModal";
 import { CreateChatModal } from "../../modals/CreateChatModal";
 import { WelcomeScreen } from "../WelcomeScreen";
+import { DropdownMenu } from "../../components/DropdownMenu/DropdownMenu";
+import userIcon from "../../../assets/img/user.png";
 
 export const Desktop = () => {
 
@@ -15,6 +17,7 @@ export const Desktop = () => {
   const urlParams = stateManager.useStateData('url-params')();
   const session = stateManager.useStateData('session')();
   const config = stateManager.useStateData('config')();
+  const wallet = stateManager.useStateData('wallet-functions')();
   const [mobileView, setMobileView] = useState('menu');
 
   useEffect(() => {
@@ -49,8 +52,17 @@ export const Desktop = () => {
         <h1 className="title">HushBubble</h1>
         <div className="spacer" />
         {!online && <div className="connecting-indicator"><span>offline</span><span className="loader loader-small"></span></div> }
-        <a className="header-link no-mobile" href="https://bubbleprotocol.com/chat/about.html">What is HushBubble?</a>
-        <a className="header-link mobile" href="https://bubbleprotocol.com/chat/about.html">What is it?</a>
+        {!session && <a className="header-link" href="https://bubbleprotocol.com/chat/about.html">About</a>}
+        {session && 
+          <div className="user-menu">
+            <DropdownMenu direction="bottom-left" options={[
+              {name: "Disconnect", onClick: wallet.disconnect},
+              {name: "About HushBubble", onClick: () => window.open('https://bubbleprotocol.com/chat/about.html')}
+            ]} >
+              <img className="user-icon-button" src={userIcon}></img>
+            </DropdownMenu>
+          </div>
+        }
       </header>
 
       {/* Content */}

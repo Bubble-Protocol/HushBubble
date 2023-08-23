@@ -82,6 +82,24 @@
   width: fit-content;
 }
 
+.desktop .user-icon-button {
+  width: 32px;
+  height: 32px;
+}
+
+.desktop .user-icon-button:hover {
+  cursor: pointer;
+}
+
+.desktop .user-menu {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  /* padding: 19px 12px; */
+  position: relative;
+}
+
 .desktop .mobile {
   display: none;
 }
