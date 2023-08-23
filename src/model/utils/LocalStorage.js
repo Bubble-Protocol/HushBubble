@@ -192,7 +192,7 @@ class IndexedDbStorage {
 
   _deleteMessages(index, value) {
     return new Promise((resolve, reject) => {
-      let transaction = this.db.transaction(this.messageTable, 'readonly');
+      let transaction = this.db.transaction(this.messageTable, 'readwrite');
       transaction.onerror = (event) => reject(event.target.error);
       let request = transaction.objectStore(this.messageTable).index(index).openCursor(IDBKeyRange.only(value));
 
