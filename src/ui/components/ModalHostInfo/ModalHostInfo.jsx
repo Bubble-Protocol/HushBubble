@@ -15,14 +15,14 @@ export const ModalHostInfo = ({
     <div className="step-frame">
       <div className="info-frame">
         <div className="row">
-          <div className="label" style={{width: 80}}>Chain:</div>
+          <div className="label" style={{width: 40}}>Chain:</div>
           <div className="field">
             {chain.name}
             {chain.icon && <img className="logo-small" src={chain.icon}/>}
           </div>
         </div>
         <div className="row">
-          <div className="label" style={{width: 80}}>Chat Host:</div>
+          <div className="label" style={{width: 40}}>Host:</div>
           <div className="field">
             {host.name}
             {host.icon && <img className="logo-small" src={host.icon}/>}
