@@ -29,7 +29,6 @@ export const ChatSelectorColumn = ({className, chats, selectedChat, setSelectedC
   function createChatModal(bubble) {
     return <CreateChatModal session={session} chains={config.chains} hosts={config.hosts} bubble={bubble} onCreate={session.createChat} onCancel={() => {setModal(null)}} onCompletion={() => {setModal(null); setCentrePanel('chat')}} />;
   } 
-  console.debug(wallet.getChain())
 
   return menuMinimized
     ?

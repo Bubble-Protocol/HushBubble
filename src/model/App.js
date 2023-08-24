@@ -86,7 +86,7 @@ export class MessengerApp {
   }
 
   async _openSession(delegate) {
-    const session = new Session(DEFAULT_CONFIG.chains[4], this.wallet, this.deviceKey);
+    const session = new Session(DEFAULT_CONFIG.chains.find(c => c.id === DEFAULT_CONFIG.defaultChainId), this.wallet, this.deviceKey);
     return session.open(delegate)
       .then(() => {
         this.session = session;
