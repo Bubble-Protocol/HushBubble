@@ -84,7 +84,16 @@
   white-space: nowrap;
 }
 
+.chat-selector .subtitle-row {
+  align-items: flex-start;
+  align-self: stretch;
+  display: flex;
+  gap: 10px;
+  position: relative;
+}
+
 .chat-selector .text {
+  flex: 1;
   align-self: stretch;
   color: #666666;
   font-family: "Work Sans", Helvetica;
@@ -111,5 +120,11 @@
   height: 42px;
   min-width: 42px;
   position: relative;
+}
+
+.chat-selector .chat-type-icon {
+  flex: 0;
+  height: 20px;
+  width: 20px;
 }
 

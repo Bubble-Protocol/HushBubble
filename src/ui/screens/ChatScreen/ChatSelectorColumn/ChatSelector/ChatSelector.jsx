@@ -36,14 +36,17 @@ export const ChatSelector = ({
       <div className="content">
         <div className="title-row">
           <div className="title">{title || 'Unknown'}</div>
-          {notifications === 0 && <div className="time">{formatTime(latestMessage.modified)}</div>}
+          {notifications === 0 && <img className="chat-type-icon" src={chat.chatType.icon}></img>}
           {notifications > 0 && (
             <div className="notification">
               <div className="notification-text">{notifications > 99 ? '99' : notifications}</div>
             </div>
           )}
         </div>
-        <p className="text">{!enabled ? stateText : (latestMessage.text || '')}</p>
+        <div className="subtitle-row">
+          <p className="text">{!enabled ? stateText : (latestMessage.text || '')}</p>
+          <div className="time">{formatTime(latestMessage.modified)}</div>
+        </div>
       </div>
     </div>
   );
