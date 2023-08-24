@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useEffect } from "react";
-import { TextBox } from "../../../components/TextBox";
-import { User } from "../../../../model/User";
+import { TextBox } from "../../components/TextBox";
+import { User } from "../../../model/User";
 
 export const SingleUserInput = ({ title, subtitle, value, setValue }) => {
 

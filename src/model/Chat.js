@@ -5,7 +5,6 @@ import { stateManager } from "../state-context";
 import { fromBase64Url, toBase64Url } from "./utils/StringUtils";
 import { toDelegateSignFunction } from "@bubble-protocol/client";
 
-import { User } from "./User";
 import { ParamFactory } from "./chats/ParamFactory";
 
 const CONTENT = {
@@ -38,23 +37,23 @@ const STATE = {
 export class Chat extends Bubble {
 
   state = STATE.uninitialised;
-  listeners = new EventManager(['new-message-notification', 'unread-change', 'terminated']);
+  listeners = new EventManager(['new-message-notification', 'metadata-updated', 'unread-change', 'terminated']);
 
   id;
   chatType;
-  classType;
   myId;
-  metadata = DEFAULT_METADATA;
+  metadata;
   messages = [];
   lastModTime = 1;
   lastRead = 1;
   unreadMsgs = 0;
   
-  constructor(chatType, classType, bubbleId, myId, deviceKey, encryptionPolicy, userManager, delegation) {
+  constructor(chatType, bubbleId, metadata=DEFAULT_METADATA, myId, deviceKey, encryptionPolicy, userManager, delegation, contacts) {
     assert.isNotNull(chatType, 'chatType');
-    assert.isString(classType, 'classType');
+    assert.isObject(metadata, 'metadata');
     assert.isObject(myId, 'myId');
     assert.isObject(deviceKey, 'deviceKey');
+    assert.isObject(contacts, 'contacts');
 
     // handle any delegation
     if (delegation) {
@@ -66,13 +65,15 @@ export class Chat extends Bubble {
     const provider = new bubbleProviders.WebsocketBubbleProvider(bubbleId.provider, {sendTimeout: 10000});
 
     // construct the bubble
-    console.trace('constructing', classType, bubbleId, chatType, provider, deviceKey.signFunction, encryptionPolicy, userManager)
+    console.trace('constructing', chatType.classType, bubbleId, chatType, provider, deviceKey.signFunction, encryptionPolicy, userManager)
     super(bubbleId, provider, deviceKey.signFunction, encryptionPolicy, userManager);
     this.id = bubbleId.chain+'-'+bubbleId.contract;
     this.chatType = chatType;
-    this.classType = classType;
+    this.metadata = metadata;
+    console.debug('metadata', metadata)
     this.myId = myId;
     this.delegation = delegation;
+    this.contacts = contacts;
 
     this.capabilities = {
       ...DEFAULT_CAPABILITIES,
@@ -83,7 +84,7 @@ export class Chat extends Bubble {
     // register state variables
     stateManager.register(this.id+'-state', this.state);
     stateManager.register(this.id+'-connection-state', this.provider.state);
-    stateManager.register(this.id+'-metadata', {bubbleId: bubbleId, ...DEFAULT_METADATA});
+    stateManager.register(this.id+'-metadata', this.metadata);
     stateManager.register(this.id+'-messages', []);
     stateManager.register(this.id+'-unread', 0);
     stateManager.register(this.id+'-capabilities', this.capabilities);
@@ -94,6 +95,7 @@ export class Chat extends Bubble {
     provider.on('error', event => console.warn(this.id, 'websocket error:', event));
     this.on = this.listeners.on.bind(this.listeners);
     this.off = this.listeners.off.bind(this.listeners);
+    this._handleContactUpdate = this._handleContactUpdate.bind(this);
   }
 
   create({wallet, metadata, options}) {
@@ -169,6 +171,7 @@ export class Chat extends Bubble {
   postMessage(message) {
     console.trace(this.id, 'post message', message);
     message.from = this.myId.getId();
+    console.debug('from', message.from)
     if (message.id === undefined) message.id = Date.now() + Math.floor(Math.random() * Math.pow(10, 6));
     this.write(CONTENT.textChat + '/' + message.id, JSON.stringify(message))
       .then(() => {
@@ -204,7 +207,7 @@ export class Chat extends Bubble {
   }
 
   serialize() {
-    return {chatType: this.chatType.id, classType: this.classType, id: this.id, bubbleId: this.contentId.toString(), metadata: this.metadata, delegation: this.delegation}
+    return {chatType: this.chatType.id, id: this.id, bubbleId: this.contentId.toString(), metadata: this.metadata, delegation: this.delegation}
   }
 
   deserialize(data) {
@@ -223,7 +226,7 @@ export class Chat extends Bubble {
 
   getInvite() {
     return toBase64Url(Buffer.from(JSON.stringify({
-      t: this.classType,
+      t: this.chatType.classType,
       id: this.contentId.toString()
     })))
   }
@@ -234,6 +237,10 @@ export class Chat extends Bubble {
 
   getTerminateKey() {
     throw new Error('Chat.getTerminateKey is a virtual function and must be implemented');
+  }
+
+  getChatInfo() {
+    return this.metadata.members.length + ' member' + (this.metadata.members.length === 1 ? '' : 's');
   }
 
   close() {
@@ -280,9 +287,10 @@ export class Chat extends Bubble {
   _handleMetadataChange(notification) { 
     console.trace(this.id, 'rxd new metadata', notification)
     const metadata = JSON.parse(notification.data);
-    this.metadata = {...DEFAULT_METADATA, ...metadata, bubbleId: this.contentId};
-    this.metadata.members = getMembers(metadata);
+    this.metadata = {...DEFAULT_METADATA, ...this.metadata, ...metadata};
+    this.metadata.members = this._getMembers(metadata);
     stateManager.dispatch(this.id+'-metadata', this.metadata);
+    this.listeners.notifyListeners('metadata-updated', this.metadata);
   }
 
   _readMessage(messageDetails, attempts=5) {
@@ -317,14 +325,14 @@ export class Chat extends Bubble {
   }
 
   _setMessage(message) {
-    message.from = new User(message.from);
+    message.from = this.contacts.getContact(message.from, this._handleContactUpdate);
     message.conversationId = this.id;
     const index = this.messages.findIndex(m => m.id === message.id);
     if (index >=0) this.messages[index] = message;
     else this.messages.push(message);
     this.messages.sort((a,b) => a.created - b.created);
     this.messages = [...this.messages];  // mutate to trigger any react hooks
-    localStorage.writeMessage(message);
+    localStorage.writeMessage({...message, from: message.from.id});
     stateManager.dispatch(this.id+'-messages', this.messages);
     this.listeners.notifyListeners('new-message-notification');
     this._updateUnread()
@@ -334,7 +342,7 @@ export class Chat extends Bubble {
     return localStorage.queryMessagesByConversation(conversationId)
       .then(messages => {
         messages.sort((a,b) => a.created - b.created);
-        messages.forEach(m => {m.from = new User(m.from)});
+        messages.forEach(m => {console.debug('loaded message', m); m.from = this.contacts.getContact(m.from, this._handleContactUpdate)});
         this.messages = messages;
         this.lastModTime = messages.reduce((time, m) => {return m.modified > time ? m.modified : time}, 1);
         this.lastRead = this.lastModTime;
@@ -355,16 +363,17 @@ export class Chat extends Bubble {
       });
   }
 
-  _subscribeToContent(metadataRead, textChatList, options={}) {
+  _subscribeToContent(metadataRead, textChatList, options={}, promises=[]) {
     console.trace(this.id, 'subscribing to content');
-    return Promise.all([
+    return Promise.all(promises.concat([
       this.subscribe(CONTENT.metadataFile, this._handleMetadataChange.bind(this), {...options, read: metadataRead}),
       this.subscribe(CONTENT.textChat, this._handleMessageNotification.bind(this), {...options, since: textChatList ? this.lastModTime : undefined}),
-    ])
+    ]))
     .then(subscriptions => { 
       console.trace(this.id, 'subscriptions', subscriptions)
       if(metadataRead) this._handleMetadataChange(subscriptions[0]);
       if(textChatList) this._handleMessageNotification(subscriptions[1]);
+      return subscriptions;
     })
   }
 
@@ -391,6 +400,7 @@ export class Chat extends Bubble {
       this._setState(STATE.terminated);
       if (this.provider.state !== 'closed') this.provider.close();
       this.listeners.notifyListeners('terminated', this);
+      this.contacts.removeUpdateListener(this._handleContactUpdate);
     }
     else if(error.code === ErrorCodes.BUBBLE_ERROR_PERMISSION_DENIED) {
       this._setState(STATE.notMember);
@@ -398,17 +408,21 @@ export class Chat extends Bubble {
     }
   }
 
-}
-
-function getMembers(metadata) {
-  let members = [];
-  let found = true;
-  let index = 0;
-  while(found) {
-    if (metadata['member'+index]) members.push(new User(metadata['member'+index]));
-    else found = false;
-    index++;
+  _handleContactUpdate() {
+    stateManager.dispatch(this.id+'-messages', [...this.messages]);
   }
-  if (assert.isArray(metadata.members)) members = members.concat(metadata.members.map(m => new User(m)));
-  return members.sort((a,b) => a.id.localeCompare(b.id)).filter((m, i, members) => i===0 || m.id !== members[i-1].id);
+
+  _getMembers(metadata) {
+    let members = [];
+    let found = true;
+    let index = 0;
+    while(found) {
+      if (metadata['member'+index]) members.push(this.contacts.getContact(metadata['member'+index], this._handleContactUpdate));
+      else found = false;
+      index++;
+    }
+    if (assert.isArray(metadata.members)) members = members.concat(metadata.members.map(m => this.contacts.getContact(m, this._handleContactUpdate)));
+    return members.sort((a,b) => a.id.localeCompare(b.id)).filter((m, i, members) => i===0 || m.id !== members[i-1].id);
+  }
+  
 }

@@ -100,18 +100,16 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
   let chatIcons = chatData.icon 
     ? [<img key={0} className="chat-header-icon" src={chatData.icon} />] 
     : chatData.members 
-      ? chatData.members.filter(member => member.icon).slice(0,3).map((member, index) => <img key={index} className="chat-header-icon" src={member.icon} />)
+      ? chatData.members
+        .filter(member => member.icon)
+        .filter(member => member.id !== myId.id)
+        .slice(0,3)
+        .map((member, index) => <img key={index} className="chat-header-icon" src={member.icon} />)
       : []
   if (chatIcons.length === 0) chatIcons = [<img key={0} className="chat-header-icon" src={defaultIcon} />];
   
-  function getTitle() {
-    let title = chatData.title;
-    if (!title) {
-      if (!assert.isArray(chatData.members)) return 'Unknown';
-      if (chatData.members.length > 2) return 'Group';
-      const otherMember = chatData.members.find(m => m.id && m.id !== myId.id)
-      if (otherMember) title = otherMember.getKnownAs();
-    }
+  function getTitle() { console.debug('title', chatData.title);
+    let title = chatData.title || 'Unknown';
     if (!assert.isHexString(title) || title.length <= 16) return title;
     const mobileMediaQuery = window.matchMedia('(max-width: 640px)');
     return mobileMediaQuery.matches ? title.slice(0,6) + '..' + title.slice(-4) : title;
@@ -119,7 +117,8 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
 
   const enabled = chatState === 'open' && connectionState === 'open';
   const stateText = chatState !== 'open' ? chatState : connectionState;
-  
+  const chatInfo = chat.getChatInfo();
+
   return (
     <div className={"chat-frame " + className + (hide ? ' hide' : '')} >
 
@@ -138,7 +137,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
         </div>
         <div className="chat-header-title-row">
           <div className="chat-header-title">{getTitle()}</div>
-          {chatData.members && chatData.members.length > 0 && <div className="chat-header-subtext">{chatData.members.length + ' member' + (chatData.members.length === 1 ? '' : 's')}</div>}
+          {chatInfo && <div className="chat-header-subtext">{chatInfo}</div>}
         </div>
         <div className="chat-header-menu">
           <DropdownMenu direction="bottom-left" options={[

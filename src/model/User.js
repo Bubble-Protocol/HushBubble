@@ -12,6 +12,7 @@ export class User {
 
   constructor(details) {
     try {
+      assert.isNotNull(details, 'details');
       if (ecdsa.assert.isCompressedPublicKey(details)) {
         this.account = ecdsa.publicKeyToAddress(details);
         this.delegate.publicKey = details;
@@ -30,7 +31,6 @@ export class User {
       }
       else {
         // assume it is already a Member object (or representation of one)
-        console.debug(details)
         this.title = details.title;
         this.icon = details.icon;
         this.account = details.account || details.address; // address is for backwards compatibility

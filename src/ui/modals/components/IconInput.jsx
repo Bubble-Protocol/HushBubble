@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
-import { IconChooser } from "../../../components/IconChooser/IconChooser";
+import { IconChooser } from "../../components/IconChooser/IconChooser";
 
 export const IconInput = ({ title, subtitle, value, setValue }) => {
 

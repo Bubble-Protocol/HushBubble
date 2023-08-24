@@ -1,12 +1,8 @@
 import { Bubble, assert, encryptionPolicies, toFileId } from "@bubble-protocol/client";
 import { WebsocketBubbleProvider } from "@bubble-protocol/client/src/bubble-providers/WebsocketBubbleProvider";
 import { ecdsa, ecies } from "@bubble-protocol/crypto";
+import { DEFAULT_CONFIG } from "../config";
 
-const BASE_GOERLI_PUBLIC_BUBBLE = {
-  chain: 84531,
-  contract: '0xDC8bb7aa04431BC0Edc5F0373B98824eC184CFbF',
-  provider: "wss://vault.bubbleprotocol.com/v2/base-goerli"
-}
 
 export class HushBubbleConnectRelay {
 
@@ -14,8 +10,8 @@ export class HushBubbleConnectRelay {
     this.monitoredDir = toFileId(deviceKey.address);
     this.listener = listener;
     this.bubble = new Bubble(
-      BASE_GOERLI_PUBLIC_BUBBLE, 
-      new WebsocketBubbleProvider(BASE_GOERLI_PUBLIC_BUBBLE.provider),
+      DEFAULT_CONFIG.connectionRelay, 
+      new WebsocketBubbleProvider(DEFAULT_CONFIG.connectionRelay.provider),
       deviceKey.signFunction,
       new encryptionPolicies.ECIESEncryptionPolicy(deviceKey.cPublicKey, deviceKey.privateKey)
     );
@@ -46,7 +42,8 @@ export class HushBubbleConnectRelay {
   }
 
   close() {
-    if (this.provider.state !== 'closed') this.provider.close();
+    if (this.bubble.provider.state === 'closed') return Promise.resolve();
+    return this.bubble.provider.close();
   }
 
   _handleNotification(notification) {

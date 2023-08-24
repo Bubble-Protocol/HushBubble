@@ -24,19 +24,18 @@ export const ChatSelector = ({
 
   // Calculate fields
 
-  const { title, members, icon } = chatData;
+  const { title, icon } = chatData;
   const latestMessage = !messages ? {} : messages.length === 0 ? {} : messages.slice(-1)[0];
-  const otherMember = !members || members.length === 0 ? {} : members[0].id === myId.id ? members[1] : members[0];
 
   const enabled = chatState === 'open' && connectionState === 'open';
   const stateText = chatState !== 'open' ? chatState : connectionState;
 
   return (
     <div className={"chat-selector" + (selected ? ' selected' : '') + (!enabled ? ' disabled' : '')} onClick={onClick}>
-      <img className="contact-icon" src={icon || otherMember.icon || defaultIcon} />
+      <img className="contact-icon" src={icon || defaultIcon} />
       <div className="content">
         <div className="title-row">
-          <div className="title">{title || (!otherMember || otherMember.getKnownAs ? otherMember.getKnownAs() : 'Unknown')}</div>
+          <div className="title">{title || 'Unknown'}</div>
           {notifications === 0 && <div className="time">{formatTime(latestMessage.modified)}</div>}
           {notifications > 0 && (
             <div className="notification">

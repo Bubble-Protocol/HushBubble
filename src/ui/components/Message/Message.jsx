@@ -13,19 +13,18 @@ export const Message = ({
   date,
   remote,
   icon = defaultIcon,
-  iconVisible = false,
   title,
   text = ""
 }) => {
   return (
     <div className={"message"+ (!remote ? ' right' : '')}>
-      {iconVisible && <div className="chat-icon-container">{remote && <img className="chat-icon" src={icon} />}</div>}
+      {icon !== defaultIcon && <div className="chat-icon-container">{remote && <img className="chat-icon" src={icon} />}</div>}
       <div className={"chat-message" + (!remote ? ' local-message' : ' remote-message')}>
-        {remote && <div className="message-time no-mobile">{icon !== defaultIcon ? '' : title+' / '}</div>}
+        {remote && icon === defaultIcon && <div className="message-time no-mobile">{title+' / '}</div>}
         <div className="message-text"><Linkify>{text}</Linkify></div>
-        {<div className="message-time no-mobile">{formatTime(date)}</div>}
+        <div className="message-time no-mobile">{formatTime(date)}</div>
         <div className="mobile-meta mobile">
-          {remote && <div className="message-time">{icon !== defaultIcon ? '' : title}</div>}
+          {remote && <div className="message-time">{icon !== defaultIcon ? null : title}</div>}
           {<div className="message-time">{formatTime(date)}</div>}
         </div>
       </div>

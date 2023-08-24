@@ -9,6 +9,7 @@ import { CreateChatModal } from "../../modals/CreateChatModal";
 import { WelcomeScreen } from "../WelcomeScreen";
 import { DropdownMenu } from "../../components/DropdownMenu/DropdownMenu";
 import userIcon from "../../../assets/img/user.png";
+import { ManageProfileModal } from "../../modals/ManageProfileModal";
 
 export const Desktop = () => {
 
@@ -16,6 +17,7 @@ export const Desktop = () => {
   const online = stateManager.useStateData('online')();
   const urlParams = stateManager.useStateData('url-params')();
   const session = stateManager.useStateData('session')();
+  const myId = stateManager.useStateData('myId')();
   const config = stateManager.useStateData('config')();
   const wallet = stateManager.useStateData('wallet-functions')();
   const [mobileView, setMobileView] = useState('menu');
@@ -56,11 +58,12 @@ export const Desktop = () => {
         {session && 
           <div className="user-menu">
             <DropdownMenu direction="bottom-left" options={[
-              {name: session.myId.account.slice(0,6)+'..'+session.myId.account.slice(-4)},
+              {name: myId.account.slice(0,6)+'..'+myId.account.slice(-4)},
+              {name: "Profile", onClick: () => setModal(<ManageProfileModal onCancel={() => setModal(null)} onCompletion={() => setModal(null)} />)},
               {name: "Disconnect", onClick: wallet.disconnect},
               {name: "About HushBubble", onClick: () => window.open('https://bubbleprotocol.com/chat/about.html')}
             ]} >
-              <img className="user-icon-button" src={userIcon}></img>
+              <img className="user-icon-button" src={myId.icon || userIcon}></img>
             </DropdownMenu>
           </div>
         }

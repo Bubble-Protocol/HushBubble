@@ -32,7 +32,7 @@ export const DEFAULT_BUBBLES = [
     description: "Encrypted chat between two people", 
     details: "Two person, end-to-end encrypted chat. No-one, not even HushBubble, can read your messages.", 
     id: {category: 'one-to-one', bytecodeHash: '6a50777810fb784389b557b9058fd0d5eea28466d0711fca6a31a36252a356e9'}, 
-    classType: 'PrivateChat', 
+    classType: 'OneToOneChat', 
     sourceCode: oneToOneChatSourceCode.default, 
     constructorParams: ['member0.account', 'member1.account', 'terminateToken'],
     metadata: {member0: 'member0.id', member1: 'member1.id'},
