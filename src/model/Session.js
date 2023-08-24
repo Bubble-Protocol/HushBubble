@@ -142,8 +142,8 @@ export class Session {
       })
       .then(() => {
         console.trace('deploying chat contract', bubbleType.title, constructorParams);
-        return this.wallet.deploy(bubbleType.sourceCode, constructorParams);
-        // return "0xe58F956AbCe562A8C3aCb93c2aB5d43e39f85645";
+        //return this.wallet.deploy(bubbleType.sourceCode, constructorParams);
+        return "0x5Ec6A3284049E8b3e5966882fd3D40FCFB839501";
       })
       .then(contractAddress => {
         console.trace('contract deployed with address', contractAddress);
@@ -152,7 +152,7 @@ export class Session {
           contract: contractAddress,
           provider: host.chains[chain.id].url
         });
-        const conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, metadata, this.myId, this.sessionKey, terminateKey, this.keyDelegation, this.contacts, metadata);
+        const conversation = ChatFactory.constructChat(bubbleType.id, bubbleId, metadata, this.myId, this.sessionKey, terminateKey, this.keyDelegation, this.contacts, metadata);
         console.trace('creating off-chain bubble on host', conversation.contentId.provider);
         return conversation.create({
           wallet: this.wallet,
@@ -202,7 +202,7 @@ export class Session {
         if (!bubbleType) throw new Error('Chat type is not supported');
         let conversation;
         try {
-          conversation = ChatFactory.constructChat(bubbleType.id, bubbleType.classType, bubbleId, undefined, this.myId, this.sessionKey, undefined, this.keyDelegation, this.contacts);
+          conversation = ChatFactory.constructChat(bubbleType.id, bubbleId, undefined, this.myId, this.sessionKey, undefined, this.keyDelegation, this.contacts);
         }
         catch(error) {
           console.warn(error);
