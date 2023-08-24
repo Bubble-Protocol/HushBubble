@@ -159,6 +159,15 @@
   cursor: pointer;
 }
 
+.disabled {
+  opacity: 50%;
+}
+
+.disabled:hover {
+  cursor: initial;
+  background-color: inherit;
+}
+
 .desktop .content {
   align-items: flex-start;
   align-self: stretch;

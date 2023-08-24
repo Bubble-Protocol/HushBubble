@@ -24,13 +24,9 @@
   background-color: rgba(224, 250, 216, 0.70);
 }
 
-.bubble-selector .disabled {
-  opacity: 50%;
-}
-
-.bubble-selector .disabled:hover {
-  cursor: default;
+.bubble-selector-disabled:hover {
   background-color: inherit;
+  cursor: initial;
 }
 
 .bubble-selector .selector-content {
@@ -83,4 +79,5 @@
   min-width: 28px;
   position: relative;
 }
+
 
