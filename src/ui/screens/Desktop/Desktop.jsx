@@ -58,7 +58,8 @@ export const Desktop = () => {
         {session && 
           <div className="user-menu">
             <DropdownMenu direction="bottom-left" options={[
-              {name: myId.account.slice(0,6)+'..'+myId.account.slice(-4)},
+              {name: myId.getKnownAs()},
+              {type: 'line'},
               {name: "Profile", onClick: () => setModal(<ManageProfileModal onCancel={() => setModal(null)} onCompletion={() => setModal(null)} />)},
               {name: "Disconnect", onClick: wallet.disconnect},
               {name: "About HushBubble", onClick: () => window.open('https://bubbleprotocol.com/chat/about.html')}

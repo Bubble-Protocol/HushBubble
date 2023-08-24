@@ -291,7 +291,7 @@ export class Session {
     if (profile.title === '') profile.title = undefined;
     this.myId.title = profile.title;
     this.myId.icon = profile.icon;
-    stateManager.dispatch('myId', {...this.myId});
+    stateManager.dispatch('myId', this.myId);
   }
 
   _addNewConversation(conversation) {

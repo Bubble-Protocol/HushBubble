@@ -18,6 +18,7 @@
   margin: 4px 0;
   padding: 0;
   min-width: 200px;
+  max-width: 95vw;
   align-self: stretch;
   display: flex;
   flex-direction: column;
@@ -30,8 +31,6 @@
 .dropdown-menu-container .li {
   display: flex;
   padding: 12px 32px;
-  overflow: hidden;
-  text-overflow: ellipsis;
   cursor: pointer;
   color: #0f1217;
 }
@@ -100,3 +99,6 @@
   left: 0;
 }
 
+.dropdown-menu .line {
+  border-bottom: 1px solid #e4e4e4;
+}

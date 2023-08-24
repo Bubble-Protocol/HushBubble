@@ -20,15 +20,19 @@ export const DropdownMenu = ({ children, direction='top-left', options=[] }) => 
       </div>
       {isOpen && (
         <div className={"dropdown-menu"+(direction ? " dropdown-"+direction : '')} onMouseLeave={() => setIsOpen(false)}>
-          {options.map((option, i) => (
-            <div className={"li"+(option.onClick ? '' : ' no-click')} onClick={() => clickOption(option)} key={i}>
-              <div className="icon-text">
-                {hasIcon && option.icon && <img src={option.icon} /> }
-                {hasIcon && !option.icon && <div className="blank-img" /> }
-                {option.name}
-              </div>
-            </div>
-          ))}
+          {options.map((option, i) => {
+            switch (option.type) {
+              case 'line': return <div className="line"></div>
+              default: 
+                return <div className={"li"+(option.onClick ? '' : ' no-click')} onClick={() => clickOption(option)} key={i}>
+                  <div className="icon-text">
+                    {hasIcon && option.icon && <img src={option.icon} /> }
+                    {hasIcon && !option.icon && <div className="blank-img" /> }
+                    {option.name}
+                  </div>
+                </div>
+              }
+          })}
         </div>
       )}
     </div>
