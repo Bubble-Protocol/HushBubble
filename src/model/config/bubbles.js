@@ -4,11 +4,13 @@ import * as publicEventChatSourceCode from "../contracts/PublicEventBubble.json"
 import * as groupChatSourceCode from "../contracts/GroupBubble.json";
 import * as erc721ChatSourceCode from "../contracts/ERC721Bubble.json";
 import * as erc1155ChatSourceCode from "../contracts/ERC1155Bubble.json";
+import * as friendtechSourceCode from "../contracts/FriendTechBubble.json";
 import simpleChatIcon from "../../assets/img/users.png";
 import globeIcon from "../../assets/img/globe.png";
 import groupIcon from "../../assets/img/group.png";
 import publicEventIcon from "../../assets/img/volume.png";
 import nftIcon from "../../assets/img/nft.png";
+import friendtechIcon from "../../assets/img/friendtech.png";
 
 
 export const DEFAULT_BUBBLES = [
@@ -88,6 +90,22 @@ export const DEFAULT_BUBBLES = [
       canWrite: {method: 'isUser', params: ['my.checksum-account']}
     },
     icon: publicEventIcon
+  },
+  {
+    title: "friend.tech Chat", 
+    description: "Chat with your friend.tech key holders", 
+    details: "Only friend.tech key holders with one or more or your keys can access the chat. You MUST be logged in to HushBubble with your friend.tech account.", 
+    id: {category: 'public', bytecodeHash: '928726f9072f58097631fc0d852b6666b48559406f9637cd0374e4f5af714f17'}, 
+    classType: 'PublicChat', 
+    sourceCode: friendtechSourceCode.default, 
+    constructorParams: [], 
+    metadata: {title: 'title', icon: 'icon'},
+    actions: {
+      canConstruct: true,
+      canDelete: {method: 'canDelete', params: ['my.account']},
+    },
+    icon: friendtechIcon,
+    limitToChains: [8453]
   },
   {
     title: "NFT Chat (ERC721)", 
