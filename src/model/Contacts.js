@@ -38,7 +38,7 @@ export class Contacts {
   }
 
   _notifyListeners(contact) {
-    contact.listeners.forEach(l => { console.debug('l', l)
+    contact.listeners.forEach(l => {
       if (!this.expiredListeners.includes(l)) l(contact.user);
     })
   }

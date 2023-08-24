@@ -35,7 +35,6 @@ export const ModalHostCustomise = ({
         newValues.urlProtocolValid = validProtocol.test(u.protocol);
         newValues.urlPathValid = validPathname.test(url);
         newValues.urlValid = newValues.urlProtocolValid && newValues.urlPathValid;
-        console.debug(newValues, u, u.hostname, validPathname.test(u.hostname) && url.indexOf(' ') < 0)
       } catch(_){}
     }
     onChange(newValues);

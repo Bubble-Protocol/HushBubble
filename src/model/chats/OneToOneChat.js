@@ -5,7 +5,6 @@ export class OneToOneChat extends PrivateChat {
 
   _handleContactUpdate(user) {
     const knownAs = user.getKnownAs();
-    console.debug('knownAs', knownAs, user, this.metadata.title);
     if (user.id !== this.myId.id && (knownAs !== this.metadata.title || user.icon !== this.metadata.icon)) {
       this.metadata.title = user.getKnownAs();
       this.metadata.icon = user.icon;

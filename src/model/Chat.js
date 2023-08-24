@@ -58,7 +58,6 @@ export class Chat extends Bubble {
     // handle any delegation
     if (delegation) {
       deviceKey = {...deviceKey, signFunction: toDelegateSignFunction(deviceKey.signFunction, delegation)};
-      console.debug('deviceKey', deviceKey)
     }
 
     // construct the provider
@@ -70,7 +69,6 @@ export class Chat extends Bubble {
     this.id = bubbleId.chain+'-'+bubbleId.contract;
     this.chatType = chatType;
     this.metadata = metadata;
-    console.debug('metadata', metadata)
     this.myId = myId;
     this.delegation = delegation;
     this.contacts = contacts;
@@ -171,7 +169,6 @@ export class Chat extends Bubble {
   postMessage(message) {
     console.trace(this.id, 'post message', message);
     message.from = this.myId.getId();
-    console.debug('from', message.from)
     if (message.id === undefined) message.id = Date.now() + Math.floor(Math.random() * Math.pow(10, 6));
     this.write(CONTENT.textChat + '/' + message.id, JSON.stringify(message))
       .then(() => {
@@ -342,7 +339,7 @@ export class Chat extends Bubble {
     return localStorage.queryMessagesByConversation(conversationId)
       .then(messages => {
         messages.sort((a,b) => a.created - b.created);
-        messages.forEach(m => {console.debug('loaded message', m); m.from = this.contacts.getContact(m.from, this._handleContactUpdate)});
+        messages.forEach(m => {m.from = this.contacts.getContact(m.from, this._handleContactUpdate)});
         this.messages = messages;
         this.lastModTime = messages.reduce((time, m) => {return m.modified > time ? m.modified : time}, 1);
         this.lastRead = this.lastModTime;

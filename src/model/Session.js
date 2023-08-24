@@ -131,7 +131,6 @@ export class Session {
 
     // get metadata and initialise the member array
     const metadata = ParamFactory.getParams(bubbleType.metadata, params);
-    console.debug(metadata, metadata.members);
     if (metadata.member0) metadata.member0 = new User(metadata.member0);
     if (metadata.member1) metadata.member1 = new User(metadata.member1);
     metadata.members = getMembers(this.myId, metadata);
@@ -288,7 +287,6 @@ export class Session {
   }
 
   _handleProfileUpdate(profile) {
-    console.debug('_handleProfileUpdate', profile);
     if (profile.title !== undefined) profile.title = profile.title.trim();
     if (profile.title === '') profile.title = undefined;
     this.myId.title = profile.title;

@@ -108,7 +108,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
       : []
   if (chatIcons.length === 0) chatIcons = [<img key={0} className="chat-header-icon" src={defaultIcon} />];
   
-  function getTitle() { console.debug('title', chatData.title);
+  function getTitle() {
     let title = chatData.title || 'Unknown';
     if (!assert.isHexString(title) || title.length <= 16) return title;
     const mobileMediaQuery = window.matchMedia('(max-width: 640px)');

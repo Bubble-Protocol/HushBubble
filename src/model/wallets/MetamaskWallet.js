@@ -117,7 +117,6 @@ export class MetamaskWallet extends Wallet {
   }
 
   async call(contractAddress, abi, method, params=[]) {
-    console.debug('calling', contractAddress, method, params, abi)
     const contract = new web3.eth.Contract(abi, contractAddress);
     return contract.methods[method](...params).call({from: this.getAccount()});
   }

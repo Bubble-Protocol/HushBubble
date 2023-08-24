@@ -8,7 +8,6 @@ import "./style.css";
 
 export const MemberRow = ({ member, modType, modified, toggleModified }) => {
 
-  console.debug('MemberRow', member.id, modType, modified)
   return (
     <div className="member-row" onClick={toggleModified} >
       <img className="member-icon" src={member.icon || defaultIcon} />
