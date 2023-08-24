@@ -12,7 +12,7 @@ export class PublicChat extends Chat {
   }
 
   getChatInfo() {
-    return "Public Chat";
+    return this.chatType.title;
   }
 
 }
