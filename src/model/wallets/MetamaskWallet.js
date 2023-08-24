@@ -140,7 +140,7 @@ export class MetamaskWallet extends Wallet {
     return window.ethereum.request({ method: 'eth_decrypt', params: [data, this.accounts[0]] });
   }
 
-  async switchChain(chainId) {
+  async switchChain(chainId, chainName) {
     if (!assert.isHexString(chainId)) chainId = '0x'+chainId.toString(16);
     try {
       await window.ethereum.request({
@@ -149,7 +149,7 @@ export class MetamaskWallet extends Wallet {
       });
     } catch (error) {
       if (error.code === 4902) {
-        throw new Error('Add the chain to Metamask and try again');
+        throw {code: 'chain-missing', message: 'Add the chain to Metamask and try again', chain: {id: parseInt(chainId), name: chainName}};
       }
       else console.warn('switchChain error:', error);
       throw error;

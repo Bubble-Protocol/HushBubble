@@ -56,7 +56,7 @@ export class Session {
           this.myId = new User({account: this.wallet.getAccount(), delegate: this.sessionKey.cPublicKey});
           this._saveState();
         }
-        if (this.wallet.getChain() !== this.chain.id) return this.wallet.switchChain(this.chain.id)
+        if (this.wallet.getChain() !== this.chain.id) return this.wallet.switchChain(this.chain.id, this.chain.name)
       })
       .then(() => {
         if (!this.keyDelegation) {
@@ -138,7 +138,7 @@ export class Session {
     // test provider exists then deploy encrypted application bubble (application id has access, use application key as encryption key)
     return testProviderExists(chain.id, host.chains[chain.id].url, chain.publicBubble)
       .then(() => {
-        if (this.wallet.getChain() !== chain.id) return this.wallet.switchChain(chain.id)
+        if (this.wallet.getChain() !== chain.id) return this.wallet.switchChain(chain.id, chain.name)
       })
       .then(() => {
         console.trace('deploying chat contract', bubbleType.title, constructorParams);

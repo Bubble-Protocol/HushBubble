@@ -5,6 +5,7 @@ import { stateManager } from "../../../state-context";
 export const WelcomeScreen = () => {
 
   const [error, setError] = useState();
+  const [chainError, setChainError] = useState();
   const [delegateRequest, setDelegateRequest] = useState();
 
   const wallet = stateManager.useStateData("wallet-functions")();
@@ -13,6 +14,7 @@ export const WelcomeScreen = () => {
     wallet.connect()
       .catch(error => {
         if (error.code === 'requires-delegate' && error.delegateRequest) setDelegateRequest(error.delegateRequest);
+        else if (error.code === 'chain-missing' && error.chain) setChainError(error.chain);
         else {
           console.warn(error, error.cause);
           setError(error);
@@ -29,6 +31,7 @@ export const WelcomeScreen = () => {
       {!delegateRequest && <div className="connect-text" onClick={connectWallet}>Connect Wallet to Begin</div>}
       {delegateRequest && <div className="connect-text" onClick={signDelegation}>Login On This Device</div>}
       {error && <div className="error-text">{error.message}</div>}
+      {chainError && <div className="add-chain-text">The {chainError.name} chain is not available in your wallet.<br/>Visit <a href={"https://chainlist.org/?search="+chainError.id}>chainlist.org</a> to add the chain to your wallet then try again.</div>}
     </div>
   );
 };
