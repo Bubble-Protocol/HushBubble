@@ -142,8 +142,8 @@ export class Session {
       })
       .then(() => {
         console.trace('deploying chat contract', bubbleType.title, constructorParams);
-        //return this.wallet.deploy(bubbleType.sourceCode, constructorParams);
-        return "0x5Ec6A3284049E8b3e5966882fd3D40FCFB839501";
+        return this.wallet.deploy(bubbleType.sourceCode, constructorParams);
+        // return "0x5Ec6A3284049E8b3e5966882fd3D40FCFB839501";
       })
       .then(contractAddress => {
         console.trace('contract deployed with address', contractAddress);
