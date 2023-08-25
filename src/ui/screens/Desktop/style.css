@@ -165,7 +165,6 @@
 
 .disabled:hover {
   cursor: initial;
-  background-color: inherit;
 }
 
 .desktop .content {
