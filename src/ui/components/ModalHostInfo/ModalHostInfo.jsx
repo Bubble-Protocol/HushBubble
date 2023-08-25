@@ -29,7 +29,7 @@ export const ModalHostInfo = ({
           </div>
         </div>
       </div>
-      <div className="small-text">Other chains and hosts coming soon!</div>
+      {onCustomise && <div className="text-button" onClick={onCustomise}>customise</div>}
     </div>
   );
 };

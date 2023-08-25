@@ -79,7 +79,7 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
     contents=
       <React.Fragment>
         {!customise && <ModalHostInfo chain={hostValues.chain} host={getHost()} onCustomise={() => setCustomised(true)} />}
-        {customise && <ModalHostCustomise chainTitle="Blockchain" hostTitle="Host" values={hostValues} chains={chains} hosts={hosts} onChange={v => {setCreateError(); setHostValues(v)}} onCollapse={() => setCustomised(false)} /> }   
+        {customise && <ModalHostCustomise chainTitle="Blockchain" hostTitle="Host" values={hostValues} chains={bubble.limitToChains ? chains.filter(c => bubble.limitToChains.includes(c.id)) : chains} hosts={hosts} onChange={v => {setCreateError(); setHostValues(v)}} onCollapse={() => setCustomised(false)} /> }   
         {
           params.map((param, i) => 
             {
