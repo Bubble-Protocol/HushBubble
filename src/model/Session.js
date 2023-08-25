@@ -176,7 +176,11 @@ export class Session {
   async terminateChat(conversation) {
     const terminateKey = conversation.getTerminateKey();
     console.trace('terminating contract', conversation.contentId.contract, 'with key', terminateKey, 'and abi', conversation.chatType.sourceCode.abi);
-    return this.wallet.send(conversation.contentId.contract, conversation.chatType.sourceCode.abi, 'terminate', [terminateKey])
+    const chain = DEFAULT_CONFIG.chains.find(c => c.id === conversation.contentId.chain) || {id: conversation.contentId.chain, name: 'Unknown'};
+    return this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name)
+      .then(() => {
+        return this.wallet.send(conversation.contentId.contract, conversation.chatType.sourceCode.abi, 'terminate', [terminateKey])
+      })
       .then(() => conversation.terminate())
       .then(() => this._removeChat(conversation));
   }
@@ -223,26 +227,33 @@ export class Session {
       assert.isArray(removedMembers, 'removedMembers');
       const newMembers = chat.metadata.members.filter(m => !removedMembers.includes(m)).concat(addedMembers);
       console.trace(chat.id, 'setting new members', newMembers);
+      const chain = DEFAULT_CONFIG.chains.find(c => c.id === chat.contentId.chain) || {id: chat.contentId.chain, name: 'Unknown'};
       return Promise.resolve()
       .then(() => {
         console.trace(chat.id, 'adding new members')
         return addedMembers.length === 0 ? Promise.resolve() : 
-          this.wallet.send(
-            chat.contentId.contract, 
-            chat.chatType.sourceCode.abi,
-            chat.chatType.actions.addMembers.method,
-            ParamFactory.getParamsAsArray(chat.chatType.actions.addMembers.params, {members: addedMembers})
-          )
+          this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name)
+          .then(() => {
+            return this.wallet.send(
+              chat.contentId.contract, 
+              chat.chatType.sourceCode.abi,
+              chat.chatType.actions.addMembers.method,
+              ParamFactory.getParamsAsArray(chat.chatType.actions.addMembers.params, {members: addedMembers})
+            )
+          })
       })
       .then(() => {
         console.trace(chat.id, 'removing old members')
         return removedMembers.length === 0 ? Promise.resolve() : 
-          this.wallet.send(
-            chat.contentId.contract, 
-            chat.chatType.sourceCode.abi,
-            chat.chatType.actions.removeMembers.method,
-            ParamFactory.getParamsAsArray(chat.chatType.actions.removeMembers.params, {members: removedMembers})
-          )
+          this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name)
+          .then(() => {
+            return this.wallet.send(
+              chat.contentId.contract, 
+              chat.chatType.sourceCode.abi,
+              chat.chatType.actions.removeMembers.method,
+              ParamFactory.getParamsAsArray(chat.chatType.actions.removeMembers.params, {members: removedMembers})
+            )
+          })
       })
       .then(() => {
         console.trace(chat.id, "writing new users' metadata files")
