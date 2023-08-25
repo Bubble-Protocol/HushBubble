@@ -40,8 +40,6 @@ export class MetamaskWallet extends Wallet {
       }
     })
     .then(available => {
-      // window.ethereum.on('accountsChanged', this._setAccounts.bind(this));
-      // window.ethereum.on('chainChanged', () => { this._setChain.bind(this) });
       this.state = WALLET_STATE.disconnected;
       return available;
     });
@@ -54,7 +52,10 @@ export class MetamaskWallet extends Wallet {
   async connect() {
     this.chainId = window.ethereum.networkVersion;
     return window.ethereum.request({ method: 'eth_requestAccounts' })
-      .then(this._setAccounts.bind(this))
+      .then(accounts => {
+        this._setAccounts(accounts);
+        window.ethereum.on('accountsChanged', this._setAccounts.bind(this));
+      })
   }
 
   async disconnect() {

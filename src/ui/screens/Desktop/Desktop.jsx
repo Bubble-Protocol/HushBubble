@@ -59,7 +59,7 @@ export const Desktop = () => {
         {session && 
           <div className="user-menu">
             <DropdownMenu direction="bottom-left" options={[
-              {name: myId.getKnownAs()},
+              {name: myId.account.slice(0,6)+'..'+myId.account.slice(-4)},
               {type: 'line'},
               {name: "Profile", onClick: () => setModal(<ManageProfileModal onCancel={() => setModal(null)} onCompletion={() => setModal(null)} />)},
               {name: "Disconnect", onClick: wallet.disconnect},
