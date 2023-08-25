@@ -36,14 +36,27 @@ export class MessengerApp {
   }
 
   initialise() {
-    this._loadState();
+    const lastSession = this._loadState();
     if (!this.deviceKey) {
       this.deviceKey = new ecdsa.Key();
       this._saveState();
     }
-    this.state = STATE.initialised;
-    stateManager.dispatch('app-state', this.state);
-    return Promise.resolve();
+    if (!lastSession) {
+      this.state = STATE.initialised;
+      stateManager.dispatch('app-state', this.state);
+      return Promise.resolve();
+    }
+    const wallet = new MetamaskWallet();
+    return wallet.connect()
+      .then(() => {
+        this.wallet = wallet;
+        return this._openSession(lastSession)
+      })
+      .then(() => {
+        this.state = STATE.initialised;
+        stateManager.dispatch('app-state', this.state);    
+      })
+      .catch(console.warn);
   }
 
   setOnlineStatus(online) {
@@ -64,14 +77,14 @@ export class MessengerApp {
   async connectWallet(delegate) {
     console.trace('connect wallet', delegate ? delegate : '', this.session)
     if (this.wallet && this.session) return Promise.resolve();
-    else if (this.wallet) return this._openSession(delegate);
+    else if (this.wallet) return this._openSession(this.wallet.getAccount(), delegate);
     else {
       const wallet = new MetamaskWallet();
       return wallet.connect()
         .then(() => {
           this.wallet = wallet;
           stateManager.dispatch('wallet', this.wallet);
-          return this._openSession();
+          return this._openSession(this.wallet.getAccount(), delegate);
         })
     }
   }
@@ -85,11 +98,12 @@ export class MessengerApp {
       })
   }
 
-  async _openSession(delegate) {
-    const session = new Session(DEFAULT_CONFIG.chains.find(c => c.id === DEFAULT_CONFIG.defaultChainId), this.wallet, this.deviceKey);
-    return session.open(delegate)
+  async _openSession(id, delegate) {
+    const session = new Session(id);
+    return session.open(this.wallet, delegate)
       .then(() => {
         this.session = session;
+        this._saveState();
         stateManager.dispatch('session', this.session);
         stateManager.dispatch('myId', this.session.myId);
         stateManager.dispatch('chats', this.session.conversations);
@@ -117,12 +131,14 @@ export class MessengerApp {
     if (json) {
       const state = JSON.parse(json);
       this.deviceKey = new ecdsa.Key(state.deviceKey);
+      return state.lastSession;
     }
   }
 
   _saveState() {
     const state = {
-      deviceKey: this.deviceKey.privateKey
+      deviceKey: this.deviceKey.privateKey,
+      lastSession: this.session ? this.session.id : undefined
     }
     localStorage.write('default', JSON.stringify(state));
   }

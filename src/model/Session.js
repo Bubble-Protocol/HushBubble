@@ -12,6 +12,7 @@ import { HushBubbleConnectRelay } from "./services/HushBubbleConnectRelay";
 import { ParamFactory } from "./chats/ParamFactory";
 import { ProfileRegistry } from "./services/ProfileRegistry";
 import { Contacts } from "./Contacts";
+import { Wallet } from "./Wallet";
 
 const CONSTRUCTION_STATE = {
   closed: 'closed',
@@ -23,7 +24,8 @@ const CONSTRUCTION_STATE = {
 }
 
 const DEFAULT_SETTINGS = {
-  connectionRelay: 'HushBubbleConnectRelay'
+  connectionRelay: 'HushBubbleConnectRelay',
+  defaultChain: DEFAULT_CONFIG.defaultChainId
 }
 
 export class Session {
@@ -31,32 +33,31 @@ export class Session {
   constructionState = CONSTRUCTION_STATE.closed;
   account;
   id;
+  wallet;
   sessionKey;
   keyDelegation;
   settings = DEFAULT_SETTINGS;
   conversations = [];
 
-
-  constructor(chain, wallet) {
-    this.chain = chain;
-    this.wallet = wallet;
-    this.id = chain.id+'-'+this.wallet.getAccount();
+  constructor(id) {
+    this.id = id;
     this.joinChat = this.joinChat.bind(this);
     this.createChat = this.createChat.bind(this);
     this.terminateChat = this.terminateChat.bind(this);
   }
 
-  async open(delegate) {
+  async open(wallet, delegate) {
     console.trace('opening session', this);
+    assert.isInstanceOf(wallet, Wallet, 'wallet');
+    this.wallet = wallet;
     this.state = CONSTRUCTION_STATE.new;
     return this._loadState()
       .then(exists => {
         if (!exists) {
           this.sessionKey = new ecdsa.Key();
-          this.myId = new User({account: this.wallet.getAccount(), delegate: this.sessionKey.cPublicKey});
+          this.myId = new User({account: this.id, delegate: this.sessionKey.cPublicKey});
           this._saveState();
         }
-        if (this.wallet.getChain() !== this.chain.id) return this.wallet.switchChain(this.chain.id, this.chain.name)
       })
       .then(() => {
         if (!this.keyDelegation) {
@@ -155,7 +156,6 @@ export class Session {
         const conversation = ChatFactory.constructChat(bubbleType.id, bubbleId, metadata, this.myId, this.sessionKey, terminateKey, this.keyDelegation, this.contacts, metadata);
         console.trace('creating off-chain bubble on host', conversation.contentId.provider);
         return conversation.create({
-          wallet: this.wallet,
           metadata: metadata,
           options: {silent: true}
         })
@@ -209,7 +209,7 @@ export class Session {
           return Promise.reject(new Error('Invite is invalid', {cause: error}));
         }
         if (this.conversations.find(c => c.id === conversation.id)) return Promise.reject(new Error('You are already a member of this chat'));
-        return conversation.join(this.wallet)
+        return conversation.join()
           .then(() => {
             this._addNewConversation(conversation);
           });
@@ -286,6 +286,10 @@ export class Session {
     return this.profileRegistry.setMyProfile(profile);
   }
 
+  getDefaultChainId() {
+    return this.settings.defaultChain;
+  }
+
   _handleProfileUpdate(profile) {
     if (profile.title !== undefined) profile.title = profile.title.trim();
     if (profile.title === '') profile.title = undefined;
@@ -351,10 +355,10 @@ export class Session {
       const state = JSON.parse(json);
       if (state.sessionKey) {
         this.sessionKey = new ecdsa.Key(state.sessionKey);
-        this.myId = new User({account: this.wallet.getAccount(), delegate: this.sessionKey.cPublicKey});
+        this.myId = new User({account: this.id, delegate: this.sessionKey.cPublicKey});
       }
       this.keyDelegation = state.keyDelegation;
-      this.settings = state.settings || DEFAULT_SETTINGS;
+      this.settings = state.settings ? {...DEFAULT_SETTINGS, ...state.settings} : DEFAULT_SETTINGS;
       this.rawConversations = state.conversations;
       return Promise.resolve(true);
     }
@@ -370,7 +374,7 @@ export class Session {
         try {
           const conversation = ChatFactory.constructChat(rawC.chatType, new ContentId(rawC.bubbleId), rawC.metadata, this.myId, this.sessionKey, undefined, rawC.delegation, this.contacts);
           this._addConversation(conversation);
-          const promise = conversation.initialise(this.wallet)
+          const promise = conversation.initialise()
             .then(() => {
               if (!conversation.isValid()) console.warn('conversation', conversation.id, 'is invalid', conversation);
             })

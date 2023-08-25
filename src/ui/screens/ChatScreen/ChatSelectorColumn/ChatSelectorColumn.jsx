@@ -19,7 +19,6 @@ export const ChatSelectorColumn = ({className, chats, selectedChat, setSelectedC
   const myId = stateManager.useStateData('myId')();
   const config = stateManager.useStateData('config')();
   const session = stateManager.useStateData('session')();
-  const wallet = stateManager.useStateData('wallet')();
 
   const [menuMinimized, setMenuMinimized] = useState(false);
   const [centrePanel, setCentrePanel] = useState('chat');
@@ -98,7 +97,7 @@ export const ChatSelectorColumn = ({className, chats, selectedChat, setSelectedC
             <CopySelector title="Your Connection Link" subtitle="Share this link to allow others to send you connection requests." value={config.appUrl + '?connect=' + myId.id} />
             {
               config.bubbles.filter(b => b.actions.canConstruct).map((bubble, index) => {
-                return <BubbleSelector key={index} title={bubble.title} icon={bubble.icon} description={bubble.description || ""} disabled={!online || bubble.disabled || (bubble.limitToChains && !bubble.limitToChains.includes(wallet.getChain()))} onClick={() => setModal(createChatModal(bubble))} />
+                return <BubbleSelector key={index} title={bubble.title} icon={bubble.icon} description={bubble.description || ""} disabled={!online || bubble.disabled} onClick={() => setModal(createChatModal(bubble))} />
               })
             }
           </div>

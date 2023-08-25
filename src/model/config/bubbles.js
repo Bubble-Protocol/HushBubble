@@ -87,7 +87,7 @@ export const DEFAULT_BUBBLES = [
       canConstruct: true,
       addMembers: {method: 'setUsers', params: ['members.account', 'true']},
       removeMembers: {method: 'setUsers', params: ['members.account', 'false']},
-      canWrite: {method: 'isUser', params: ['my.checksum-account']}
+      canWrite: true  // {method: 'isUser', params: ['my.checksum-account']}
     },
     icon: publicEventIcon
   },
@@ -102,7 +102,7 @@ export const DEFAULT_BUBBLES = [
     metadata: {title: 'title', icon: 'icon'},
     actions: {
       canConstruct: true,
-      canDelete: {method: 'canDelete', params: ['my.account']},
+      canDelete: true  // {method: 'canDelete', params: ['my.account']},
     },
     icon: friendtechIcon,
     limitToChains: [8453]
@@ -122,7 +122,7 @@ export const DEFAULT_BUBBLES = [
     actions: {
       requiresDelegate: true,
       canConstruct: true,
-      canDelete: {method: 'canDelete', params: ['my.account']},
+      canDelete: true  // {method: 'canDelete', params: ['my.account']},
     },
     icon: nftIcon
   },
@@ -142,7 +142,7 @@ export const DEFAULT_BUBBLES = [
     actions: {
       requiresDelegate: true,
       canConstruct: true,
-      canDelete: {method: 'canDelete', params: ['my.account']},
+      canDelete: true  // {method: 'canDelete', params: ['my.account']},
     },
     icon: nftIcon
   },

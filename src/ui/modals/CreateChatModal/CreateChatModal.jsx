@@ -35,7 +35,7 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
     }
   }
 
-  const defaultChain = chains.find(c => c.id === session.chain.id) || chains[0];
+  const defaultChain = chains.find(c => c.id === session.getDefaultChainId()) || chains[0];
   const [state, setState] = useState('user-input');
   const [values, setValues] = useState(valuesIn);
   const [hostValues, setHostValues] = useState({chain: defaultChain, host: hosts[0], url: "", urlValid: false});

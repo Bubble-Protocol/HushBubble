@@ -96,7 +96,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
       messageElements.push(<ChatDateRow key={'date-'+index} date={date} />);
       lastDate = date;
     };
-    messageElements.push(<Message key={index} date={date} text={msg.text} icon={msg.from.icon} title={msg.from.getKnownAs()} remote={msg.from.id !== myId.id} />);
+    messageElements.push(<Message key={index} date={date} text={msg.text} icon={msg.from.icon} title={msg.from.getKnownAs()} remote={msg.from.account !== myId.account} />);
   })
 
   let chatIcons = chatData.icon 

@@ -13,6 +13,7 @@ import { ManageProfileModal } from "../../modals/ManageProfileModal";
 
 export const Desktop = () => {
 
+  const appState = stateManager.useStateData('app-state')();
   const unread = stateManager.useStateData('total-unread')();
   const online = stateManager.useStateData('online')();
   const urlParams = stateManager.useStateData('url-params')();
@@ -73,8 +74,9 @@ export const Desktop = () => {
       {/* Content */}
       <div className="content">
 
-        {!session && <WelcomeScreen />}
-        {session && <ChatScreen mobileView={mobileView} setMobileView={setMobileView} setModal={setModal} onTerminateChat={terminateChat} />}
+        {appState !== 'initialised' && <div className="loading-screen"><div className='loader centered' style={{width: 64, height: 64}}></div></div>}
+        {appState === 'initialised' && !session && <WelcomeScreen />}
+        {appState === 'initialised' && session && <ChatScreen mobileView={mobileView} setMobileView={setMobileView} setModal={setModal} onTerminateChat={terminateChat} />}
 
       </div>
 
