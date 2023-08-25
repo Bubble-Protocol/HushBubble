@@ -18,7 +18,7 @@ export const DEFAULT_BUBBLES = [
     title: "Public Chat", // Original HushBubble Public Chat (cannot construct)
     description: "Anyone can join", 
     details: "Unencrypted public chat with no restrictions.\n\nNote, public chats are owned by the wallet that creates them, so until the wallet connectivity feature is released all users will have full control, including the power to delete the chat.", 
-    id: {category: 'original-hushbubble-public-chat', bytecodeHash: '629fcda48da3757fb83407ab90325b6170f44b8727efdc4b836712f1a7a1921f'}, 
+    id: {category: 'original-hushbubble-public-chat', bytecodeHash: '2facecba5b9061ea6a3f550a87d0baa412b9b18ca45a7d7fdd0fd0f8d984396c'}, 
     classType: 'PublicChat', 
     sourceCode: publicChatSourceCode.default, 
     constructorParams: [], 
@@ -130,7 +130,7 @@ export const DEFAULT_BUBBLES = [
     title: "NFT Chat (ERC1155)", 
     description: "Chat with other NFT owners", 
     details: "Only owners of the specified ERC1155 contract and token ID can access the chat.", 
-    id: {category: 'public', bytecodeHash: '39bef1777deb3dfb14f64b9f81ced092c501fee72f90e93d03bb95ee89df9837'}, 
+    id: {category: 'public', bytecodeHash: '3554d7214ef318dda9a0cbfa742cdc4a419f8564c81f27b448981459580935b8'}, 
     classType: 'PublicChat', 
     sourceCode: erc1155ChatSourceCode.default, 
     constructorParams: [
