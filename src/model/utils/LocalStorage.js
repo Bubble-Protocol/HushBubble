@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-globals */
 
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let localStorage = {
   name: "null-storage",
@@ -63,6 +63,14 @@ class IndexedDbStorage {
             const msgStore = db.createObjectStore(this.messageTable, {keyPath: 'id'});
             msgStore.createIndex("by_conversation", "conversationId");
             break;
+          case 3:
+            Object.keys(this.values).forEach(key => {
+              const parts = key.split('-');
+              if (parts === 2 && parts[1].slice(0,2) == '0x' && parts[1].length === 42 && this.values[parts[1]] === undefined) {
+                this.values[parts[1]] = this.values[key];
+                this.values[key] = undefined;
+              }
+            })
         }
       }
 
@@ -80,6 +88,7 @@ class IndexedDbStorage {
   }
 
   read(key) {
+    if (key === undefined) return this.values;
     return this.values[key];
   }
   

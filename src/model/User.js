@@ -26,8 +26,15 @@ export class User {
       else if (assert.isString(details)) {
         // assume it is an id
         const id = fromBase64Url(details).toString('hex');
-        this.account = '0x'+id.slice(0,40);
-        this.delegate.publicKey = id.slice(40);
+        if (id.length === 64 || id.length === 66) {
+          // old id format - just delegate public key
+          this.delegate.publicKey = id;
+          this.account = ecdsa.publicKeyToAddress(this.delegate.publicKey);
+        }
+        else {
+          this.account = '0x'+id.slice(0,40);
+          this.delegate.publicKey = id.slice(40);
+        }
       }
       else {
         // assume it is already a Member object (or representation of one)

@@ -144,7 +144,7 @@ export class Session {
       .then(() => {
         console.trace('deploying chat contract', bubbleType.title, constructorParams);
         return this.wallet.deploy(bubbleType.sourceCode, constructorParams);
-        // return "0x5Ec6A3284049E8b3e5966882fd3D40FCFB839501";
+        // return "0xa759312f16b9d8eD4CeE978ddA7B58cdCDba0aEA";
       })
       .then(contractAddress => {
         console.trace('contract deployed with address', contractAddress);
@@ -177,7 +177,8 @@ export class Session {
     const terminateKey = conversation.getTerminateKey();
     console.trace('terminating contract', conversation.contentId.contract, 'with key', terminateKey, 'and abi', conversation.chatType.sourceCode.abi);
     const chain = DEFAULT_CONFIG.chains.find(c => c.id === conversation.contentId.chain) || {id: conversation.contentId.chain, name: 'Unknown'};
-    return this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name)
+    const promise = this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name);
+    return promise
       .then(() => {
         return this.wallet.send(conversation.contentId.contract, conversation.chatType.sourceCode.abi, 'terminate', [terminateKey])
       })
@@ -197,7 +198,11 @@ export class Session {
       console.warn(error);
       return Promise.reject(new Error('Invite is invalid', {cause: error}));
     }
-    return this.wallet.getCode(bubbleId.contract)
+    console.trace('attempting to join bubble', bubbleId);
+    const chain = DEFAULT_CONFIG.chains.find(c => c.id === bubbleId.chain) || {id: bubbleId.chain, name: 'Unknown'};
+    const promise = this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name);
+    return promise
+      .then(() => this.wallet.getCode(bubbleId.contract))
       .then(code => {
         const codeHash = ecdsa.hash(code);
         console.trace('invite contract hash:', codeHash);
@@ -217,6 +222,10 @@ export class Session {
           .then(() => {
             this._addNewConversation(conversation);
           });
+    })
+    .catch(error => {
+      console.debug(error);
+      throw error;
     })
   }
 
@@ -306,6 +315,7 @@ export class Session {
     if (profile.title === '') profile.title = undefined;
     this.myId.title = profile.title;
     this.myId.icon = profile.icon;
+    this._saveState();
     stateManager.dispatch('myId', this.myId);
   }
 
@@ -366,7 +376,7 @@ export class Session {
       const state = JSON.parse(json);
       if (state.sessionKey) {
         this.sessionKey = new ecdsa.Key(state.sessionKey);
-        this.myId = new User({account: this.id, delegate: this.sessionKey.cPublicKey});
+        this.myId = new User({account: this.id, delegate: this.sessionKey.cPublicKey, title: state.userTitle, icon: state.userIcon});
       }
       this.keyDelegation = state.keyDelegation;
       this.settings = state.settings ? {...DEFAULT_SETTINGS, ...state.settings} : DEFAULT_SETTINGS;
@@ -421,6 +431,8 @@ export class Session {
       sessionKey: this.sessionKey.privateKey,
       keyDelegation: this.keyDelegation,
       settings: this.settings,
+      userTitle: this.myId.title,
+      userIcon: this.myId.icon,
       conversations: this.conversations.map(c => c.serialize())
     }
     localStorage.write(this.id, JSON.stringify(state));

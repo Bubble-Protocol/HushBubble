@@ -7,7 +7,8 @@ import { MetamaskWallet } from "./wallets/MetamaskWallet";
 
 const STATE = {
   uninitialised: 'uninitialised',
-  initialised: 'initialised'
+  initialised: 'initialised',
+  switching: 'switching-session'
 }
 
 export class MessengerApp {
@@ -31,7 +32,9 @@ export class MessengerApp {
     stateManager.register('wallet-functions', {
       connect: this.connectWallet.bind(this),
       disconnect: this.disconnectWallet.bind(this),
-      delegate: this.disconnectWallet.bind(this)
+      delegate: this.disconnectWallet.bind(this),
+      getAccounts: this.getAccounts.bind(this),
+      switchAccount: this.switchAccount.bind(this)
     });
   }
 
@@ -42,8 +45,7 @@ export class MessengerApp {
       this._saveState();
     }
     if (!lastSession) {
-      this.state = STATE.initialised;
-      stateManager.dispatch('app-state', this.state);
+      this._setAppState(STATE.initialised);
       return Promise.resolve();
     }
     const wallet = new MetamaskWallet();
@@ -53,8 +55,7 @@ export class MessengerApp {
         return this._openSession(lastSession)
       })
       .then(() => {
-        this.state = STATE.initialised;
-        stateManager.dispatch('app-state', this.state);    
+        this._setAppState(STATE.initialised);
       })
       .catch(console.warn);
   }
@@ -117,7 +118,22 @@ export class MessengerApp {
       });
   }
 
-  _closeSession() {
+  getAccounts() {
+    const storedValues = localStorage.read();
+    return Object.keys(storedValues).filter(v => ecdsa.assert.isAddress(v))
+     .map(key => {
+       return {account: key, title: storedValues[key].userTitle, icon: storedValues[key].userIcon}
+     })
+  }
+
+  async switchAccount(id) {
+    this._setAppState(STATE.switching);
+    return this._closeSession()
+      .then(() => this._openSession(id))
+      .then(() => this._setAppState(STATE.initialised));
+  }
+
+  async _closeSession() {
     if (!this.session) return Promise.resolve();
     return this.session.close()
       .then(() => {
@@ -142,6 +158,11 @@ export class MessengerApp {
       lastSession: this.session ? this.session.id : undefined
     }
     localStorage.write('default', JSON.stringify(state));
+  }
+
+  _setAppState(state) {
+    this.state = state;
+    stateManager.dispatch('app-state', this.state);
   }
 
 }

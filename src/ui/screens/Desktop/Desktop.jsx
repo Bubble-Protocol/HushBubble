@@ -23,6 +23,8 @@ export const Desktop = () => {
   const wallet = stateManager.useStateData('wallet-functions')();
   const [mobileView, setMobileView] = useState('menu');
 
+  const otherAccounts = session ? wallet.getAccounts().filter(a => a.account !== session.id) : [];
+
   useEffect(() => {
     if (!session || !urlParams) return;
     if (urlParams.connect && !session.hasConnectionWith(urlParams.connect)) {
@@ -59,12 +61,18 @@ export const Desktop = () => {
         {session && 
           <div className="user-menu">
             <DropdownMenu direction="bottom-left" options={[
-              {name: myId.account.slice(0,6)+'..'+myId.account.slice(-4)},
-              {type: 'line'},
-              {name: "Profile", onClick: () => setModal(<ManageProfileModal onCancel={() => setModal(null)} onCompletion={() => setModal(null)} />)},
-              {name: "Disconnect", onClick: wallet.disconnect},
-              {name: "About HushBubble", onClick: () => window.open('https://bubbleprotocol.com/chat/about.html')}
-            ]} >
+                {name: myId.account.slice(0,6)+'..'+myId.account.slice(-4)},
+                {type: 'line'},
+                {name: "Edit Profile", onClick: () => setModal(<ManageProfileModal onCancel={() => setModal(null)} onCompletion={() => setModal(null)} />)},
+                {name: "Disconnect", onClick: wallet.disconnect},
+                {name: "About HushBubble", onClick: () => window.open('https://bubbleprotocol.com/chat/about.html')},
+                otherAccounts.length > 0 ? {type: 'line'} : null,
+                otherAccounts.length > 0 ? {name: "Switch Account"} : null
+              ].concat(
+                otherAccounts.map(a => {
+                  return {name: (a.title || a.account.slice(0,6)+'..'+a.account.slice(-4)), icon: a.icon, onClick: () => wallet.switchAccount(a.account)}
+                })
+              ).filter(Boolean)}>
               <img className="user-icon-button" src={myId.icon || userIcon}></img>
             </DropdownMenu>
           </div>
