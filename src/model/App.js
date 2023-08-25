@@ -122,6 +122,7 @@ export class MessengerApp {
     return this.session.close()
       .then(() => {
         this.session = undefined;
+        this._saveState();
         stateManager.dispatch('session', this.session);
       })
   }
