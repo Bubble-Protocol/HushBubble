@@ -13,6 +13,7 @@ import { DeleteChatModal } from "../../../modals/DeleteChatModal";
 import { assert } from "@bubble-protocol/core";
 import { ManageMemberModal } from "../../../modals/ManageMemberModal";
 import { LeaveChatModal } from "../../../modals/LeaveChatModal";
+import { EditChatModal } from "../../../modals/EditChatModal/EditChatModal";
 
 export const ChatFrame = ({ className, chat, hide, setModal }) => {
 
@@ -40,7 +41,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
   const scrollToBottom = (force = false) => {
     const { current: chatColumn } = chatColumnRef;
     if (chatColumn && messages.length) {
-      if (force || messages[messages.length - 1].from.id === myId.id) {
+      if (force || messages[messages.length - 1].from.account === myId.account) {
         chatColumn.scrollTo(0, chatColumn.scrollHeight);
       }
       else if (!atBottom()) chatColumn.scrollTo(0, chatColumn.scrollHeight);
@@ -81,6 +82,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
     chat.setReadTime(Date.now());
   }
 
+  const editModal = <EditChatModal chat={chat} onCancel={() => setModal()} onCompletion={() => setModal()} />;
   const leaveModal = <LeaveChatModal chat={chat} onLeave={chatFunctions.leave} onCancel={() => setModal()} onCompletion={() => setModal()} />;
   const deleteModal = <DeleteChatModal chat={chat} onDelete={chatFunctions.terminate} onCancel={() => setModal()} onCompletion={() => setModal()} />;
   const manageMemberModal = <ManageMemberModal chat={chat} onSave={chatFunctions.manageMembers} onCancel={() => setModal()} onCompletion={() => setModal()} />;
@@ -144,6 +146,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
         <div className="chat-header-menu">
           <DropdownMenu direction="bottom-left" options={[
             {name: "Copy Chat Link", onClick: () => navigator.clipboard.writeText(config.appUrl+'?chat='+chat.getInvite())},
+            chat.chatType.metadata.title || chat.chatType.metadata.icon ? {name: 'Edit Chat', onClick: () => setModal(editModal)} : null,
             capabilities.canLeave || chatState !== 'open' ? {name: "Leave Chat", onClick: () => setModal(leaveModal)} : null,
             capabilities.canDelete ? {name: "Delete Chat", onClick: () => setModal(deleteModal)} : null
           ].filter(Boolean)} >

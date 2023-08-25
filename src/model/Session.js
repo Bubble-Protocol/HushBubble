@@ -254,7 +254,7 @@ export class Session {
       })
       .then(() => {
         console.trace(chat.id, 'saving new metadata to bubble')
-        return chat.setMetadata({...chat.metadata, members: newMembers});
+        return chat.setMetadata({members: newMembers});
       })
     }
     catch(error) {

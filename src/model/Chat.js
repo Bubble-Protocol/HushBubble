@@ -184,9 +184,15 @@ export class Chat extends Bubble {
     return Promise.resolve();
   }
 
-  setMetadata(metadata) {
-    this._validateMetadata(metadata);
-    this._saveMetadata(metadata);
+  async setMetadata(metadata) {
+    const newMetadata = {...this.metadata, ...metadata};
+    try {
+      this._validateMetadata(newMetadata);
+      return this._saveMetadata(newMetadata);
+    }
+    catch(error) {
+      return Promise.reject(error);
+    }
   }
 
   setReadTime(time) {
