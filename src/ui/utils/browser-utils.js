@@ -1,86 +1,29 @@
+import { EventManager } from "../../model/utils/EventManager";
 
-export function addVisibilityListener(listener) {
+//
+// Window Events
+//
 
-  var browserPrefixes = ['moz', 'ms', 'o', 'webkit'],
-      isVisible = true; // internal flag, defaults to true
+export const windowEvents = new EventManager(['visible', 'online', 'offline', 'beforeunload']);
 
-  // get the correct attribute name
-  function getHiddenPropertyName(prefix) {
-    return (prefix ? prefix + 'Hidden' : 'hidden');
-  }
 
-  // get the correct event name
-  function getVisibilityEvent(prefix) {
-    return (prefix ? prefix : '') + 'visibilitychange';
-  }
+// Simple events
 
-  // get current browser vendor prefix
-  function getBrowserPrefix() {
-    for (var i = 0; i < browserPrefixes.length; i++) {
-      if(getHiddenPropertyName(browserPrefixes[i]) in document) {
-        // return vendor prefix
-        return browserPrefixes[i];
-      }
-    }
+window.addEventListener('online', () => windowEvents.notifyListeners('online'));
+window.addEventListener('offline', () => windowEvents.notifyListeners('offline'));
+window.addEventListener('beforeunload', () => windowEvents.notifyListeners('beforeunload'));
 
-    // no vendor prefix needed
-    return null;
-  }
 
-  // bind and handle events
-  var browserPrefix = getBrowserPrefix(),
-      hiddenPropertyName = getHiddenPropertyName(browserPrefix),
-      visibilityEventName = getVisibilityEvent(browserPrefix);
+// Window visibility
 
-  function onVisible() {
-    // prevent double execution
-    if(isVisible) {
-      return;
-    }
-    // change flag value
-    isVisible = true;
-    listener(true);
-  }
+let visible = document.visibilityState === 'visible';
 
-  function onHidden() {
-    // prevent double execution
-    if(!isVisible) {
-      return;
-    }
-    // change flag value
-    isVisible = false;
-    listener(false);
-  }
+document.addEventListener('visibilitychange', () => setVisible(document.visibilityState === 'visible'));
+window.addEventListener('focus', () => setVisible(true));
+window.addEventListener('blur', () => setVisible(false));
 
-  function handleVisibilityChange(forcedFlag) {
-    // forcedFlag is a boolean when this event handler is triggered by a
-    // focus or blur eventotherwise it's an Event object
-    if(typeof forcedFlag === "boolean") {
-      return forcedFlag ? onVisible() : onHidden();
-    }
-    else if(document[hiddenPropertyName]) {
-      return onHidden();
-    }
-    else return onVisible();
-  }
-
-  document.addEventListener(visibilityEventName, handleVisibilityChange, false);
-
-  // extra event listeners for better behaviour
-  document.addEventListener('focus', function() {
-    handleVisibilityChange(true);
-  }, false);
-
-  document.addEventListener('blur', function() {
-    handleVisibilityChange(false);
-  }, false);
-
-  window.addEventListener('focus', function() {
-      handleVisibilityChange(true);
-  }, false);
-
-  window.addEventListener('blur', function() {
-    handleVisibilityChange(false);
-  }, false);
-
+function setVisible(v) {
+  const pV = visible;
+  visible = v;
+  if (visible && pV !== v) windowEvents.notifyListeners('visible');
 }
