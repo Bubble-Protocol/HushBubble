@@ -12,7 +12,7 @@ import { CopySelector } from "../../../components/CopySelector";
 import { BubbleSelector } from "./BubbleSelector";
 import { CreateChatModal } from "../../../modals/CreateChatModal";
 
-export const ChatSelectorColumn = ({className, chats, selectedChat, setSelectedChat, setModal}) => {
+export const ChatSelectorColumn = ({className, mobileVisible, chats, selectedChat, setSelectedChat, setModal}) => {
 
   const online = stateManager.useStateData('online')();
   const unread = stateManager.useStateData('total-unread')();
@@ -53,7 +53,7 @@ export const ChatSelectorColumn = ({className, chats, selectedChat, setSelectedC
     <>
       {/* Chat Selector */}
       {centrePanel !== 'new-chat' &&
-        <div className={"chat-column "+className}>
+        <div className={"chat-column "+className+(!mobileVisible ? ' no-mobile' : '')}>
           <div className="chat-column">
             <div className="title-item">
               <div className="selector-content">
@@ -113,6 +113,7 @@ export const ChatSelectorColumn = ({className, chats, selectedChat, setSelectedC
 
 ChatSelectorColumn.propTypes = {
   className: PropTypes.string,
+  mobileVisible: PropTypes.bool,
   chats: PropTypes.array.isRequired,
   selectedChat: PropTypes.object,
   setSelectedChat: PropTypes.func.isRequired,

@@ -26,7 +26,7 @@ export const IconChatSelector = ({
   const otherMember = !members || members.length === 0 ? {} : members[0].account === myId.account ? members[1] : members[0];
 
   return (
-    <div className={"icon-chat-selector" + (selected ? ' selected' : '') + (connectionState !== 'open' ? ' disabled' : '')} onClick={onClick}>
+    <div className={"icon-chat-selector" + (selected ? ' icon-chat-selected' : '') + (connectionState !== 'open' ? ' disabled' : '')} onClick={onClick}>
       <img className="contact-icon" src={icon || otherMember.icon || defaultIcon} />
       {notifications > 0 && (
         <div className="notification">

@@ -17,7 +17,7 @@ export const BubbleSelector = ({
   onClick
 }) => {
   return (
-    <div className={"bubble-selector" + (selected ? ' selected' : '') + (disabled ? ' bubble-selector-disabled' : '')} onClick={disabled ? undefined : onClick}>
+    <div className={"bubble-selector" + (selected ? ' bubble-selector-selected' : '') + (disabled ? ' bubble-selector-disabled' : '')} onClick={disabled ? undefined : onClick}>
       {icon !== null && <img className={"icon" + (disabled ? ' disabled' : '')} src={icon} />}
       <div className={"selector-content" + (disabled ? ' disabled' : '')}>
         <div className="selector-title">{title}</div>

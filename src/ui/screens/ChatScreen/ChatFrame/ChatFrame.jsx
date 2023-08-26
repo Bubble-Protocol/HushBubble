@@ -18,7 +18,7 @@ import { ArrowLeft } from "../../../icons/ArrowLeft/ArrowLeft";
 
 let n = 0;
 
-export const ChatFrame = ({ className, chat, onBack, hide, setModal }) => {
+export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setModal }) => {
 
   const [messageText, setMessageText] = useState('');
   const myId = stateManager.useStateData('myId')();
@@ -61,7 +61,7 @@ export const ChatFrame = ({ className, chat, onBack, hide, setModal }) => {
 
   // Auto-scroll to the bottom if user is already at the bottom
   useEffect(() => {
-    if (!hide) {
+    if (!hide && mobileVisible) {
       if (isScrolledToBottom()) {
         chat.setReadTime(Date.now())
         scrollToBottom();
@@ -201,6 +201,7 @@ export const ChatFrame = ({ className, chat, onBack, hide, setModal }) => {
 
 ChatFrame.propTypes = {
   className: PropTypes.string,
+  mobileVisible: PropTypes.bool,
   chat: PropTypes.object.isRequired,
   hide: PropTypes.bool
 };

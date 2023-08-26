@@ -13,7 +13,7 @@
   cursor: pointer;
 }
 
-.selected {
+.icon-chat-selected {
   background-color: rgba(224, 250, 216, 0.70);
 }
 

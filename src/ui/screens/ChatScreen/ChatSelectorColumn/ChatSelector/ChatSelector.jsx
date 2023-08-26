@@ -31,7 +31,7 @@ export const ChatSelector = ({
   const stateText = chatState !== 'open' ? chatState : connectionState;
 
   return (
-    <div className={"chat-selector" + (selected ? ' selected' : '') + (!enabled ? ' disabled' : '')} onClick={onClick}>
+    <div className={"chat-selector" + (selected ? ' chat-selector-selected' : '') + (!enabled ? ' disabled' : '')} onClick={onClick}>
       <img className="contact-icon" src={icon || defaultIcon} />
       <div className="content">
         <div className="title-row">
