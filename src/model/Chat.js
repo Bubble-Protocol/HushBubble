@@ -113,6 +113,7 @@ export class Chat extends Bubble {
         return this._subscribeToContent(false, false, options);
       })
       .then(() => {
+        this.metadata.members = this._getMembers(metadata);
         this._setState(STATE.initialised);
         return this.contentId;
       })
