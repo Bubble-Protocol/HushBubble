@@ -9,7 +9,7 @@ import { Inbox } from "../../../icons/Inbox";
 import { PopularPlus } from "../../../icons/PopularPlus";
 import { ArrowLeft } from "../../../icons/ArrowLeft/ArrowLeft";
 import { CopySelector } from "../../../components/CopySelector";
-import { BubbleSelector } from "../../../components/BubbleSelector";
+import { BubbleSelector } from "./BubbleSelector";
 import { CreateChatModal } from "../../../modals/CreateChatModal";
 
 export const ChatSelectorColumn = ({className, chats, selectedChat, setSelectedChat, setModal}) => {
@@ -54,52 +54,54 @@ export const ChatSelectorColumn = ({className, chats, selectedChat, setSelectedC
       {/* Chat Selector */}
       {centrePanel !== 'new-chat' &&
         <div className={"chat-column "+className}>
-            <div className="chat-column">
-              <div className="title-item">
-                <div className="selector-content">
-                  <div className="selector-title-row">
-                    <div className="title-item-title">Inbox</div>
-                    <PopularPlus className="icon-plus button-like" color="#0F1217" onClick={() => setCentrePanel('new-chat')} />
-                  </div>
-                  <p className="p">{chats.length} conversation{chats.length === 1 ? '' : 's'}, {unread} unread message{unread === 1 ? '' : 's'}</p>
+          <div className="chat-column">
+            <div className="title-item">
+              <div className="selector-content">
+                <div className="selector-title-row">
+                  <div className="title-item-title">Inbox</div>
+                  <PopularPlus className="icon-plus button-like" color="#0F1217" onClick={() => setCentrePanel('new-chat')} />
                 </div>
-              </div>
-              <div className="dividing-line" />
-              <div className="chat-list">
-                {chats !== undefined &&
-                  chats.map(c => {
-                    return <ChatSelector key={c.id} chat={c} myId={myId} selected={c === selectedChat} onClick={() => setSelectedChat(c)} />
-                  })
-                }
-              </div>
-              <div className="chat-column-footer no-mobile">
-                <div className="mobile-menu-button" onClick={() => setMenuMinimized(true)} >
-                  <ChevronsChevronsLeft />
-                </div>
+                <p className="p">{chats.length} conversation{chats.length === 1 ? '' : 's'}, {unread} unread message{unread === 1 ? '' : 's'}</p>
               </div>
             </div>
+            <div className="dividing-line" />
+            <div className="chat-list">
+              {chats !== undefined &&
+                chats.map(c => {
+                  return <ChatSelector key={c.id} chat={c} myId={myId} selected={c === selectedChat} onClick={() => setSelectedChat(c)} />
+                })
+              }
+            </div>
+            <div className="chat-column-footer no-mobile">
+              <div className="mobile-menu-button" onClick={() => setMenuMinimized(true)} >
+                <ChevronsChevronsLeft />
+              </div>
+            </div>
+          </div>
         </div>
       }
 
       {/* Join Chat */}
       {centrePanel === 'new-chat' &&
         <div className={"chat-column "+className}>
-          <div className="title-item">
-            <div className="selector-content">
-              <div className="selector-title-row">
-                <div className="title-item-title">New Chat</div>
-                <ArrowLeft className="icon-plus button-like" color="#0F1217" onClick={() => setCentrePanel('chat')} />
+          <div className="chat-column">
+            <div className="title-item">
+              <div className="selector-content">
+                <div className="selector-title-row">
+                  <div className="title-item-title">New Chat</div>
+                  <ArrowLeft className="icon-plus button-like" color="#0F1217" onClick={() => setCentrePanel('chat')} />
+                </div>
               </div>
             </div>
-          </div>
-          <div></div>
-          <div className="bubble-list">
-            <CopySelector title="Your Connection Link" subtitle="Share this link to allow others to send you connection requests." value={config.appUrl + '?connect=' + myId.id} />
-            {
-              config.bubbles.filter(b => b.actions.canConstruct).map((bubble, index) => {
-                return <BubbleSelector key={index} title={bubble.title} icon={bubble.icon} description={bubble.description || ""} disabled={!online || bubble.disabled} onClick={() => setModal(createChatModal(bubble))} />
-              })
-            }
+            <div></div>
+            <div className="bubble-list">
+              <CopySelector title="Your Connection Link" subtitle="Share this link to allow others to send you connection requests." value={config.appUrl + '?connect=' + myId.id} />
+              {
+                config.bubbles.filter(b => b.actions.canConstruct).map((bubble, index) => {
+                  return <BubbleSelector key={index} title={bubble.title} icon={bubble.icon} description={bubble.description || ""} disabled={!online || bubble.disabled} onClick={() => setModal(createChatModal(bubble))} />
+                })
+              }
+            </div>
           </div>
         </div>
       }
