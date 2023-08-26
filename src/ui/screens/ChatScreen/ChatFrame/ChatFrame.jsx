@@ -1,5 +1,4 @@
 import { ChatDateRow } from "./ChatDateRow";
-import { Message } from "../../../components/Message";
 import defaultIcon from "../../../../assets/img/unknown-contact-icon.png";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
@@ -15,8 +14,7 @@ import { ManageMemberModal } from "../../../modals/ManageMemberModal";
 import { LeaveChatModal } from "../../../modals/LeaveChatModal";
 import { EditChatModal } from "../../../modals/EditChatModal/EditChatModal";
 import { ArrowLeft } from "../../../icons/ArrowLeft/ArrowLeft";
-
-let n = 0;
+import { MessageGroup } from "./MessageGroup";
 
 export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setModal }) => {
 
@@ -103,19 +101,62 @@ export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setMod
   const manageMemberModal = <ManageMemberModal chat={chat} onSave={chatFunctions.manageMembers} onCancel={() => setModal()} onCompletion={() => setModal()} />;
 
 
-  // Create messages view
+  // Group messages
   
-  let lastDate = new Date(0);
-  const messageElements = [];
-  messages.forEach((msg, index) => {
-    const date = new Date(msg.created);
-    if (date.toDateString() !== lastDate.toDateString()) {
-      messageElements.push(<ChatDateRow key={'date-'+index} date={date} />);
-      lastDate = date;
-    };
-    messageElements.push(<Message key={index} date={date} text={msg.text} icon={msg.from.icon} title={msg.from.getKnownAs()} remote={msg.from.account !== myId.account} />);
-  })
+  const groupedMessages = [];
+  let currentGroup = null;
+  let lastDateStr = new Date(0).toDateString();
 
+  messages.forEach((msg) => {
+    const msgDateStr = new Date(msg.created).toDateString();
+    if (!currentGroup || currentGroup.from.account !== msg.from.account || lastDateStr !== msgDateStr) {
+      if (currentGroup) groupedMessages.push(currentGroup);
+      currentGroup = { from: msg.from, messages: [] };
+    }
+    currentGroup.messages.push(msg);
+    lastDateStr = msgDateStr;
+  });
+
+  if (currentGroup) groupedMessages.push(currentGroup);
+
+  
+  // let lastDate = new Date(0);
+  // const messageElements = [];
+  // messages.forEach((msg, index) => {
+  //   const date = new Date(msg.created);
+  //   if (date.toDateString() !== lastDate.toDateString()) {
+  //     messageElements.push(<ChatDateRow key={'date-'+index} date={date} />);
+  //     lastDate = date;
+  //   };
+  //   messageElements.push(<Message key={index} date={date} text={msg.text} icon={msg.from.icon} title={msg.from.getKnownAs()} remote={msg.from.account !== myId.account} />);
+  // })
+
+  lastDateStr = new Date(0).toDateString();
+
+  const messageElements = groupedMessages.flatMap(group => {
+    const firstMessageDate = new Date(group.messages[0].created);
+    const dateStr = firstMessageDate.toDateString();
+    let elements = [];
+  
+    if (dateStr !== lastDateStr) {
+      elements.push(<ChatDateRow key={'date-' + group.messages[0].id} date={firstMessageDate} />);
+      lastDateStr = dateStr;
+    }
+
+    elements.push(
+      <MessageGroup
+        key={group.messages[0].id} 
+        from={group.from} 
+        isRemote={group.from.account !== myId.account}
+        messages={group.messages}
+      />
+    );
+
+    return elements;
+  });
+  
+  // Chat icons
+  
   let chatIcons = chatData.icon 
     ? [<img key={0} className="chat-header-icon" src={chatData.icon} />] 
     : chatData.members 

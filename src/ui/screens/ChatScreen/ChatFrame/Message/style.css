@@ -1,43 +1,30 @@
 .message {
-  align-items: center;
+  flex: 1;
+  align-items: flex-end;
   display: flex;
   gap: 4px;
-  max-width: 70%;
 }
 
-.right {
+.message-remote {
   align-self: flex-end;
   text-align: right;
 }
 
-.message .chat-icon-container {
-  height: 36px;
-  min-width: 36px;
-  position: relative;
-}
-
-.message .chat-icon {
-  border: 2px solid;
-  border-color: #ffffff;
-  border-radius: 20px;
-  height: 36px;
-  width: 36px;
-}
-
 .message .chat-message {
-  align-items: center;
+  align-items: flex-end;
   display: flex;
   flex-direction: row;
   border-radius: 8px;
   overflow: hidden;
   padding: 4px 16px;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   position: relative;
+  box-shadow: 0 1px 1px 0px rgba(0, 0, 0, 0.1);
 }
 
 .message .remote-message {
-  background-color: #f1ffef;
+  background-color: rgba(220, 255, 209, 0.7);
 }
 
 .message .local-message {
@@ -49,14 +36,15 @@
   flex: 1;
   color: #0e1218;
   font-family: "Work Sans", Helvetica;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 400;
   letter-spacing: 0;
-  line-height: 22px;
+  line-height: 20px;
   position: relative;
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  word-break: break-all;
   overflow: hidden;
 }
 
@@ -64,19 +52,12 @@
   flex: 0;
   color: #888;
   font-family: "Work Sans", Helvetica;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 400;
   letter-spacing: 0;
   line-height: normal;
   position: relative;
   white-space: nowrap;
-}
-
-.message .mobile-meta {
-  flex: 1;
-  display: flex;
-  gap: 8px;
-  display: none;
 }
 
 @media only screen and (max-width: 800px) {
