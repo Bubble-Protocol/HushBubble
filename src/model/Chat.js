@@ -128,6 +128,7 @@ export class Chat extends Bubble {
           })
           .then(() => {
             this._setState(STATE.initialised);
+            stateManager.dispatch(this.id+'-connection-state', this.provider.state); // belt and braces
           })
           .catch(error => {
             this._handleError(error);
