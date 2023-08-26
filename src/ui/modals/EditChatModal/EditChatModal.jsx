@@ -14,7 +14,6 @@ export const EditChatModal = ({ chat, onCancel, onCompletion }) => {
   const [icon, setIcon] = useState({value: metadata.icon || defaultIcon, valid: true});
   const [error, setError] = useState();
 
-  console.debug(title)
   function save() {
     setState('saving');
     const newMetadata = {};

@@ -66,6 +66,8 @@ export class Chat extends Bubble {
     // construct the bubble
     console.trace('constructing', chatType.classType, bubbleId, chatType, myId, provider, deviceKey.signFunction, encryptionPolicy, userManager)
     super(bubbleId, provider, deviceKey.signFunction, encryptionPolicy, userManager);
+
+    // set class variables
     this.id = bubbleId.chain+'-'+bubbleId.contract;
     this.chatType = chatType;
     this.metadata = metadata;
@@ -99,12 +101,12 @@ export class Chat extends Bubble {
   create({metadata, options}) {
     this._validateMetadata(metadata);
     this.metadata = metadata;
-    stateManager.dispatch(this.id+'-metadata', this.metadata);
+    this.metadata.members = this._getMembers(metadata);
     return this.provider.open()
       .then(() => super.create(options))
       .then(() => {
         return Promise.all([
-          this._saveMetadata(metadata, options),
+          this._saveMetadata(options),
           this.mkdir(CONTENT.textChat, options),
         ])
       })
@@ -112,7 +114,7 @@ export class Chat extends Bubble {
         return this._subscribeToContent(false, false, options);
       })
       .then(() => {
-        this.metadata.members = this._getMembers(metadata);
+        stateManager.dispatch(this.id+'-metadata', this.metadata);
         this._setState(STATE.initialised);
         return this.contentId;
       })
@@ -189,6 +191,7 @@ export class Chat extends Bubble {
     const newMetadata = {...this.metadata, ...metadata};
     try {
       this._validateMetadata(newMetadata);
+      this.metadata = newMetadata;
       return this._saveMetadata(newMetadata);
     }
     catch(error) {
@@ -208,7 +211,8 @@ export class Chat extends Bubble {
   }
 
   serialize() {
-    return {chatType: this.chatType.id, id: this.id, bubbleId: this.contentId.toString(), metadata: this.metadata, delegation: this.delegation}
+    const plainMetadata = this._getPlainMetadata({includeMemberDetails: true});
+    return {chatType: this.chatType.id, id: this.id, bubbleId: this.contentId.toString(), metadata: plainMetadata, delegation: this.delegation}
   }
 
   deserialize(data) {
@@ -261,8 +265,19 @@ export class Chat extends Bubble {
     if (metadata.members) assert.isArray(metadata.members, 'members');
   }
 
-  _saveMetadata(metadata, options) {
-    return this.write(CONTENT.metadataFile, JSON.stringify(metadata), options);
+  _saveMetadata(options) {
+    const plainMetadata = this._getPlainMetadata({includeMemberDetails: false});
+    return this.write(CONTENT.metadataFile, JSON.stringify(plainMetadata), options);
+  }
+
+  _getPlainMetadata(options) {
+    return {
+      ...this.metadata,
+      members: this.metadata.members.map(m => {
+        if (options.includeMemberDetails) return {id: m.id, icon: m.icon, title: m.title}
+        else return {id: m.id};
+      })
+    }
   }
 
   _handleMessageNotification(notification) {
@@ -397,7 +412,9 @@ export class Chat extends Bubble {
   }
 
   _handleContactUpdate() {
-    stateManager.dispatch(this.id+'-messages', [...this.messages]);
+    stateManager.dispatch(this.id+'-metadata', this.metadata);
+    this.listeners.notifyListeners('metadata-updated', this.metadata);
+    stateManager.dispatch(this.id+'-messages', this.messages);
   }
 
   _getMembers(metadata) {
@@ -405,11 +422,12 @@ export class Chat extends Bubble {
     let found = true;
     let index = 0;
     while(found) {
-      if (metadata['member'+index]) members.push(this.contacts.getContact(metadata['member'+index], this._handleContactUpdate));
+      if (metadata['member'+index]) members.push(metadata['member'+index]);
       else found = false;
       index++;
     }
-    if (assert.isArray(metadata.members)) members = members.concat(metadata.members.map(m => this.contacts.getContact(m, this._handleContactUpdate)));
+    if (assert.isArray(metadata.members)) members = members.concat(metadata.members);
+    members = members.map(m => this.contacts.getContact(m, this._handleContactUpdate));
     return members.sort((a,b) => a.id.localeCompare(b.id)).filter((m, i, members) => i===0 || m.id !== members[i-1].id);
   }
   

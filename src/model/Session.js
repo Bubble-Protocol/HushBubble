@@ -224,7 +224,6 @@ export class Session {
           });
     })
     .catch(error => {
-      console.debug(error);
       throw error;
     })
   }

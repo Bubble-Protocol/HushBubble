@@ -25,24 +25,20 @@ export class User {
       }
       else if (assert.isString(details)) {
         // assume it is an id
-        const id = fromBase64Url(details).toString('hex');
-        if (id.length === 64 || id.length === 66) {
-          // old id format - just delegate public key
-          this.delegate.publicKey = id;
-          this.account = ecdsa.publicKeyToAddress(this.delegate.publicKey);
-        }
-        else {
-          this.account = '0x'+id.slice(0,40);
-          this.delegate.publicKey = id.slice(40);
-        }
+        const {account, delegate} = parseId(details);
+        this.account = account;
+        this.delegate = delegate;
       }
       else {
         // assume it is already a Member object (or representation of one)
+        const publicKey = details.delegate ? details.delegate.publicKey || details.delegate : details.publicKey;
+        const accountAddress = details.account || details.address; // address is for backwards compatibility
+        const {account, delegate} = details.id ? parseId(details.id, accountAddress) : {account: accountAddress, delegate: {publicKey: publicKey}};
         this.title = details.title;
         this.icon = details.icon;
-        this.account = details.account || details.address; // address is for backwards compatibility
+        this.account = account;
+        this.delegate = delegate;
         if (this.account.slice(0,2) !== '0x') this.account = '0x'+this.account;
-        this.delegate.publicKey = details.delegate ? details.delegate.publicKey || details.delegate : details.publicKey; // publicKey is for backwards compatibility
         if (this.delegate.publicKey.slice(0,2) === '0x') this.delegate.publicKey = this.delegate.publicKey.slice(2);
       }
       ecdsa.assert.isAddress(this.account, 'account');
@@ -66,4 +62,22 @@ export class User {
 
   getId() { return this.id }
 
+}
+
+
+function parseId(idStr, account) {
+  const id = fromBase64Url(idStr).toString('hex');
+  if (id.length === 64 || id.length === 66) {
+    // old id format - just delegate public key
+    return {
+      delegate: {publicKey: id},
+      account: account || ecdsa.publicKeyToAddress(id)
+    }
+  }
+  else {
+    return {
+      delegate: {publicKey: id.slice(40)},
+      account: '0x'+id.slice(0,40)
+    }
+  }
 }
