@@ -31,7 +31,7 @@ export const WelcomeScreen = ({ walletAvailable }) => {
       {walletAvailable && !delegateRequest && <div className="connect-text" onClick={connectWallet}>Connect Wallet to Begin</div>}
       {walletAvailable && delegateRequest && <div className="connect-text" onClick={signDelegation}>Login On This Device</div>}
       {error && <div className="error-text">{error.message}</div>}
-      {chainError && <div className="add-chain-text">The {chainError.name} chain is not available in your wallet.<br/>Visit <a href={"https://chainlist.org/?search="+chainError.id}>chainlist.org</a> to add the chain to your wallet then try again.</div>}
+      {chainError && <div className="add-chain-text">The {chainError.name} chain is not available in your wallet.<br/>Visit <a href={"https://chainlist.org/?search="+chainError.id} target="_blank">chainlist.org</a> to add the chain to your wallet then try again.</div>}
     </div>
   );
 };
