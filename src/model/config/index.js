@@ -6,14 +6,14 @@ import { DEFAULT_HOSTS } from "./hosts";
 export const DEFAULT_CONFIG = {
   appUrl: "https://bubbleprotocol.com/chat",
   profileRegistry: new ContentId({
-    chain: 84531,
-    contract: '0xaC136c8a856C38CC9760677E6AfDDe3E2886bA49',
-    provider: 'wss://vault.bubbleprotocol.com/v2/base-goerli'
+    chain: 8453,
+    contract: '0x901dB5a41E6Af7884cF8DB1cEe657A425dFC172b',
+    provider: 'wss://vault.bubbleprotocol.com/v2/base'
   }),
   connectionRelay: {
-    chain: 84531,
-    contract: '0xDC8bb7aa04431BC0Edc5F0373B98824eC184CFbF',
-    provider: "wss://vault.bubbleprotocol.com/v2/base-goerli"
+    chain: 8453,
+    contract: '0x45fD2D2c6b8cC6BA39d834B41D248a470F8a974b',
+    provider: "wss://vault.bubbleprotocol.com/v2/base"
   },
   chains: DEFAULT_CHAINS,
   hosts: DEFAULT_HOSTS,

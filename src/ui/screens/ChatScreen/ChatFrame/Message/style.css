@@ -44,8 +44,11 @@
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  word-break: break-all;
   overflow: hidden;
+}
+
+.message a {
+  word-break: break-all;
 }
 
 .message .message-time {

@@ -1,0 +1,117 @@
+{
+	"compiler": {
+		"version": "0.8.18+commit.87f61d96"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "user",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "contentId",
+						"type": "uint256"
+					}
+				],
+				"name": "getAccessPermissions",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "terminate",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {
+				"getAccessPermissions(address,uint256)": {
+					"params": {
+						"contentId": "the id of the content (file or directory) being requested",
+						"user": "the user requesting access"
+					}
+				}
+			},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {
+				"getAccessPermissions(address,uint256)": {
+					"notice": "Provides the access permissions for off-chain content controlled by this contract.  An  off-chain storage service calls this method to obtain a specific user's permissions for  accessing a given file or directory.  The method must return a bit field, with POSIX-like  bits for terminated, directory, read, write, append and execute (tdrwax).  See AccessControlBits.sol for a complete definition of the bit field returned by this method.  Note, the following content IDs are reserved:    CID  Purpose   ---  ------------------------------------------------------------------------------------------   0    The root of the bubble itself.  Any user with write permission to id 0 can construct the         bubble on an off-chain storage service.  Any user with read permission can list the        contents of the bubble's root directory.  ID 0 is always considered a directory and so the         Directory Bit permission returned by this contract is ignored.   "
+				}
+			},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"ConnectionRelayBubble.sol": "ConnectionRelayBubble"
+		},
+		"evmVersion": "paris",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"AccessControlBits.sol": {
+			"keccak256": "0x5074b55c7fd9399d90fcc29c094d1e3ac427ed8a7a9bd90a60f2738d6839eb5e",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0a1fc60395fccbb06875bd47250f7d7dff74427bd3808c542fd94b8457f6630b",
+				"dweb:/ipfs/QmXzaCsEwLfG2C3mDLKhP7ZftMy1uWp8bNy1aGdfHKXeEM"
+			]
+		},
+		"AccessControlledStorage.sol": {
+			"keccak256": "0x87fcb849962c533440b276e5db948b1ab7e65bd1039f6449883a409a54ac1f3f",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://03325e566a6d0099248d055ca40ef0622f8d61c7d6fd01ff7fce6d53ef673ee6",
+				"dweb:/ipfs/QmPdX8ZCmwKTm6o37ZYipgaEWUwHzgPYuZd5yXfdeE1tpK"
+			]
+		},
+		"ConnectionRelayBubble.sol": {
+			"keccak256": "0x550214214f87e6af2726883140154aa777fc497234c97788f0bd7c86a8e135d3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://610ffed4e270986b5dd5a6877b938cf0261d1cb02148b46672316116c8975f7b",
+				"dweb:/ipfs/Qmbpsb5MsA7sayE8XDivctfaegwJd74KLiSmdJ2VEwfemd"
+			]
+		}
+	},
+	"version": 1
+}
