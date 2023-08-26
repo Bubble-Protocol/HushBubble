@@ -197,10 +197,11 @@
   cursor: pointer;
 }
 
-.loading-screen {
+.basic-screen {
   align-items: center;
   justify-content: center;
   align-self: stretch;
+  text-align: center;
   display: flex;
   flex-direction: column;
   flex: 1;

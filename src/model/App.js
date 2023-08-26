@@ -7,6 +7,7 @@ import { MetamaskWallet } from "./wallets/MetamaskWallet";
 
 const STATE = {
   uninitialised: 'uninitialised',
+  noWallet: 'no-wallet',
   initialised: 'initialised',
   switching: 'switching-session'
 }
@@ -49,13 +50,19 @@ export class MessengerApp {
       return Promise.resolve();
     }
     const wallet = new MetamaskWallet();
-    return wallet.connect()
-      .then(() => {
-        this.wallet = wallet;
-        return this._openSession(lastSession)
-      })
-      .then(() => {
-        this._setAppState(STATE.initialised);
+    return wallet.isAvailable()
+      .then(available => {
+        if (!available) this._setAppState(STATE.noWallet);
+        else {
+          return wallet.connect()
+          .then(() => {
+            this.wallet = wallet;
+            return this._openSession(lastSession)
+          })
+          .then(() => {
+            this._setAppState(STATE.initialised);
+          })
+        }
       })
       .catch(console.warn);
   }

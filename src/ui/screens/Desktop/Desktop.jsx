@@ -82,8 +82,9 @@ export const Desktop = () => {
       {/* Content */}
       <div className="content">
 
-        {appState !== 'initialised' && <div className="loading-screen"><div className='loader centered' style={{width: 64, height: 64}}></div></div>}
-        {appState === 'initialised' && !session && <WelcomeScreen />}
+        {appState !== 'initialised' && appState !== 'no-wallet' && <div className="basic-screen"><div className='loader centered' style={{width: 64, height: 64}}></div></div>}
+        {appState === 'no-wallet' && <WelcomeScreen walletAvailable={false} />}
+        {appState === 'initialised' && !session && <WelcomeScreen walletAvailable={true} />}
         {appState === 'initialised' && session && <ChatScreen mobileView={mobileView} setMobileView={setMobileView} setModal={setModal} onTerminateChat={terminateChat} />}
 
       </div>

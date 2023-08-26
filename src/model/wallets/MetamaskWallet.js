@@ -24,7 +24,7 @@ export class MetamaskWallet extends Wallet {
   async isAvailable() {
 
     function detectMetamask() {
-      return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
+      return typeof window.ethereum !== 'undefined';
     }
   
     return new Promise((resolve) => {
