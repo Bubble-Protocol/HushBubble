@@ -14,10 +14,11 @@ import { assert } from "@bubble-protocol/core";
 import { ManageMemberModal } from "../../../modals/ManageMemberModal";
 import { LeaveChatModal } from "../../../modals/LeaveChatModal";
 import { EditChatModal } from "../../../modals/EditChatModal/EditChatModal";
+import { ArrowLeft } from "../../../icons/ArrowLeft/ArrowLeft";
 
 let n = 0;
 
-export const ChatFrame = ({ className, chat, hide, setModal }) => {
+export const ChatFrame = ({ className, chat, onBack, hide, setModal }) => {
 
   const [messageText, setMessageText] = useState('');
   const myId = stateManager.useStateData('myId')();
@@ -142,7 +143,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
 
       {/* Header */}
       <div className="chat-header">
-        <div className="chat-header-menu-left mobile"></div>
+        <ArrowLeft className="chat-header-menu-left button-like mobile" color="#0F1217" onClick={onBack} />
         <div className="chat-header-icons no-mobile">
           <div className="chat-header-member-icons">
             {chatIcons}

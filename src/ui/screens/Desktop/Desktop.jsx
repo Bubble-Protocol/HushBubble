@@ -56,15 +56,12 @@ export const Desktop = () => {
     <div className="desktop">
 
       {/* Header */}
-      <header className="header">
-        <div className="mobile-menu-button mobile" onClick={() => setMobileView(mobileView === 'chat' ? 'menu' : 'chat')}>
-          <PopularMoreVertical1 className="mobile" size="32px" color="#cccccc" />
-          {unread !== 0 && <span className="mobile-menu-notification mobile">{unread}</span>}
-        </div>
+      <header className={"header" + (mobileView === 'chat' ? ' no-mobile' : '')}>
         <h1 className="title">HushBubble</h1>
         <div className="spacer" />
         {!online && <div className="connecting-indicator"><span>offline</span><span className="loader loader-small"></span></div> }
         {!session && <a className="header-link" href="https://bubbleprotocol.com/chat/about.html">About</a>}
+        {unread !== 0 && <span className="mobile-menu-notification mobile">{unread}</span>}
         {session && 
           <div className="user-menu">
             <DropdownMenu direction="bottom-left" options={[

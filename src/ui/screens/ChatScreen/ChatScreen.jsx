@@ -27,7 +27,7 @@ export const ChatScreen = ({mobileView, setMobileView, onTerminateChat, setModal
 
       <ChatSelectorColumn className={mobileView === 'chat' ? 'no-mobile' : ''} chats={orderedChats} selectedChat={selectedChat} setSelectedChat={setSelectedChatExt} setModal={setModal} />
 
-      {chats.map(c => c.state === 'invalid' ? null : <ChatFrame className={mobileView === 'menu' ? 'no-mobile' : ''} key={c.id} hide={c !== selectedChat} chat={c} onTerminate={onTerminateChat} setModal={setModal} />)}
+      {chats.map(c => c.state === 'invalid' ? null : <ChatFrame className={mobileView === 'menu' ? 'no-mobile' : ''} key={c.id} hide={c !== selectedChat} chat={c} onBack={() => setMobileView('menu')} onTerminate={onTerminateChat} setModal={setModal} />)}
       {selectedChat === undefined && <div className="chat-frame"></div>}
 
     </div>
