@@ -21,6 +21,7 @@ export const Desktop = () => {
   const myId = stateManager.useStateData('myId')();
   const config = stateManager.useStateData('config')();
   const wallet = stateManager.useStateData('wallet-functions')();
+  const joinRequest = stateManager.useStateData('join-request')();
   const [mobileView, setMobileView] = useState('menu');
 
   const otherAccounts = session ? wallet.getAccounts().filter(a => a.account !== session.id) : [];
@@ -31,9 +32,15 @@ export const Desktop = () => {
       setModal(<CreateChatModal session={session} chains={config.chains} hosts={config.hosts} bubble={config.bubbles.find(b => b.id.category === 'one-to-one')} valuesIn={[null, urlParams.connect]} onCreate={session.createChat} onCancel={() => setModal(null)} onCompletion={() => setModal(null)} />);
     }
     else if (urlParams.join) {
-      setModal(<JoinChatModal onJoin={session.joinChat} bubbleIn={urlParams.join} onCompletion={() => setModal(null)} onCancel={() => setModal(null)} />);
+      session.receiveInvite(urlParams.join);
     }
   }, [session])
+
+  useEffect(() => {
+    if (joinRequest) {
+      setModal(<JoinChatModal onJoin={session.joinChat} invite={joinRequest} onCompletion={() => setModal(null)} onCancel={() => setModal(null)} />);
+    }
+  }, [joinRequest])
 
   setFaviconWithCount(unread);
 

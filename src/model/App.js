@@ -30,6 +30,7 @@ export class MessengerApp {
     stateManager.register('online', window.navigator.onLine);
     stateManager.register('myId', undefined);
     stateManager.register('config', DEFAULT_CONFIG);
+    stateManager.register('join-request');
     stateManager.register('wallet-functions', {
       connect: this.connectWallet.bind(this),
       disconnect: this.disconnectWallet.bind(this),

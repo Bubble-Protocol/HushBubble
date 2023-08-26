@@ -4,21 +4,14 @@ import { Modal } from "../../components/Modal/Modal";
 import { Button } from "../../components/Button/Button";
 import { TextBox } from "../../components/TextBox";
 import { ErrorCodes } from "@bubble-protocol/core";
+import { ModalHostInfo } from "../../components/ModalHostInfo";
 
-export const JoinChatModal = ({ bubbleIn, onJoin, onCancel, onCompletion }) => {
-  const [bubbleId, setBubbleId] = useState(bubbleIn);
+export const JoinChatModal = ({ invite, onJoin, onCancel, onCompletion }) => {
   const [error, setError] = useState();
   const [chainError, setChainError] = useState();
 
-  let invite = bubbleId;
-  try {
-    const url = new URL(bubbleId);
-    invite = url.searchParams.get('chat');
-  }
-  catch(_) {}
-
-  function join(delegation) {
-    onJoin(invite, delegation).then(onCompletion)
+  function join() {
+    onJoin(invite).then(onCompletion)
       .catch(error => {
         if (error.code === ErrorCodes.BUBBLE_ERROR_BUBBLE_TERMINATED) setError(new Error('Chat no longer exists'));
         else if (error.code === ErrorCodes.BUBBLE_ERROR_PERMISSION_DENIED) setError(new Error('Permission denied'));
@@ -27,28 +20,40 @@ export const JoinChatModal = ({ bubbleIn, onJoin, onCancel, onCompletion }) => {
       })
   }
 
+  const fromName = invite.from.title || (invite.from.account ? invite.from.account.slice(0,6)+'..'+invite.from.account.slice(-4) : 'Unknown');
+
   return (
     <Modal 
     onCancel={onCancel}
     contentCentered={true}
     title="Join Chat"
-    subtitle="Join a chat created by someone else." 
     contents=
-      <React.Fragment>
-        <div className="step-frame">
-          <p className="small-text">Paste the chat ID below to join</p>
-          <TextBox text={invite} onChange={setBubbleId} valid={invite !== undefined} />
-        </div>
-        {error && <p className="small-text error-text">{error.message}</p>}
-        {chainError && <div className="small-text error-text">The {chainError.name} chain is not available in your wallet.<br/>Visit <a href={"https://chainlist.org/?search="+chainError.id} target="_blank">chainlist.org</a> to add the chain to your wallet then try again.</div>}
-        <Button title="Join" onClick={() => join()} disabled={invite === undefined} />
-      </React.Fragment>
+      {
+        invite.valid ?
+          <React.Fragment>
+            <p className="centered-row step-title">{invite.from.icon && <img className="logo" src={invite.from.icon}/>} {fromName}</p>
+            <p>...is inviting you to join a {invite.bubbleType.title}</p>
+            {invite.bubbleType && <p className="small-text">{invite.bubbleType.details}</p>}
+            {<ModalHostInfo chain={invite.chain} host={invite.host} centered={true} />}
+            <div></div>
+            {error && <p className="small-text error-text">{error.message}</p>}
+            {chainError && <div className="small-text error-text">The {chainError.name} chain is not available in your wallet.<br/>Visit <a href={"https://chainlist.org/?search="+chainError.id} target="_blank">chainlist.org</a> to add the chain to your wallet then try again.</div>}
+            <Button title="Join" onClick={() => join()} disabled={invite === undefined} />
+          </React.Fragment>
+        :
+          <React.Fragment>
+            <div className="step-frame">
+              <p className="small-text error-text">The invite is invalid ({invite.error.message})</p>
+            </div>
+            <Button title="Cancel" onClick={onCancel} />
+          </React.Fragment>
+      }
     />
   );
 };
 
 JoinChatModal.propTypes = {
-  bubbleIn: PropTypes.string,
+  invite: PropTypes.object.isRequired,
   onJoin: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   onCompletion: PropTypes.func,

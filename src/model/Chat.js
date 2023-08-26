@@ -5,7 +5,6 @@ import { stateManager } from "../state-context";
 import { fromBase64Url, toBase64Url } from "./utils/StringUtils";
 import { toDelegateSignFunction } from "@bubble-protocol/client";
 
-import { ParamFactory } from "./chats/ParamFactory";
 import { User } from "./User";
 
 const CONTENT = {
@@ -228,7 +227,8 @@ export class Chat extends Bubble {
 
   getInvite() {
     return toBase64Url(Buffer.from(JSON.stringify({
-      t: this.chatType.classType,
+      f: this.myId.account,
+      t: this.chatType.id.bytecodeHash.slice(0,16), // first 8 bytes of bytecode
       id: this.contentId.toString()
     })))
   }

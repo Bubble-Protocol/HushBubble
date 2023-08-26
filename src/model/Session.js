@@ -37,6 +37,7 @@ export class Session {
   sessionKey;
   keyDelegation;
   settings = DEFAULT_SETTINGS;
+  profileRegistry;
   conversations = [];
 
   constructor(id) {
@@ -75,7 +76,7 @@ export class Session {
       })
       .then(() => {
         if (this.settings.connectionRelay) {
-          this.connectionRelay = new HushBubbleConnectRelay(this.sessionKey, this.joinChat.bind(this));
+          this.connectionRelay = new HushBubbleConnectRelay(this.sessionKey, invite => this.receiveInvite(invite, false));
           return this.connectionRelay.monitor();
         }
       })
@@ -186,23 +187,22 @@ export class Session {
       .then(() => this._removeChat(conversation));
   }
 
-  async joinChat(inviteStr) {
-    assert.isString(inviteStr, "invite");
-    let invite, bubbleId, bubbleProvider;
-    try {
-      invite = Chat.parseInvite(inviteStr);
-      bubbleId = new ContentId(invite.id || invite);
-      bubbleProvider = new URL(bubbleId.provider);
-    }
-    catch(error) {
-      console.warn(error);
-      return Promise.reject(new Error('Invite is invalid', {cause: error}));
-    }
-    console.trace('attempting to join bubble', bubbleId);
-    const chain = DEFAULT_CONFIG.chains.find(c => c.id === bubbleId.chain) || {id: bubbleId.chain, name: 'Unknown'};
-    const promise = this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name);
+  receiveInvite(inviteStr, ignoreError=true) {
+    console.trace('rxd invite', inviteStr);
+    this._parseInvite(inviteStr, ignoreError)
+      .then(invite => {
+        console.trace('parsed invite', invite);
+        if (!invite.existingChat) stateManager.dispatch('join-request', invite);
+        else console.trace('already a member');
+      })
+      .catch(console.warn);
+  }
+
+  async joinChat(invite) {
+    console.trace('attempting to join bubble', invite.bubbleId);
+    const promise = this.wallet.getChain() === invite.chain.id ? Promise.resolve() : this.wallet.switchChain(invite.chain.id, invite.chain.name);
     return promise
-      .then(() => this.wallet.getCode(bubbleId.contract))
+      .then(() => this.wallet.getCode(invite.bubbleId.contract))
       .then(code => {
         const codeHash = ecdsa.hash(code);
         console.trace('invite contract hash:', codeHash);
@@ -211,7 +211,7 @@ export class Session {
         if (!bubbleType) throw new Error('Chat type is not supported');
         let conversation;
         try {
-          conversation = ChatFactory.constructChat(bubbleType.id, bubbleId, undefined, this.myId, this.sessionKey, undefined, this.keyDelegation, this.contacts);
+          conversation = ChatFactory.constructChat(bubbleType.id, invite.bubbleId, undefined, this.myId, this.sessionKey, undefined, this.keyDelegation, this.contacts);
         }
         catch(error) {
           console.warn(error);
@@ -308,6 +308,45 @@ export class Session {
 
   getDefaultChainId() {
     return this.settings.defaultChain;
+  }
+
+  async _parseInvite(inviteStr, ignoreError) {
+    assert.isString(inviteStr, "invite");
+    let from, bubbleType, bubbleId;
+    try {
+      const inv = Chat.parseInvite(inviteStr);
+      console.trace('raw invite:', inv);
+      from = inv.f;
+      bubbleType = DEFAULT_CONFIG.bubbles.find(b => b.id.bytecodeHash.slice(0,16) === inv.t);
+      if (!bubbleType) throw new Error('chat type is not supported');
+      bubbleId = new ContentId(inv.id);
+    }
+    catch(error) {
+      console.warn(error);
+      if (ignoreError) return Promise.resolve({inviteStr: inviteStr, valid: false, error: error, from: {account: from}});
+      else return Promise.reject('invite is invalid', error);
+    }
+    const invite = {
+      inviteStr: inviteStr,
+      valid: true,
+      bubbleType: bubbleType,
+      bubbleId: bubbleId,
+      chain: DEFAULT_CONFIG.chains.find(c => c.id === bubbleId.chain) || {id: bubbleId.chain, name: 'Unknown ('+bubbleId.chain+')'},
+      host: DEFAULT_CONFIG.hosts.find(h => h.chains[bubbleId.chain].url === bubbleId.provider) || {name: bubbleId.provider},
+      from: {
+        account: from
+      },
+      existingChat: this.conversations.find(c => c.contentId.chain === bubbleId.chain && c.contentId.contract === bubbleId.contract)
+    }
+    return this.profileRegistry.getProfile(from)
+      .then(profile => {
+        invite.from.title = profile.title;
+        invite.from.icon = profile.icon;
+        return invite;
+      })
+      .catch(() => {
+        return invite;
+      })
   }
 
   _handleProfileUpdate(profile) {

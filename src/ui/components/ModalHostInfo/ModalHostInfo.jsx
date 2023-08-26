@@ -9,10 +9,11 @@ import React from "react";
 export const ModalHostInfo = ({
   chain,
   host,
-  onCustomise
+  onCustomise,
+  centered
 }) => {
   return (
-    <div className="step-frame">
+    <div className={"step-frame"+(centered ? '-centered' : '')}>
       <div className="info-frame">
         <div className="row">
           <div className="label" style={{width: 40}}>Chain:</div>
@@ -38,6 +39,7 @@ export const ModalHostInfo = ({
 ModalHostInfo.propTypes = {
   chain: PropTypes.object.isRequired,
   host: PropTypes.object.isRequired,
-  onCustomise: PropTypes.func.isRequired,
+  onCustomise: PropTypes.func,
+  centered: PropTypes.bool
 };
 
