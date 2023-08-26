@@ -15,6 +15,8 @@ import { ManageMemberModal } from "../../../modals/ManageMemberModal";
 import { LeaveChatModal } from "../../../modals/LeaveChatModal";
 import { EditChatModal } from "../../../modals/EditChatModal/EditChatModal";
 
+let n = 0;
+
 export const ChatFrame = ({ className, chat, hide, setModal }) => {
 
   const [messageText, setMessageText] = useState('');
@@ -27,49 +29,60 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
   const online = stateManager.useStateData('online')();
   const config = stateManager.useStateData('config')();
   const chatFunctions = stateManager.useStateData('chat-functions')();
+  const notifications = stateManager.useStateData(chat.id+'-unread')();
 
+  //
   // Setup scroll-to-bottom
+  //
 
-  const endOfMessagesRef = useRef(null);
-  const chatColumnRef = useRef(null);
+  // ref notifications for scroll event handler
 
-  const atBottom = () => {
-    const { current: chatColumn } = chatColumnRef;
-    return chatColumn.scrollHeight - chatColumn.scrollTop - chatColumn.clientHeight < 1;
-  }
-
-  const scrollToBottom = (force = false) => {
-    const { current: chatColumn } = chatColumnRef;
-    if (chatColumn && messages.length) {
-      if (force || messages[messages.length - 1].from.account === myId.account) {
-        chatColumn.scrollTo(0, chatColumn.scrollHeight);
-      }
-      else if (!atBottom()) chatColumn.scrollTo(0, chatColumn.scrollHeight);
-    }
-  }
-
-  useEffect(scrollToBottom, [messages]);
-  useEffect(() => scrollToBottom(true), []);
-
-
-  // Clear notifications if user scrolls to bottom
+  const notificationsRef = useRef(notifications);
 
   useEffect(() => {
+    notificationsRef.current = notifications;
+  }, [notifications]);
 
-    const handleScroll = () => {
-      if (atBottom() && document.hasFocus()) chat.setReadTime(Date.now());
-    };
-  
-    const chatContainer = chatColumnRef.current;
-    if (chatContainer) {
-      chatContainer.addEventListener('scroll', handleScroll);
-    }
 
-    return () => {
-      if (chatContainer) {
-        chatContainer.removeEventListener('scroll', handleScroll);
+  // ref chatColumn for scroll to bottom functions
+
+  const chatColumnRef = useRef(null);
+
+  const isScrolledToBottom = () => {
+    const el = chatColumnRef.current;
+    return el ? el.scrollHeight - el.scrollTop - el.clientHeight < 96: false;
+  };
+
+  const scrollToBottom = () => {
+    const el = chatColumnRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  };
+
+  // Auto-scroll to the bottom if user is already at the bottom
+  useEffect(() => {
+    if (!hide) {
+      if (isScrolledToBottom()) {
+        chat.setReadTime(Date.now())
+        scrollToBottom();
       }
-    };
+    }
+  }, [hide, messages]);
+
+  // Handle manual user scrolling
+  const handleScroll = () => {
+    if (notificationsRef.current > 0 && isScrolledToBottom()) {
+      chat.setReadTime(Date.now());
+    }
+  };
+
+  // useEffect for scroll event listener
+  useEffect(() => {
+    const el = chatColumnRef.current;
+    if (el) {
+      setTimeout(scrollToBottom, 1000);
+      el.addEventListener('scroll', () => handleScroll(notifications));
+      return () => el.removeEventListener('scroll', handleScroll);
+    }
   }, []);
 
 
@@ -80,6 +93,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
     if (!text) return;
     chat.postMessage({text: text}).then(() => setMessageText('')).catch(console.warn);
     chat.setReadTime(Date.now());
+    scrollToBottom();
   }
 
   const editModal = <EditChatModal chat={chat} onCancel={() => setModal()} onCompletion={() => setModal()} />;
@@ -159,7 +173,6 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
       <div className="chat-messages" ref={chatColumnRef}>
         {messageElements}
         <div></div>
-        <div ref={endOfMessagesRef} />
       </div>
 
       {/* Footer */}
