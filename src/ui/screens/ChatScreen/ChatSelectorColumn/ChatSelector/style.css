@@ -5,6 +5,7 @@
   gap: 20px;
   padding: 12px 20px;
   position: relative;
+  border-bottom: 1px solid #c8c8c8;
 }
 
 .chat-selector .disabled {
@@ -15,7 +16,7 @@
   cursor: pointer;
 }
 
-.selected {
+.chat-selector-selected {
   background-color: rgba(224, 250, 216, 0.70);
 }
 
@@ -84,7 +85,16 @@
   white-space: nowrap;
 }
 
+.chat-selector .subtitle-row {
+  align-items: flex-start;
+  align-self: stretch;
+  display: flex;
+  gap: 10px;
+  position: relative;
+}
+
 .chat-selector .text {
+  flex: 1;
   align-self: stretch;
   color: #666666;
   font-family: "Work Sans", Helvetica;
@@ -113,3 +123,16 @@
   position: relative;
 }
 
+.chat-selector .chat-type-icon {
+  flex: 0;
+  height: 20px;
+  width: 20px;
+}
+
+@media only screen and (max-width: 800px) {
+
+  .chat-selector-selected {
+    background-color: inherit;
+  }
+
+}

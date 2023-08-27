@@ -45,14 +45,11 @@
 }
 
 .desktop .mobile-menu-notification {
-  position: absolute;
-  margin-top: -26px;
-  margin-left: 2px;
-  border-radius: 10px;
-  width: 28px;
-  height: 20px;
-  background-color: #c00;
-  color: #fff;
+  border-radius: 11px;
+  padding: 0 8px;
+  height: 22px;
+  background-color: #e8e8e8;
+  color: #0f1217;
   font-size: 14px;
   line-height: 14px;
   display: flex;
@@ -80,6 +77,25 @@
   position: relative;
   white-space: nowrap;
   width: fit-content;
+}
+
+.desktop .user-icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+}
+
+.desktop .user-icon-button:hover {
+  cursor: pointer;
+}
+
+.desktop .user-menu {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  /* padding: 19px 12px; */
+  position: relative;
 }
 
 .desktop .mobile {
@@ -140,6 +156,14 @@
   cursor: pointer;
 }
 
+.disabled {
+  opacity: 50%;
+}
+
+.disabled:hover {
+  cursor: initial;
+}
+
 .desktop .content {
   align-items: flex-start;
   align-self: stretch;
@@ -169,6 +193,19 @@
 .desktop .button-like:hover {
   cursor: pointer;
 }
+
+.basic-screen {
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  max-width: 100%;
+}
+
 
 @media only screen and (max-width: 800px) {
 

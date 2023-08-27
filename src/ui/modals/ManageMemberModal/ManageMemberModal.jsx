@@ -30,7 +30,7 @@ export const ManageMemberModal = ({ chat, onSave, onCancel, onCompletion }) => {
     });
   }
 
-  function toggleRemoveMember(member) { console.debug(removedMembers)
+  function toggleRemoveMember(member) {
     if (removedMembers.includes(member)) setRemovedMembers(removedMembers.filter(m => m !== member));
     else {
       removedMembers.push(member);

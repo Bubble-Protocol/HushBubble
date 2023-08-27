@@ -18,6 +18,7 @@
   margin: 4px 0;
   padding: 0;
   min-width: 200px;
+  max-width: 95vw;
   align-self: stretch;
   display: flex;
   flex-direction: column;
@@ -30,9 +31,8 @@
 .dropdown-menu-container .li {
   display: flex;
   padding: 12px 32px;
-  overflow: hidden;
-  text-overflow: ellipsis;
   cursor: pointer;
+  color: #0f1217;
 }
 
 .dropdown-menu-container .li:not(:last-child) {
@@ -46,7 +46,6 @@
 
 .dropdown-menu-container .icon-text {
   flex: 1;
-  color: #0f1217;
   align-items: center;
   display: flex;
   gap: 8px;
@@ -55,6 +54,15 @@
   letter-spacing: 0;
   line-height: normal;
   white-space: nowrap;
+}
+
+.dropdown-menu-container .no-click {
+  cursor: default;
+  color: #6e7683;
+}
+
+.dropdown-menu-container .no-click:hover {
+  background-color: inherit;
 }
 
 .dropdown-menu-container img {
@@ -91,3 +99,6 @@
   left: 0;
 }
 
+.dropdown-menu .line {
+  border-bottom: 1px solid #e4e4e4;
+}

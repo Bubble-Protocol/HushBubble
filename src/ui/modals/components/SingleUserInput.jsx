@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import React, { useEffect } from "react";
-import { TextBox } from "../../../components/TextBox";
-import { User } from "../../../../model/User";
+import { TextBox } from "../../components/TextBox";
+import { User } from "../../../model/User";
 
 export const SingleUserInput = ({ title, subtitle, value, setValue }) => {
 
@@ -28,7 +28,7 @@ export const SingleUserInput = ({ title, subtitle, value, setValue }) => {
     <div className="step-frame">
       <p className="step-title">{title}</p>
       {subtitle && <p className="small-text">{subtitle}</p>}
-      <TextBox text={userObj ? userObj.address : value.value || ''} onChange={v => {setValue(validateValue(v))}} />
+      <TextBox text={userObj ? userObj.account : value.value || ''} onChange={v => {setValue(validateValue(v))}} />
     </div>
   );
 };

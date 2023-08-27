@@ -36,7 +36,7 @@ export const CopySelector = ({
   }
 
   return (
-    <div className={"id-selector" + (selected ? ' selected' : '')} onClick={onClick || copyToClipboard}>
+    <div className={"id-selector" + (selected ? ' id-selector-selected' : '')} onClick={onClick || copyToClipboard}>
       <div className="selector-content">
         <div className="selector-title">{title}</div>
         <p className={"selector-" + (subtitleIsCode ? 'code' : 'text')} ref={subtitleRef} style={{ height }} >{text}</p>

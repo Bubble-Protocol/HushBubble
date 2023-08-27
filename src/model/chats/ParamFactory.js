@@ -32,18 +32,21 @@ function getParam(param, paramValues) {
     case 'true': return true;
     case 'false': return false;
     case 'member0': return paramValues.member0 || paramValues.members[0];
-    case 'member0.address': return paramValues.member0 ? paramValues.member0.address : paramValues.members[0].address;
-    case 'member0.publicKey': return paramValues.member0 ? paramValues.member0.publicKey : paramValues.members[0].publicKey;
+    case 'member0.account': return paramValues.member0 ? paramValues.member0.account : paramValues.members[0].account;
+    case 'member0.delegate.address': return paramValues.member0 ? paramValues.member0.delegate.address : paramValues.members[0].delegate.address;
+    case 'member0.delegate.publicKey': return paramValues.member0 ? paramValues.member0.delegate.publicKey : paramValues.members[0].delegate.publicKey;
     case 'member0.id': return paramValues.member0 ? paramValues.member0.id : paramValues.members[0].id;
     case 'member1': return paramValues.member1 || paramValues.members[1];
-    case 'member1.address': return paramValues.member1 ? paramValues.member1.address : paramValues.members[1].address;
-    case 'member1.publicKey': return paramValues.member1 ? paramValues.member1.publicKey : paramValues.members[1].publicKey;
+    case 'member1.account': return paramValues.member1 ? paramValues.member1.account : paramValues.members[1].account;
+    case 'member1.delegate.address': return paramValues.member1 ? paramValues.member1.delegate.address : paramValues.members[1].delegate.address;
+    case 'member1.delegate.publicKey': return paramValues.member1 ? paramValues.member1.delegate.publicKey : paramValues.members[1].delegate.publicKey;
     case 'member1.id': return paramValues.member1 ? paramValues.member1.id : paramValues.members[1].id;
-    case 'members.address': return paramValues.members.map(m => m.address);
-    case 'members.publicKey': return paramValues.members.map(m => m.publicKey);
+    case 'members.account': return paramValues.members.map(m => m.account);
+    case 'members.delegate.address': return paramValues.members.map(m => m.delegate.address);
+    case 'members.delegate.publicKey': return paramValues.members.map(m => m.delegate.publicKey);
     case 'members.id': return paramValues.members.map(m => m.id);
-    case 'my.address': return paramValues.myId ? paramValues.myId.address : 'hidden';
-    case 'my.checksum-address': return paramValues.myId ? Web3.utils.toChecksumAddress(paramValues.myId.address) : 'hidden';
+    case 'my.account': return paramValues.myId ? paramValues.myId.account : 'hidden';
+    case 'my.checksum-account': return paramValues.myId ? Web3.utils.toChecksumAddress(paramValues.myId.account) : 'hidden';
     case 'title': 
       assert.isString(paramValues.title, 'title');
       return paramValues.title

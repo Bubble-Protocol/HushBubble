@@ -3,12 +3,16 @@ import { Chat } from "../Chat";
 
 export class PublicChat extends Chat {
 
-  constructor(chatType, bubbleId, myId, deviceKey, delegation) {
-    super(chatType, 'PublicChat', bubbleId, myId, deviceKey, undefined, new NullUserManager(), delegation);
+  constructor(chatType, bubbleId, metadata, myId, sessionKey, delegation, contacts) {
+    super(chatType, bubbleId, metadata, myId, sessionKey, undefined, new NullUserManager(), delegation, contacts);
   }
 
   getTerminateKey() {
     return "0x00";
+  }
+
+  getChatInfo() {
+    return this.chatType.title;
   }
 
 }

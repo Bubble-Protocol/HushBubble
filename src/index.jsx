@@ -5,6 +5,7 @@ import { initialiseLocalStorage } from "./model/utils/LocalStorage";
 import { MessengerApp } from "./model/App";
 import { stateManager } from "./state-context";
 import { setFaviconWithCount } from "./ui/utils/favicon";
+import { addVisibilityListener, windowEvents } from "./ui/utils/browser-utils";
 
 //
 // Application
@@ -33,16 +34,10 @@ messenger.initialise()
   })
   .catch(console.error);
 
-window.addEventListener('online', () => messenger.setOnlineStatus(true));
-window.addEventListener('offline', () => messenger.setOnlineStatus(false));
-window.addEventListener('beforeunload', () => messenger.close());
-
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    // Primarily for mobiles, reconnect all websockets if needed
-    messenger.checkConnections();
-  }
-});
+windowEvents.on('online', () => messenger.setOnlineStatus(true));
+windowEvents.on('offline', () => messenger.setOnlineStatus(false));
+windowEvents.on('visible', () => messenger.checkConnections());
+// windowEvents.on('beforeunload', () => messenger.close());
 
 
 //

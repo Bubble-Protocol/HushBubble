@@ -24,7 +24,7 @@ export class MetamaskWallet extends Wallet {
   async isAvailable() {
 
     function detectMetamask() {
-      return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
+      return typeof window.ethereum !== 'undefined';
     }
   
     return new Promise((resolve) => {
@@ -40,8 +40,6 @@ export class MetamaskWallet extends Wallet {
       }
     })
     .then(available => {
-      // window.ethereum.on('accountsChanged', this._setAccounts.bind(this));
-      // window.ethereum.on('chainChanged', () => { this._setChain.bind(this) });
       this.state = WALLET_STATE.disconnected;
       return available;
     });
@@ -54,7 +52,10 @@ export class MetamaskWallet extends Wallet {
   async connect() {
     this.chainId = window.ethereum.networkVersion;
     return window.ethereum.request({ method: 'eth_requestAccounts' })
-      .then(this._setAccounts.bind(this))
+      .then(accounts => {
+        this._setAccounts(accounts);
+        window.ethereum.on('accountsChanged', this._setAccounts.bind(this));
+      })
   }
 
   async disconnect() {
@@ -113,12 +114,12 @@ export class MetamaskWallet extends Wallet {
 
   async send(contractAddress, abi, method, params=[], options={}) { 
     const contract = new web3.eth.Contract(abi, contractAddress);
-    return contract.methods[method](params).send({from: this.getAccount(), ...options});
+    return contract.methods[method](...params).send({from: this.getAccount(), ...options});
   }
 
   async call(contractAddress, abi, method, params=[]) {
     const contract = new web3.eth.Contract(abi, contractAddress);
-    return contract.methods[method](params).call({from: this.getAccount()});
+    return contract.methods[method](...params).call({from: this.getAccount()});
   }
 
   async getCode(contractAddress) {
@@ -140,7 +141,7 @@ export class MetamaskWallet extends Wallet {
     return window.ethereum.request({ method: 'eth_decrypt', params: [data, this.accounts[0]] });
   }
 
-  async switchChain(chainId) {
+  async switchChain(chainId, chainName) {
     if (!assert.isHexString(chainId)) chainId = '0x'+chainId.toString(16);
     try {
       await window.ethereum.request({
@@ -149,7 +150,7 @@ export class MetamaskWallet extends Wallet {
       });
     } catch (error) {
       if (error.code === 4902) {
-        throw new Error('Add the chain to Metamask and try again');
+        throw {code: 'chain-missing', message: 'Add the chain to Metamask and try again', chain: {id: parseInt(chainId), name: chainName}};
       }
       else console.warn('switchChain error:', error);
       throw error;
@@ -164,7 +165,8 @@ export class MetamaskWallet extends Wallet {
     const account = this.getAccount();
     return (hash) => {
       hash = hash.slice(0,2) === '0x' ? hash.slice(2) : hash;
-      return web3.eth.personal.sign(hash, account, '')
+      console.trace('signing message', hash, 'with account', account);
+      return web3.eth.personal.sign(hash, account, 'Login to HushBubble')
         .then(toEthereumSignature);
     }
   }

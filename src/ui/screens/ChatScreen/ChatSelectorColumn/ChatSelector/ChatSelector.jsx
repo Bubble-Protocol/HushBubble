@@ -24,27 +24,29 @@ export const ChatSelector = ({
 
   // Calculate fields
 
-  const { title, members, icon } = chatData;
+  const { title, icon } = chatData;
   const latestMessage = !messages ? {} : messages.length === 0 ? {} : messages.slice(-1)[0];
-  const otherMember = !members || members.length === 0 ? {} : members[0].id === myId.id ? members[1] : members[0];
 
   const enabled = chatState === 'open' && connectionState === 'open';
   const stateText = chatState !== 'open' ? chatState : connectionState;
 
   return (
-    <div className={"chat-selector" + (selected ? ' selected' : '') + (!enabled ? ' disabled' : '')} onClick={onClick}>
-      <img className="contact-icon" src={icon || otherMember.icon || defaultIcon} />
+    <div className={"chat-selector" + (selected ? ' chat-selector-selected' : '') + (!enabled ? ' disabled' : '')} onClick={onClick}>
+      <img className="contact-icon" src={icon || defaultIcon} />
       <div className="content">
         <div className="title-row">
-          <div className="title">{formatTitle(title || otherMember.title || otherMember.address)}</div>
-          {notifications === 0 && <div className="time">{formatTime(latestMessage.modified)}</div>}
+          <div className="title">{title || 'Unknown'}</div>
+          {notifications === 0 && <img className="chat-type-icon" src={chat.chatType.icon}></img>}
           {notifications > 0 && (
             <div className="notification">
               <div className="notification-text">{notifications > 99 ? '99' : notifications}</div>
             </div>
           )}
         </div>
-        <p className="text">{!enabled ? stateText : (latestMessage.text || '')}</p>
+        <div className="subtitle-row">
+          <p className="text">{!enabled ? stateText : (latestMessage.text || '')}</p>
+          <div className="time">{formatTime(latestMessage.modified)}</div>
+        </div>
       </div>
     </div>
   );
@@ -63,12 +65,6 @@ ChatSelector.propTypes = {
 //
 // Format functions
 //
-
-function formatTitle(title) {
-  if (title && title.length === 42 && title.slice(0,2) === '0x') return title.slice(2,6)+'..'+title.slice(-4);
-  else return title;
-}
-
 
 function formatTime(time) {
   if (!time) return '';

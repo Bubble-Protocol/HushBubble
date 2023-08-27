@@ -4,9 +4,9 @@ import { Modal } from "../../components/Modal/Modal";
 import { Button } from "../../components/Button/Button";
 import { ModalHostInfo } from "../../components/ModalHostInfo";
 import { ModalHostCustomise } from "../../components/ModalHostCustomise";
-import { SingleUserInput } from "./components/SingleUserInput";
-import { TextInput } from "./components/TextInput";
-import { IconInput } from "./components/IconInput";
+import { SingleUserInput } from "../components/SingleUserInput";
+import { TextInput } from "../components/TextInput";
+import { IconInput } from "../components/IconInput";
 import defaultIcon from "../../../assets/img/unknown-contact-icon.png";
 import { ecdsa } from '@bubble-protocol/crypto';
 import { assert } from '@bubble-protocol/client';
@@ -35,7 +35,7 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
     }
   }
 
-  const defaultChain = chains.find(c => c.id === session.chain.id) || chains[0];
+  const defaultChain = chains.find(c => c.id === session.getDefaultChainId()) || chains[0];
   const [state, setState] = useState('user-input');
   const [values, setValues] = useState(valuesIn);
   const [hostValues, setHostValues] = useState({chain: defaultChain, host: hosts[0], url: "", urlValid: false});
@@ -79,7 +79,7 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
     contents=
       <React.Fragment>
         {!customise && <ModalHostInfo chain={hostValues.chain} host={getHost()} onCustomise={() => setCustomised(true)} />}
-        {customise && <ModalHostCustomise chainTitle="Blockchain" hostTitle="Host" values={hostValues} chains={chains} hosts={hosts} onChange={v => {setCreateError(); setHostValues(v)}} onCollapse={() => setCustomised(false)} /> }   
+        {customise && <ModalHostCustomise chainTitle="Blockchain" hostTitle="Host" values={hostValues} chains={bubble.limitToChains ? chains.filter(c => bubble.limitToChains.includes(c.id)) : chains} hosts={hosts} onChange={v => {setCreateError(); setHostValues(v)}} onCollapse={() => setCustomised(false)} /> }   
         {
           params.map((param, i) => 
             {

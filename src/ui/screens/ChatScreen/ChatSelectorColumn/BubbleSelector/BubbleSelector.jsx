@@ -6,7 +6,7 @@ Please share your feedback here: https://form.asana.com/?k=uvp-HPgd3_hyoXRBw1IcN
 import PropTypes from "prop-types";
 import React from "react";
 import "./style.css";
-import defaultIcon from "../../../assets/img/unknown-contact-icon.png";
+import defaultIcon from "../../../../../assets/img/unknown-contact-icon.png";
 
 export const BubbleSelector = ({
   title = "Unknown",
@@ -17,9 +17,9 @@ export const BubbleSelector = ({
   onClick
 }) => {
   return (
-    <div className={"bubble-selector" + (selected ? ' selected' : '') + (disabled ? ' disabled' : '')} onClick={disabled ? undefined : onClick}>
-      {icon !== null && <img className="icon" src={icon} />}
-      <div className="selector-content">
+    <div className={"bubble-selector" + (selected ? ' bubble-selector-selected' : '') + (disabled ? ' bubble-selector-disabled' : '')} onClick={disabled ? undefined : onClick}>
+      {icon !== null && <img className={"icon" + (disabled ? ' disabled' : '')} src={icon} />}
+      <div className={"selector-content" + (disabled ? ' disabled' : '')}>
         <div className="selector-title">{title}</div>
         <p className="selector-text">{description}</p>
       </div>

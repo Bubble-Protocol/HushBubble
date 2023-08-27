@@ -1,5 +1,4 @@
 import { ChatDateRow } from "./ChatDateRow";
-import { Message } from "../../../components/Message";
 import defaultIcon from "../../../../assets/img/unknown-contact-icon.png";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
@@ -13,8 +12,11 @@ import { DeleteChatModal } from "../../../modals/DeleteChatModal";
 import { assert } from "@bubble-protocol/core";
 import { ManageMemberModal } from "../../../modals/ManageMemberModal";
 import { LeaveChatModal } from "../../../modals/LeaveChatModal";
+import { EditChatModal } from "../../../modals/EditChatModal/EditChatModal";
+import { ArrowLeft } from "../../../icons/ArrowLeft/ArrowLeft";
+import { MessageGroup } from "./MessageGroup";
 
-export const ChatFrame = ({ className, chat, hide, setModal }) => {
+export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setModal }) => {
 
   const [messageText, setMessageText] = useState('');
   const myId = stateManager.useStateData('myId')();
@@ -26,92 +28,148 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
   const online = stateManager.useStateData('online')();
   const config = stateManager.useStateData('config')();
   const chatFunctions = stateManager.useStateData('chat-functions')();
+  const notifications = stateManager.useStateData(chat.id+'-unread')();
 
+  //
   // Setup scroll-to-bottom
+  //
 
-  const endOfMessagesRef = useRef(null);
-  const chatColumnRef = useRef(null);
+  // ref notifications for scroll event handler
 
-  const atBottom = () => {
-    const { current: chatColumn } = chatColumnRef;
-    return chatColumn.scrollHeight - chatColumn.scrollTop - chatColumn.clientHeight < 1;
-  }
-
-  const scrollToBottom = (force = false) => {
-    const { current: chatColumn } = chatColumnRef;
-    if (chatColumn && messages.length) {
-      if (force || messages[messages.length - 1].from.id === myId.id) {
-        chatColumn.scrollTo(0, chatColumn.scrollHeight);
-      }
-      else if (!atBottom()) chatColumn.scrollTo(0, chatColumn.scrollHeight);
-    }
-  }
-
-  useEffect(scrollToBottom, [messages]);
-  useEffect(() => scrollToBottom(true), []);
-
-
-  // Clear notifications if user scrolls to bottom
+  const notificationsRef = useRef(notifications);
 
   useEffect(() => {
+    notificationsRef.current = notifications;
+  }, [notifications]);
 
-    const handleScroll = () => {
-      if (atBottom() && document.hasFocus()) chat.setReadTime(Date.now());
-    };
-  
-    const chatContainer = chatColumnRef.current;
-    if (chatContainer) {
-      chatContainer.addEventListener('scroll', handleScroll);
-    }
 
-    return () => {
-      if (chatContainer) {
-        chatContainer.removeEventListener('scroll', handleScroll);
+  // ref chatColumn for scroll to bottom functions
+
+  const chatColumnRef = useRef(null);
+
+  const isScrolledToBottom = () => {
+    const el = chatColumnRef.current;
+    return el ? el.scrollHeight - el.scrollTop - el.clientHeight < 96: false;
+  };
+
+  const scrollToBottom = () => {
+    const el = chatColumnRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  };
+
+  // Auto-scroll to the bottom if user is already at the bottom
+  useEffect(() => {
+    if (!hide && mobileVisible) {
+      if (isScrolledToBottom()) {
+        chat.setReadTime(Date.now())
+        scrollToBottom();
       }
-    };
+    }
+  }, [hide, messages]);
+
+  // Handle manual user scrolling
+  const handleScroll = () => {
+    if (notificationsRef.current > 0 && isScrolledToBottom()) {
+      chat.setReadTime(Date.now());
+    }
+  };
+
+  // useEffect for scroll event listener
+  useEffect(() => {
+    const el = chatColumnRef.current;
+    if (el) {
+      setTimeout(scrollToBottom, 1000);
+      el.addEventListener('scroll', () => handleScroll(notifications));
+      return () => el.removeEventListener('scroll', handleScroll);
+    }
   }, []);
 
 
   // Functions & Modals
 
   function postMessage() {
-    chat.postMessage({text: messageText}).then(() => setMessageText('')).catch(console.warn);
+    const text = messageText.trim();
+    if (!text) return;
+    chat.postMessage({text: text}).then(() => setMessageText('')).catch(console.warn);
     chat.setReadTime(Date.now());
+    scrollToBottom();
   }
 
+  const editModal = <EditChatModal chat={chat} onCancel={() => setModal()} onCompletion={() => setModal()} />;
   const leaveModal = <LeaveChatModal chat={chat} onLeave={chatFunctions.leave} onCancel={() => setModal()} onCompletion={() => setModal()} />;
   const deleteModal = <DeleteChatModal chat={chat} onDelete={chatFunctions.terminate} onCancel={() => setModal()} onCompletion={() => setModal()} />;
   const manageMemberModal = <ManageMemberModal chat={chat} onSave={chatFunctions.manageMembers} onCancel={() => setModal()} onCompletion={() => setModal()} />;
 
 
-  // Create messages view
+  // Group messages
   
-  let lastDate = new Date(0);
-  const messageElements = [];
-  messages.forEach((msg, index) => {
-    const date = new Date(msg.created);
-    if (date.toDateString() !== lastDate.toDateString()) {
-      messageElements.push(<ChatDateRow key={'date-'+index} date={date} />);
-      lastDate = date;
-    };
-    messageElements.push(<Message key={index} date={date} text={msg.text} icon={msg.from.icon} title={msg.from.title || msg.from.address} remote={msg.from.id !== myId.id} />);
-  })
+  const groupedMessages = [];
+  let currentGroup = null;
+  let lastDateStr = new Date(0).toDateString();
 
+  messages.forEach((msg) => {
+    const msgDateStr = new Date(msg.created).toDateString();
+    if (!currentGroup || currentGroup.from.account !== msg.from.account || lastDateStr !== msgDateStr) {
+      if (currentGroup) groupedMessages.push(currentGroup);
+      currentGroup = { from: msg.from, messages: [] };
+    }
+    currentGroup.messages.push(msg);
+    lastDateStr = msgDateStr;
+  });
+
+  if (currentGroup) groupedMessages.push(currentGroup);
+
+  
+  // let lastDate = new Date(0);
+  // const messageElements = [];
+  // messages.forEach((msg, index) => {
+  //   const date = new Date(msg.created);
+  //   if (date.toDateString() !== lastDate.toDateString()) {
+  //     messageElements.push(<ChatDateRow key={'date-'+index} date={date} />);
+  //     lastDate = date;
+  //   };
+  //   messageElements.push(<Message key={index} date={date} text={msg.text} icon={msg.from.icon} title={msg.from.getKnownAs()} remote={msg.from.account !== myId.account} />);
+  // })
+
+  lastDateStr = new Date(0).toDateString();
+
+  const messageElements = groupedMessages.flatMap(group => {
+    const firstMessageDate = new Date(group.messages[0].created);
+    const dateStr = firstMessageDate.toDateString();
+    let elements = [];
+  
+    if (dateStr !== lastDateStr) {
+      elements.push(<ChatDateRow key={'date-' + group.messages[0].id} date={firstMessageDate} />);
+      lastDateStr = dateStr;
+    }
+
+    elements.push(
+      <MessageGroup
+        key={group.messages[0].id} 
+        from={group.from} 
+        isRemote={group.from.account !== myId.account}
+        messages={group.messages}
+      />
+    );
+
+    return elements;
+  });
+  
+  // Chat icons
+  
   let chatIcons = chatData.icon 
     ? [<img key={0} className="chat-header-icon" src={chatData.icon} />] 
     : chatData.members 
-      ? chatData.members.filter(member => member.icon).slice(0,3).map((member, index) => <img key={index} className="chat-header-icon" src={member.icon} />)
+      ? chatData.members
+        .filter(member => member.icon)
+        .filter(member => member.id !== myId.id)
+        .slice(0,3)
+        .map((member, index) => <img key={index} className="chat-header-icon" src={member.icon} />)
       : []
   if (chatIcons.length === 0) chatIcons = [<img key={0} className="chat-header-icon" src={defaultIcon} />];
   
   function getTitle() {
-    let title = chatData.title;
-    if (!title) {
-      if (!assert.isArray(chatData.members)) return 'Unknown';
-      if (chatData.members.length > 2) return 'Group';
-      const otherMember = chatData.members.find(m => m.id && m.id !== myId.id)
-      if (otherMember) title = otherMember.address;
-    }
+    let title = chatData.title || 'Unknown';
     if (!assert.isHexString(title) || title.length <= 16) return title;
     const mobileMediaQuery = window.matchMedia('(max-width: 640px)');
     return mobileMediaQuery.matches ? title.slice(0,6) + '..' + title.slice(-4) : title;
@@ -119,13 +177,14 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
 
   const enabled = chatState === 'open' && connectionState === 'open';
   const stateText = chatState !== 'open' ? chatState : connectionState;
-  
+  const chatInfo = chat.getChatInfo();
+
   return (
     <div className={"chat-frame " + className + (hide ? ' hide' : '')} >
 
       {/* Header */}
       <div className="chat-header">
-        <div className="chat-header-menu-left mobile"></div>
+        <ArrowLeft className="chat-header-menu-left button-like mobile" color="#0F1217" onClick={onBack} />
         <div className="chat-header-icons no-mobile">
           <div className="chat-header-member-icons">
             {chatIcons}
@@ -138,11 +197,12 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
         </div>
         <div className="chat-header-title-row">
           <div className="chat-header-title">{getTitle()}</div>
-          {chatData.members && chatData.members.length > 0 && <div className="chat-header-subtext">{chatData.members.length + ' member' + (chatData.members.length === 1 ? '' : 's')}</div>}
+          {chatInfo && <div className="chat-header-subtext">{chatInfo}</div>}
         </div>
         <div className="chat-header-menu">
           <DropdownMenu direction="bottom-left" options={[
             {name: "Copy Chat Link", onClick: () => navigator.clipboard.writeText(config.appUrl+'?chat='+chat.getInvite())},
+            chat.chatType.metadata.title || chat.chatType.metadata.icon ? {name: 'Edit Chat', onClick: () => setModal(editModal)} : null,
             capabilities.canLeave || chatState !== 'open' ? {name: "Leave Chat", onClick: () => setModal(leaveModal)} : null,
             capabilities.canDelete ? {name: "Delete Chat", onClick: () => setModal(deleteModal)} : null
           ].filter(Boolean)} >
@@ -155,7 +215,6 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
       <div className="chat-messages" ref={chatColumnRef}>
         {messageElements}
         <div></div>
-        <div ref={endOfMessagesRef} />
       </div>
 
       {/* Footer */}
@@ -183,6 +242,7 @@ export const ChatFrame = ({ className, chat, hide, setModal }) => {
 
 ChatFrame.propTypes = {
   className: PropTypes.string,
+  mobileVisible: PropTypes.bool,
   chat: PropTypes.object.isRequired,
   hide: PropTypes.bool
 };

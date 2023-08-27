@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React from "react";
-import { TextBox } from "../../../components/TextBox";
+import { TextBox } from "../../components/TextBox";
 
 export const TextInput = ({ title, subtitle, value, setValue, validatorFn = (v)=>!!v }) => {
 

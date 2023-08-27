@@ -9,27 +9,28 @@ import React from "react";
 export const ModalHostInfo = ({
   chain,
   host,
-  onCustomise
+  onCustomise,
+  centered
 }) => {
   return (
-    <div className="step-frame">
+    <div className={"step-frame"+(centered ? '-centered' : '')}>
       <div className="info-frame">
         <div className="row">
-          <div className="label" style={{width: 80}}>Chain:</div>
+          <div className="label" style={{width: 40}}>Chain:</div>
           <div className="field">
             {chain.name}
             {chain.icon && <img className="logo-small" src={chain.icon}/>}
           </div>
         </div>
         <div className="row">
-          <div className="label" style={{width: 80}}>Chat Host:</div>
+          <div className="label" style={{width: 40}}>Host:</div>
           <div className="field">
             {host.name}
             {host.icon && <img className="logo-small" src={host.icon}/>}
           </div>
         </div>
       </div>
-      <div className="small-text">Other chains and wallet connectivity coming soon!</div>
+      {onCustomise && <div className="text-button" onClick={onCustomise}>customise</div>}
     </div>
   );
 };
@@ -38,6 +39,7 @@ export const ModalHostInfo = ({
 ModalHostInfo.propTypes = {
   chain: PropTypes.object.isRequired,
   host: PropTypes.object.isRequired,
-  onCustomise: PropTypes.func.isRequired,
+  onCustomise: PropTypes.func,
+  centered: PropTypes.bool
 };
 

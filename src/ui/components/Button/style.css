@@ -29,7 +29,7 @@
   width: fit-content;
 }
 
-.disabled {
+.button .disabled {
   opacity: 50%;
 }
 

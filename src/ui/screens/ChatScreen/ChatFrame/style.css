@@ -122,6 +122,7 @@
 
 .chat-frame .chat-header-menu-left {
   width: 32px;
+  height: 32px;
 }
 
 .chat-frame .chat-messages {
@@ -130,7 +131,7 @@
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
   padding: 32px 32px;
   align-items: stretch;
 }
@@ -200,10 +201,6 @@
 
 @media only screen and (max-width: 800px) {
 
-  .chat-frame {
-    overflow-y: scroll;
-  }
-
   .chat-frame .chat-header-menu {
     width: 32px;
     padding: 0;
@@ -211,7 +208,6 @@
   
   .chat-frame .chat-messages {
     padding: 0 8px;
-    overflow-y: initial;
   }
 
   .desktop .mobile {
@@ -228,6 +224,17 @@
   
   .chat-frame .chat-header {
     padding: 4px 8px;
+  }
+  
+  .chat-frame .chat-footer {
+    gap: 4px;
+    padding: 0px 16px;
+  }
+  
+  .chat-frame .chat-footer-contents {
+    gap: 4px;
+    padding: 10px 0px 16px;
+    position: relative;
   }
   
 }
