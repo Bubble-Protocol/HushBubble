@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-import "./ChatBubble.sol";
-import "./AccessControlBits.sol";
+import "../ChatBubble.sol";
+import "../../AccessControlBits.sol";
 
 // TODO When wallet connectivity is available, change this chat to use the terminateKey
 // TODO Create a multi-user manager that reverts to public access and a public encryption policy if no user metadata file exists for the user.

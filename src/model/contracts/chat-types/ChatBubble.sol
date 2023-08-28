@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./AccessControlledStorage.sol";
+import "../AccessControlledStorage.sol";
 
 
 abstract contract ChatBubble is AccessControlledStorage {

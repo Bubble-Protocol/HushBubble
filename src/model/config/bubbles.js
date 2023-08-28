@@ -1,10 +1,10 @@
-import * as oneToOneChatSourceCode from "../contracts/OneToOneBubble.json";
-import * as publicChatSourceCode from "../contracts/PublicBubble.json";
-import * as publicEventChatSourceCode from "../contracts/PublicEventBubble.json";
-import * as groupChatSourceCode from "../contracts/GroupBubble.json";
-import * as erc721ChatSourceCode from "../contracts/ERC721Bubble.json";
-import * as erc1155ChatSourceCode from "../contracts/ERC1155Bubble.json";
-import * as friendtechSourceCode from "../contracts/FriendTechBubble.json";
+import * as oneToOneChatSourceCode from "../contracts/chat-types/OneToOne/OneToOneBubble.json";
+import * as publicChatSourceCode from "../contracts/chat-types/Public/PublicBubble.json";
+import * as publicEventChatSourceCode from "../contracts/chat-types/PublicEvent/PublicEventBubble.json";
+import * as groupChatSourceCode from "../contracts/chat-types/Group/GroupBubble.json";
+import * as erc721ChatSourceCode from "../contracts/chat-types/ERC721/ERC721Bubble.json";
+import * as erc1155ChatSourceCode from "../contracts/chat-types/ERC1155/ERC1155Bubble.json";
+import * as friendtechSourceCode from "../contracts/chat-types/FriendTech/FriendTechBubble.json";
 import simpleChatIcon from "../../assets/img/users.png";
 import globeIcon from "../../assets/img/globe.png";
 import groupIcon from "../../assets/img/group.png";

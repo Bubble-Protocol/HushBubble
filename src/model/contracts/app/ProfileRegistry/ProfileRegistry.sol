@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-import "./AccessControlledStorage.sol";
-import "./AccessControlBits.sol";
+import "../..AccessControlledStorage.sol";
+import "../..AccessControlBits.sol";
 
 
 contract ProfileRegistry is AccessControlledStorage {

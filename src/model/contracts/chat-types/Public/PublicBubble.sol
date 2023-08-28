@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-import "./ChatBubble.sol";
-import "./AccessControlBits.sol";
+import "../ChatBubble.sol";
+import "../../AccessControlBits.sol";
 
 
 contract PublicBubble is ChatBubble {
