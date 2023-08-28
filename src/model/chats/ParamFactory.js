@@ -31,12 +31,10 @@ function getParam(param, paramValues) {
   switch(param) {
     case 'true': return true;
     case 'false': return false;
-    case 'member0': return paramValues.member0 || paramValues.members[0];
     case 'member0.account': return paramValues.member0 ? paramValues.member0.account : paramValues.members[0].account;
     case 'member0.delegate.address': return paramValues.member0 ? paramValues.member0.delegate.address : paramValues.members[0].delegate.address;
     case 'member0.delegate.publicKey': return paramValues.member0 ? paramValues.member0.delegate.publicKey : paramValues.members[0].delegate.publicKey;
     case 'member0.id': return paramValues.member0 ? paramValues.member0.id : paramValues.members[0].id;
-    case 'member1': return paramValues.member1 || paramValues.members[1];
     case 'member1.account': return paramValues.member1 ? paramValues.member1.account : paramValues.members[1].account;
     case 'member1.delegate.address': return paramValues.member1 ? paramValues.member1.delegate.address : paramValues.members[1].delegate.address;
     case 'member1.delegate.publicKey': return paramValues.member1 ? paramValues.member1.delegate.publicKey : paramValues.members[1].delegate.publicKey;
