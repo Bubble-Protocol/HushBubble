@@ -27,7 +27,7 @@ export const DEFAULT_BUBBLES = [
       canConstruct: false,
       canDelete: false
     },
-    icon: simpleChatIcon
+    icon: globeIcon
   },
   {
     title: "One-to-One Chat", 
