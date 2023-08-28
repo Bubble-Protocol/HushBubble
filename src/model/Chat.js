@@ -34,6 +34,12 @@ const STATE = {
   terminated: 'terminated'
 }
 
+const MESSAGE_STATE = {
+  sent: undefined,
+  sending: 'sending',
+  failed: 'failed'
+}
+
 export class Chat extends Bubble {
 
   state = STATE.uninitialised;
@@ -168,25 +174,50 @@ export class Chat extends Bubble {
   }
 
   postMessage(message) {
-    message.from = this.myId.getId();
     const isNew = message.id === undefined;
-    if (isNew) message.id = Date.now() + Math.floor(Math.random() * Math.pow(10, 6));
-    const method = isNew ? this.append.bind(this) : this.write.bind(this);
-    method(CONTENT.textChat + '/' + message.id, JSON.stringify(message))
+    if (isNew) message.id = '' + Date.now() + Math.floor(Math.random() * Math.pow(10, 6));
+    message.from = this.myId;
+    message.created = Date.now();
+    message.modified = message.created;
+    this._sendMessage(message, isNew);
+    return Promise.resolve();
+  }
+
+  resendFailedMessages() {
+    let msgList = [];
+    this.messages.forEach(m => {
+      if (m.state === MESSAGE_STATE.failed) msgList.push(m);
+    })
+    if (msgList.length > 0) {
+      // resend one message and if successful resend the rest
+      this._sendMessage(msgList[0])
+        .then(() => {
+          msgList = msgList.slice(1);
+          msgList.forEach(m => this._sendMessage(m));
+        })
+    }
+  }
+
+  _sendMessage(message, append = false) {
+    message.state = MESSAGE_STATE.sending;
+    message.appending = append;
+    this._setMessage(message);
+    const plainMessage = {
+      text: message.text, 
+      from: this.myId.getId()
+    }
+    const method = append ? this.append.bind(this) : this.write.bind(this);
+    return method(CONTENT.textChat + '/' + message.id, JSON.stringify(plainMessage))
       .then(() => {
-        message.created = Date.now();
-        message.modified = message.created;
+        message.state = MESSAGE_STATE.sent;
         this._setMessage(message);
       })
       .catch(error => {
+        message.state = MESSAGE_STATE.failed;
+        this._setMessage(message);
         console.warn(this.id, 'failed to post message');
         this._handleError(error);
       })
-    message.pending = true;
-    message.created = Date.now();
-    message.modified = message.created;
-    this._setMessage(message);
-    return Promise.resolve();
   }
 
   async setMetadata(metadata) {
@@ -304,13 +335,14 @@ export class Chat extends Bubble {
         try {
           console.trace(this.id, 'message', messageJson);
           const message = JSON.parse(messageJson);
+          message.id = messageDetails.name.split('/')[1];
           message.created = messageDetails.created;
           message.modified = messageDetails.modified;
           if (assert.isString(message.from)) this._setMessage(message);
           else console.warn('invalid message rxd', message);
         }
         catch(error) {
-          console.warn(this.id, 'message parse error', error);
+          console.warn(this.id, 'message parse error', messageJson, error);
         }
       })
       .catch(error => {
@@ -330,13 +362,12 @@ export class Chat extends Bubble {
   }
 
   _setMessage(message) {
+    const index = this.messages.findIndex(m => m.id === message.id);
     message.from = this.contacts.getContact(message.from, this._handleContactUpdate);
     message.conversationId = this.id;
-    const index = this.messages.findIndex(m => m.id === message.id);
-    if (index >=0) this.messages[index] = message;
-    else this.messages.push(message);
+    if (index < 0) this.messages.push(message);
+    else this.messages[index] = message;
     this.messages.sort((a,b) => a.created - b.created);
-    this.messages = [...this.messages];  // mutate to trigger any react hooks
     localStorage.writeMessage({...message, from: message.from.id});
     stateManager.dispatch(this.id+'-messages', this.messages);
     this.listeners.notifyListeners('new-message-notification');

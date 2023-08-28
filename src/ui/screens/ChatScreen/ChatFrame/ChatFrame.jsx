@@ -120,17 +120,6 @@ export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setMod
   if (currentGroup) groupedMessages.push(currentGroup);
 
   
-  // let lastDate = new Date(0);
-  // const messageElements = [];
-  // messages.forEach((msg, index) => {
-  //   const date = new Date(msg.created);
-  //   if (date.toDateString() !== lastDate.toDateString()) {
-  //     messageElements.push(<ChatDateRow key={'date-'+index} date={date} />);
-  //     lastDate = date;
-  //   };
-  //   messageElements.push(<Message key={index} date={date} text={msg.text} icon={msg.from.icon} title={msg.from.getKnownAs()} remote={msg.from.account !== myId.account} />);
-  // })
-
   lastDateStr = new Date(0).toDateString();
 
   const messageElements = groupedMessages.flatMap(group => {
@@ -149,6 +138,7 @@ export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setMod
         from={group.from} 
         isRemote={group.from.account !== myId.account}
         messages={group.messages}
+        onResend={chat.resendFailedMessages.bind(chat)}
       />
     );
 

@@ -1,13 +1,28 @@
 .message {
   flex: 1;
-  align-items: flex-end;
+  align-items: center;
   display: flex;
   gap: 4px;
+  position: relative;
 }
 
 .message-remote {
   align-self: flex-end;
   text-align: right;
+}
+
+.message img.failed-icon {
+  /* position: absolute; */
+  width: 16px;
+  height: 16px;
+  display: block;
+  z-index: 1;
+  /* left: -6px;
+  top: -6px; */
+}
+
+.message img.failed-icon:hover {
+  cursor: pointer;
 }
 
 .message .chat-message {
