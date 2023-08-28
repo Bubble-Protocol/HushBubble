@@ -169,8 +169,10 @@ export class Chat extends Bubble {
 
   postMessage(message) {
     message.from = this.myId.getId();
-    if (message.id === undefined) message.id = Date.now() + Math.floor(Math.random() * Math.pow(10, 6));
-    this.write(CONTENT.textChat + '/' + message.id, JSON.stringify(message))
+    const isNew = message.id === undefined;
+    if (isNew) message.id = Date.now() + Math.floor(Math.random() * Math.pow(10, 6));
+    const method = isNew ? this.append.bind(this) : this.write.bind(this);
+    method(CONTENT.textChat + '/' + message.id, JSON.stringify(message))
       .then(() => {
         message.created = Date.now();
         message.modified = message.created;
