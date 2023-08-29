@@ -1,5 +1,6 @@
 import { ChatDateRow } from "./ChatDateRow";
 import defaultIcon from "../../../../assets/img/unknown-contact-icon.png";
+import mobileSendButton from "../../../../assets/img/mobile-send-button.png";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import "./style.css";
@@ -222,7 +223,8 @@ export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setMod
           />
           <div className="chat-entry-menu">
             <div className="spacer" />
-            <Button title="Send" onClick={postMessage} disabled={!online || !enabled || !capabilities.canWrite} />
+            <Button className="no-mobile" title="Send" onClick={postMessage} disabled={!online || !enabled || !capabilities.canWrite} />
+            <img className=" mobile-send-button mobile" src={mobileSendButton} onClick={() => online && enabled && capabilities.canWrite && postMessage()} ></img>
           </div>
         </div>
       </div>

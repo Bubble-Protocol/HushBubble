@@ -160,6 +160,7 @@
 }
 
 .chat-frame .chat-text-box {
+  flex: 1;
   align-self: stretch;
   color: #0f1217;
   font-size: 16px;
@@ -199,6 +200,11 @@
   position: relative;
 }
 
+.chat-frame .mobile-send-button {
+  width: 36px;
+  height: 36px;
+}
+
 @media only screen and (max-width: 800px) {
 
   .chat-frame .chat-header-menu {
@@ -232,6 +238,7 @@
   }
   
   .chat-frame .chat-footer-contents {
+    flex-direction: row;
     gap: 4px;
     padding: 10px 0px 16px;
     position: relative;

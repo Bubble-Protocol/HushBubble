@@ -7,15 +7,16 @@ import PropTypes from "prop-types";
 import React from "react";
 import "./style.css";
 
-export const Button = ({ title, onClick, disabled=false }) => {
+export const Button = ({ className, title, onClick, disabled=false }) => {
   return (
-    <div className={"button" + (disabled ? " disabled" : " enabled")}>
+    <div className={className+" button" + (disabled ? " disabled" : " enabled")}>
       <div className="button-text" onClick={e => {if (!disabled) onClick(e)}}>{title}</div>
     </div>
   );
 };
 
 Button.propTypes = {
+  className: PropTypes.string,
   title: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
 };
