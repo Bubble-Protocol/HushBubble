@@ -16,7 +16,7 @@ export const MessageGroup = ({
       {!iconHidden && <img className="icon" src={from.icon || defaultIcon} />}
       <div className="messages">
         {messages.map(msg => <Message key={msg.id} isRemote={isRemote} message={msg} onResend={onResend} />)}
-        {isRemote && <div className="name-text">{from.getKnownAs()}</div>}
+        {isRemote && !iconHidden && <div className="name-text">{from.getKnownAs()}</div>}
       </div>
     </div>
   );
