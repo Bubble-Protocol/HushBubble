@@ -138,6 +138,7 @@ export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setMod
         from={group.from} 
         isRemote={group.from.account !== myId.account}
         messages={group.messages}
+        iconHidden={chat.chatType.id.category === 'one-to-one'}
         onResend={chat.resendFailedMessages.bind(chat)}
       />
     );

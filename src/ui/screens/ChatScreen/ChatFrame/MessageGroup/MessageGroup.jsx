@@ -8,11 +8,12 @@ export const MessageGroup = ({
   isRemote,
   from,
   messages,
+  iconHidden = false,
   onResend,
 }) => {
   return (
     <div className={"message-group"+(!isRemote ? ' message-group-remote' : '')}>
-      <img className="icon" src={from.icon || defaultIcon} />
+      {!iconHidden && <img className="icon" src={from.icon || defaultIcon} />}
       <div className="messages">
         {messages.map(msg => <Message key={msg.id} isRemote={isRemote} message={msg} onResend={onResend} />)}
         {isRemote && <div className="name-text">{from.getKnownAs()}</div>}
@@ -25,5 +26,6 @@ MessageGroup.propTypes = {
   from: PropTypes.object.isRequired,
   isRemote: PropTypes.bool.isRequired,
   messages: PropTypes.array.isRequired,
+  iconHidden: PropTypes.bool,
   onResend: PropTypes.func
 };
