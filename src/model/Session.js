@@ -77,7 +77,7 @@ export class Session {
       .then(() => {
         if (this.settings.connectionRelay) {
           this.connectionRelay = new HushBubbleConnectRelay(this.sessionKey, invite => this.receiveInvite(invite, false));
-          return this.connectionRelay.monitor();
+          this.connectionRelay.monitor();
         }
       })
       .then(() => {
