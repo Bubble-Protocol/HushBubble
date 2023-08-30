@@ -94,7 +94,7 @@ export const DEFAULT_BUBBLES = [
   {
     title: "friend.tech Chat", 
     description: "Chat with your friend.tech key holders", 
-    details: "Only friend.tech key holders with one or more keys can access the chat. You MUST be logged in to HushBubble with your friend.tech account.", 
+    details: "Only your friend.tech key holders can access the chat. You MUST be logged in to HushBubble with your friend.tech account to create this chat.", 
     id: {category: 'public', bytecodeHash: '928726f9072f58097631fc0d852b6666b48559406f9637cd0374e4f5af714f17'}, 
     classType: 'PublicChat', 
     sourceCode: friendtechSourceCode.default, 
