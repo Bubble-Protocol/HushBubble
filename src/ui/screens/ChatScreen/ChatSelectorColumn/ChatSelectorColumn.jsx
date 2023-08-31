@@ -94,7 +94,7 @@ export const ChatSelectorColumn = ({className, mobileVisible, chats, selectedCha
               </div>
             </div>
             <div></div>
-            <div className="bubble-list">
+            <div className="chat-list">
               <CopySelector title="Your Connection Link" subtitle="Share this link to allow others to send you connection requests." value={config.appUrl + '?connect=' + myId.id} />
               {
                 config.bubbles.filter(b => b.actions.canConstruct).map((bubble, index) => {
