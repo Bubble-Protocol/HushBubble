@@ -41,6 +41,7 @@ export class MessengerApp {
   }
 
   initialise() {
+    const wallet = new MetamaskWallet();
     const lastSession = this._loadState();
     if (!this.deviceKey) {
       this.deviceKey = new ecdsa.Key();
@@ -48,9 +49,8 @@ export class MessengerApp {
     }
     if (!lastSession) {
       this._setAppState(STATE.initialised);
-      return Promise.resolve();
+      return wallet.isAvailable();
     }
-    const wallet = new MetamaskWallet();
     return wallet.isAvailable()
       .then(available => {
         if (!available) this._setAppState(STATE.noWallet);
@@ -171,6 +171,7 @@ export class MessengerApp {
   _setAppState(state) {
     this.state = state;
     stateManager.dispatch('app-state', this.state);
+    console.debug('app-state', this.state)
   }
 
 }

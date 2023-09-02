@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import "./style.css";
 import { stateManager } from "../../../state-context";
 
-export const WelcomeScreen = ({ walletAvailable }) => {
-
-  const [error, setError] = useState(walletAvailable ? undefined : new Error('Please install a Web3 wallet such as Metamask to use this app'));
-  const [chainError, setChainError] = useState();
-  const [delegateRequest, setDelegateRequest] = useState();
+export const WelcomeScreen = () => {
 
   const wallet = stateManager.useStateData("wallet-functions")();
+  const appState = stateManager.useStateData("app-state")();
+
+  const [error, setError] = useState();
+  const [chainError, setChainError] = useState();
+  const [delegateRequest, setDelegateRequest] = useState();
 
   function connectWallet() {
     wallet.connect()
@@ -26,10 +27,13 @@ export const WelcomeScreen = ({ walletAvailable }) => {
     wallet.connect(delegateRequest.delegation).catch(setError);
   }
 
+  const walletAvailable = appState === 'no-wallet';
+
   return (
     <div className="welcome-screen" >
       {walletAvailable && !delegateRequest && <div className="connect-text" onClick={connectWallet}>Connect Wallet to Begin</div>}
       {walletAvailable && delegateRequest && <div className="connect-text" onClick={signDelegation}>Login On This Device</div>}
+      {!walletAvailable && <div className="error-text">No Web3 wallet detected.<br/><br/>Please install a Web3 wallet such as Metamask to use this app</div>}
       {error && <div className="error-text">{error.message}</div>}
       {chainError && <div className="add-chain-text">The {chainError.name} chain is not available in your wallet.<br/>Visit <a href={"https://chainlist.org/?search="+chainError.id} target="_blank">chainlist.org</a> to add the chain to your wallet then try again.</div>}
     </div>

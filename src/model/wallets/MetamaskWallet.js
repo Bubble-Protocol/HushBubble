@@ -21,6 +21,7 @@ export class MetamaskWallet extends Wallet {
   chainId;
   accounts = [];
 
+
   async isAvailable() {
 
     function detectMetamask() {
@@ -30,17 +31,12 @@ export class MetamaskWallet extends Wallet {
     return new Promise((resolve) => {
       if (detectMetamask()) resolve(true);
       else {
-        let eventFired = false;
-        window.addEventListener('ethereum#initialized', () => {eventFired = true; resolve(detectMetamask())}, {
-          once: true,
-        });
-        setTimeout(() => {
-          resolve(detectMetamask())
-        }, 3000);
+        window.addEventListener('ethereum#initialized', () => resolve(detectMetamask()), {once: true});
+        setTimeout(() => resolve(detectMetamask()), 3000);
       }
     })
     .then(available => {
-      this.state = WALLET_STATE.disconnected;
+      if (available) this.state = WALLET_STATE.disconnected;
       return available;
     });
   }
@@ -50,33 +46,34 @@ export class MetamaskWallet extends Wallet {
   }
 
   async connect() {
-    this.chainId = window.ethereum.networkVersion;
+    if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
     return window.ethereum.request({ method: 'eth_requestAccounts' })
       .then(accounts => {
+        this.chainId = window.ethereum.networkVersion;
         this._setAccounts(accounts);
         window.ethereum.on('accountsChanged', this._setAccounts.bind(this));
       })
   }
 
   async disconnect() {
-    if (this.state === WALLET_STATE.unavailable) throw new Error('wallet is not available');
+    if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
     this.state = WALLET_STATE.disconnected;
     this.publicKey = undefined;
     return Promise.resolve();
   }
   
   getAccount() {
-    if (this.state === WALLET_STATE.unavailable) throw new Error('wallet is not available');
+    if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
     return this.accounts[0];
   }
   
   getAccounts() {
-    if (this.state === WALLET_STATE.unavailable) throw new Error('wallet is not available');
+    if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
     return this.accounts;
   }
 
   getChain() {
-    if (this.state === WALLET_STATE.unavailable) throw new Error('wallet is not available');
+    if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
     return parseInt(this.chainId);
   }
 
@@ -92,17 +89,17 @@ export class MetamaskWallet extends Wallet {
   }
 
   on(event, listener) {
-    if (this.state === WALLET_STATE.unavailable) throw new Error('wallet is not available');
+    if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
     window.ethereum.on(event, listener);
   }
 
   off(event, listener) {
-    if (this.state === WALLET_STATE.unavailable) throw new Error('wallet is not available');
+    if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
     window.ethereum.off(event, listener);
   }
 
   async deploy(sourceCode, params=[], options={}) {
-    if (this.state === WALLET_STATE.unavailable) throw new Error('wallet is not available');
+    if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
     const web3 = new Web3(window.ethereum);
     const contract = new web3.eth.Contract(sourceCode.abi);
     return contract.deploy({ data: sourceCode.bytecode || sourceCode.bin, arguments: params, ...options })
