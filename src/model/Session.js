@@ -14,13 +14,11 @@ import { ProfileRegistry } from "./services/ProfileRegistry";
 import { Contacts } from "./Contacts";
 import { Wallet } from "./Wallet";
 
-const CONSTRUCTION_STATE = {
+const STATE = {
   closed: 'closed',
-  new: 'new',
-  contractDeployed: 'contract-deployed',
-  open: 'open',
-  connecting: 'connecting',
-  failed: 'failed'
+  initialising: 'initialising',
+  notLoggedIn: 'not-logged-in',
+  loggedIn: 'logged-in'
 }
 
 const DEFAULT_SETTINGS = {
@@ -30,7 +28,7 @@ const DEFAULT_SETTINGS = {
 
 export class Session {
 
-  constructionState = CONSTRUCTION_STATE.closed;
+  constructionState = STATE.closed;
   account;
   id;
   wallet;
@@ -47,11 +45,11 @@ export class Session {
     this.terminateChat = this.terminateChat.bind(this);
   }
 
-  async open(wallet, delegate) {
+  async open(wallet) {
     console.trace('opening session', this);
     assert.isInstanceOf(wallet, Wallet, 'wallet');
     this.wallet = wallet;
-    this.state = CONSTRUCTION_STATE.new;
+    this.state = STATE.initialising;
     return this._loadState()
       .then(exists => {
         if (!exists) {
@@ -59,22 +57,10 @@ export class Session {
           this.myId = new User({account: this.id, delegate: this.sessionKey.cPublicKey});
           this._saveState();
         }
+        if (!this.keyDelegation) throw {code: 'missing-delegation', message: 'missing delegation'}
       })
       .then(() => {
-        if (!this.keyDelegation) {
-          if (!assert.isInstanceOf(delegate, Delegation)) {
-            const delegation = new Delegation(this.myId.delegate.address, 'never');
-            delegation.permitAccessToAllBubbles();
-            throw {code: 'requires-delegate', message: 'session requires delegate', delegateRequest: {delegation}};
-          }
-          return delegate.sign(this.wallet.getSignFunction())
-            .then(() => {
-              this.keyDelegation = delegate;
-              this._saveState();
-            })
-        }
-      })
-      .then(() => {
+        this.state = STATE.loggedIn;
         if (this.settings.connectionRelay) {
           this.connectionRelay = new HushBubbleConnectRelay(this.sessionKey, invite => this.receiveInvite(invite, false));
           this.connectionRelay.monitor();
@@ -89,7 +75,22 @@ export class Session {
         this.contacts = new Contacts(this.profileRegistry);
         return this.profileRegistry.initialise();
       })
-      .then(this._initialiseConversations.bind(this));
+      .then(this._initialiseConversations.bind(this))
+      .catch(error => {
+        if (error.code === 'missing-delegation') this.state = STATE.notLoggedIn;
+        else throw error;
+      });
+  }
+
+  async logIn() {
+    const delegation = new Delegation(this.myId.delegate.address, 'never');
+    delegation.permitAccessToAllBubbles();
+    return delegation.sign(this.wallet.getSignFunction())
+      .then(() => {
+        this.keyDelegation = delegation;
+        this._saveState();
+        return this.open(this.wallet);
+      });
   }
 
   async reconnect() {

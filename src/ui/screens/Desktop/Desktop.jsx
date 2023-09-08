@@ -3,7 +3,6 @@ import "./style.css";
 import { stateManager } from "../../../state-context";
 import { ChatScreen } from "../ChatScreen/ChatScreen";
 import { setFaviconWithCount } from "../../utils/favicon";
-import { PopularMoreVertical1 } from "../../icons/PopularMoreVertical1/PopularMoreVertical1";
 import { JoinChatModal } from "../../modals/JoinChatModal";
 import { CreateChatModal } from "../../modals/CreateChatModal";
 import { WelcomeScreen } from "../WelcomeScreen";
@@ -86,10 +85,9 @@ export const Desktop = () => {
       {/* Content */}
       <div className="content">
 
-        {appState !== 'initialised' && appState !== 'no-wallet' && <div className="basic-screen"><div className='loader centered' style={{width: 64, height: 64}}></div></div>}
-        {appState === 'no-wallet' && <WelcomeScreen walletAvailable={false} />}
-        {appState === 'initialised' && !session && <WelcomeScreen walletAvailable={true} />}
-        {appState === 'initialised' && session && <ChatScreen mobileView={mobileView} setMobileView={setMobileView} setModal={setModal} onTerminateChat={terminateChat} />}
+        {(appState === 'initialising' || appState === 'switching-session' || appState === 'logging-in') && <div className="basic-screen"><div className='loader centered' style={{width: 64, height: 64}}></div></div>}
+        {(appState === 'no-wallet' || appState === 'disconnected' || appState === 'not-logged-in') && <WelcomeScreen />}
+        {appState === 'logged-in' && <ChatScreen mobileView={mobileView} setMobileView={setMobileView} setModal={setModal} onTerminateChat={terminateChat} />}
 
       </div>
 
