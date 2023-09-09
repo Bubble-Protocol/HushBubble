@@ -38,7 +38,7 @@ export const EditChatModal = ({ chat, onCancel, onCompletion }) => {
         {chatType.icon && <IconInput title="Icon" value={icon} setValue={setIcon} />}
         {chatType.title && <TextInput title="Title" subtitle="The name of the chat" value={title} setValue={setTitle} />}
         <div className="step-frame">
-          {error && <p className="small-text error-text">{error.message}</p>}
+          {error && <p className="small-text error-text">{error.details || error.message}</p>}
           <Button title="Save" onClick={save} disabled={!(title.valid && icon.valid)} />
         </div>
       </React.Fragment>

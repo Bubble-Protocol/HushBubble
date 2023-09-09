@@ -1,5 +1,5 @@
 import { Wallet } from '../Wallet';
-import { getAccount, getNetwork, watchAccount, getWalletClient, getPublicClient, signMessage, disconnect } from 'wagmi/actions';
+import { getAccount, getNetwork, watchAccount, getWalletClient, getPublicClient, signMessage, disconnect, switchNetwork } from 'wagmi/actions';
 import { EventManager } from '../utils/EventManager';
 import { assert } from '@bubble-protocol/core';
 import { toEthereumSignature } from '@bubble-protocol/client';
@@ -30,11 +30,13 @@ export class RainbowKitWallet extends Wallet {
   }
 
   async isAvailable() {
-    return Promise.resolve(true);
+    const acc = getAccount();
+    return Promise.resolve(!!acc);
   }
   
   async isConnected() {
-    return Promise.resolve(this.state === WALLET_STATE.connected);
+    const acc = getAccount();
+    return Promise.resolve(assert.isObject(acc) ? acc.isConnected : false);
   }
 
   async connect() {
@@ -62,43 +64,75 @@ export class RainbowKitWallet extends Wallet {
   async deploy(sourceCode, params=[], options={}) {
     if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
 
-    const walletClient = await getWalletClient();
-    const publicClient = getPublicClient();
+    const chainId = this.getChain();
+    const walletClient = await getWalletClient({chainId});
+    const publicClient = getPublicClient({chainId});
 
     const txHash = await walletClient.deployContract({
       account: this.account,
       abi: sourceCode.abi,
       bytecode: sourceCode.bytecode || sourceCode.bin,
       args: params,
-      chain: this.getChain(),
       ...options
     });
 
+    console.trace('txHash', txHash);
+
     const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+    console.trace('receipt', receipt);
 
     return receipt.contractAddress;
   }
 
   async send(contractAddress, abi, method, params=[], options={}) { 
-    throw new Error('RainbowKitWallet.send not yet implemented');
+    if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
+
+    const chainId = this.getChain();
+    const walletClient = await getWalletClient({chainId});
+    const publicClient = getPublicClient({chainId});
+
+    const txHash = await walletClient.writeContract({
+      address: contractAddress,
+      abi: abi,
+      functionName: method,
+      args: params,
+      ...options
+    })
+
+    console.trace('txHash', txHash);
+
+    const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+    console.trace('receipt', receipt);
+
+    return receipt;
   }
 
   async call(contractAddress, abi, method, params=[]) {
-    throw new Error('RainbowKitWallet.call not yet implemented');
+    if (this.state === WALLET_STATE.unavailable) throw {code: 'wallet-unavailable', message: 'wallet is not available'};
+
+    const chainId = this.getChain();
+    const publicClient = getPublicClient({chainId});
+
+    return await publicClient.readContract({
+      address: contractAddress,
+      abi: abi,
+      functionName: method,
+      args: params
+    })
   }
 
   async getCode(contractAddress) {
-    const publicClient = getPublicClient();
+    const chainId = this.getChain();
+    const publicClient = getPublicClient({chainId});
     return publicClient.getBytecode({address: contractAddress});
   }
 
   async switchChain(chainId, chainName) {
-    if (!assert.isHexString(chainId)) chainId = '0x'+chainId.toString(16);
+    if (assert.isString(chainId)) chainId = parseInt(chainId);
     try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: chainId }],
-      });
+      const chain = await switchNetwork({chainId});
     } catch (error) {
       if (error.code === 4902) {
         throw {code: 'chain-missing', message: 'Add the chain to Metamask and try again', chain: {id: parseInt(chainId), name: chainName}};

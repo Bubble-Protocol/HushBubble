@@ -2,8 +2,12 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { Modal } from "../../components/Modal/Modal";
 import { Button } from "../../components/Button/Button";
+import { useAccount } from "wagmi";
+import { ConnectWallet } from "../components/ConnectWallet";
 
 export const DeleteChatModal = ({ chat, onDelete, onCancel, onCompletion }) => {
+
+  const { isConnected: walletConnected } = useAccount();
   const [error, setError] = useState();
   const [state, setState] = useState('user-input');
 
@@ -33,10 +37,11 @@ export const DeleteChatModal = ({ chat, onDelete, onCancel, onCompletion }) => {
         </div>
         <div className="step-frame">
           {!error && <p className="small-text">Are you sure you want to continue?</p>}
-          {error && <p className="small-text error-text">{error.message}</p>}
+          {error && <p className="small-text error-text">{error.details || error.message}</p>}
         </div>
+        {!walletConnected && <ConnectWallet />}
         <div className="step-frame">
-          <Button title="Delete" onClick={deleteChat} />
+          {walletConnected && <Button title="Delete" onClick={deleteChat} />}
           <div className="text-button" onClick={onCancel}>Cancel</div>
         </div>
       </React.Fragment>

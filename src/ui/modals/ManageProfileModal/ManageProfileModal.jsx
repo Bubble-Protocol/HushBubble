@@ -37,7 +37,7 @@ export const ManageProfileModal = ({ onCancel, onCompletion }) => {
       <React.Fragment>
         <IconInput title="Icon" value={icon} setValue={setIcon} />
         <TextInput title="Name" value={name} setValue={setName} />
-        {error && <p className="small-text error-text">{error.message}</p>}
+        {error && <p className="small-text error-text">{error.details || error.message}</p>}
         <Button title="Save" onClick={save} />
       </React.Fragment>
     />

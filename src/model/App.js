@@ -48,6 +48,7 @@ export class MessengerApp {
   initialise() {
     this._setAppState(STATE.initialising);
     this.wallet = new RainbowKitWallet();
+    stateManager.dispatch('wallet', this.wallet);
     this.wallet.on('connected', this._handleWalletConnected);
     const lastSession = this._loadState();
     if (!this.deviceKey) {
@@ -181,7 +182,6 @@ export class MessengerApp {
   _setAppState(state) {
     this.state = state;
     stateManager.dispatch('app-state', this.state);
-    console.debug('app-state', this.state)
   }
 
 }

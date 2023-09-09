@@ -45,7 +45,7 @@ export const CreateAppModalCustomised = ({ session, chains, hosts=[], onDeploy, 
         <div className="step-frame">
           <p className="step-title">Step 3: Deploy Your Application Bubble</p>
           <p className="small-text centered">Your wallet will prompt you twice: once to generate your recovery key, and again to deploy the bubble smart contract.</p>
-          {deployError && <p className="small-text error-text">{deployError.message}</p>}
+          {deployError && <p className="small-text error-text">{deployError.details || deployError.message}</p>}
           <Button title="Deploy" onClick={() => onDeploy({chain: chain, host: url === "" ? host : url }).then(onCompletion).catch(setDeployError)} disabled={!(url === "" || hostValid)} />
         </div>
         <div className="text-button centered" onClick={onBack}>back</div>
