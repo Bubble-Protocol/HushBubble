@@ -10,6 +10,8 @@ import { IconInput } from "../components/IconInput";
 import defaultIcon from "../../../assets/img/unknown-contact-icon.png";
 import { ecdsa } from '@bubble-protocol/crypto';
 import { assert } from '@bubble-protocol/client';
+import { ConnectWallet } from "../components/ConnectWallet";
+import { useAccount } from "wagmi";
 
 export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], onCreate, onCancel, onCompletion }) => {
 
@@ -36,6 +38,8 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
   }
 
   const defaultChain = chains.find(c => c.id === session.getDefaultChainId()) || chains[0];
+
+  const { isConnected: walletConnected } = useAccount();
   const [state, setState] = useState('user-input');
   const [values, setValues] = useState(valuesIn);
   const [hostValues, setHostValues] = useState({chain: defaultChain, host: hosts[0], url: "", urlValid: false});
@@ -87,9 +91,10 @@ export const CreateChatModal = ({ chains, hosts, session, bubble, valuesIn=[], o
             }
           ).filter(Boolean)
         }
+        {!walletConnected && <ConnectWallet />}
         <div className="step-frame">
-          {createError && <p className="small-text error-text">{createError.message}</p>}
-          <Button title="Create" onClick={createChat} disabled={(hostValues.url !== "" && !hostValues.urlValid) || !values.reduce((valid,value) => (valid && value.valid), true)} />
+          {createError && <p className="small-text error-text">{createError.details || createError.message}</p>}
+          <Button title="Create" onClick={createChat} disabled={!walletConnected || (hostValues.url !== "" && !hostValues.urlValid) || !values.reduce((valid,value) => (valid && value.valid), true)} />
         </div>
       </React.Fragment>
     />

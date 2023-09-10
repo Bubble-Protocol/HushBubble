@@ -5,9 +5,12 @@ import { Button } from "../../components/Button/Button";
 import { stateManager } from "../../../state-context";
 import { MemberRow } from "./components/MemberRow/MemberRow";
 import { assert } from "@bubble-protocol/core";
+import { useAccount } from "wagmi";
+import { ConnectWallet } from "../components/ConnectWallet";
 
 export const ManageMemberModal = ({ chat, onSave, onCancel, onCompletion }) => {
 
+  const { isConnected: walletConnected } = useAccount();
   const chats = stateManager.useStateData('chats')();
   const myId = stateManager.useStateData('myId')();
   const [state, setState] = useState('user-input');
@@ -81,8 +84,9 @@ export const ManageMemberModal = ({ chat, onSave, onCancel, onCompletion }) => {
             <MemberRow key={m.id} member={m} modType="add" modified={addedMembers.includes(m)} toggleModified={() => toggleAddMember(m)} />
           )}
         </div>
-        {error && <p className="small-text error-text">{error.message}</p>}
-        <Button title="Save" onClick={save} disabled={removedMembers.length + addedMembers.length === 0} />
+        {!walletConnected && <ConnectWallet />}
+        {error && <p className="small-text error-text">{error.details || error.message}</p>}
+        <Button title="Save" onClick={save} disabled={!walletConnected || (removedMembers.length + addedMembers.length === 0)} />
       </React.Fragment>
     />
   );

@@ -5,7 +5,10 @@ import { initialiseLocalStorage } from "./model/utils/LocalStorage";
 import { MessengerApp } from "./model/App";
 import { stateManager } from "./state-context";
 import { setFaviconWithCount } from "./ui/utils/favicon";
-import { addVisibilityListener, windowEvents } from "./ui/utils/browser-utils";
+import { windowEvents } from "./ui/utils/browser-utils";
+import { rainbowKitConfig } from "./ui/utils/rainbow-kit";
+import { WagmiConfig } from "wagmi";
+import { RainbowKitProvider, lightTheme } from "@rainbow-me/rainbowkit";
 
 //
 // Application
@@ -51,7 +54,11 @@ setFaviconWithCount(0);
 
 function render(params={}) { 
   root.render(
-    <Desktop connect={params.connect} />
+    <WagmiConfig config={rainbowKitConfig.wagmiConfig}>
+      <RainbowKitProvider chains={rainbowKitConfig.chains} theme={lightTheme({borderRadius: 'small'})} >
+        <Desktop connect={params.connect} />
+      </RainbowKitProvider>
+    </WagmiConfig>
   );
 }
 

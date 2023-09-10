@@ -32,7 +32,7 @@ export const LeaveChatModal = ({ chat, onLeave, onCancel, onCompletion }) => {
         <div className="step-frame">
           {!error && <p className="small-text">Are you sure you want to leave this chat?</p>}
           {!error && <p className="small-text">You can rejoin the chat any time if you have the chat link.</p>}
-          {error && <p className="small-text error-text">{error.message}</p>}
+          {error && <p className="small-text error-text">{error.details || error.message}</p>}
         </div>
         <div className="step-frame">
           <Button title="Leave" onClick={leaveChat} />

@@ -14,13 +14,11 @@ import { ProfileRegistry } from "./services/ProfileRegistry";
 import { Contacts } from "./Contacts";
 import { Wallet } from "./Wallet";
 
-const CONSTRUCTION_STATE = {
+const STATE = {
   closed: 'closed',
-  new: 'new',
-  contractDeployed: 'contract-deployed',
-  open: 'open',
-  connecting: 'connecting',
-  failed: 'failed'
+  initialising: 'initialising',
+  notLoggedIn: 'not-logged-in',
+  loggedIn: 'logged-in'
 }
 
 const DEFAULT_SETTINGS = {
@@ -30,8 +28,8 @@ const DEFAULT_SETTINGS = {
 
 export class Session {
 
-  constructionState = CONSTRUCTION_STATE.closed;
-  account;
+  constructionState = STATE.closed;
+  myId;
   id;
   wallet;
   sessionKey;
@@ -47,11 +45,11 @@ export class Session {
     this.terminateChat = this.terminateChat.bind(this);
   }
 
-  async open(wallet, delegate) {
+  async open(wallet) {
     console.trace('opening session', this);
     assert.isInstanceOf(wallet, Wallet, 'wallet');
     this.wallet = wallet;
-    this.state = CONSTRUCTION_STATE.new;
+    this.state = STATE.initialising;
     return this._loadState()
       .then(exists => {
         if (!exists) {
@@ -59,22 +57,10 @@ export class Session {
           this.myId = new User({account: this.id, delegate: this.sessionKey.cPublicKey});
           this._saveState();
         }
+        if (!this.keyDelegation) throw {code: 'missing-delegation', message: 'missing delegation'}
       })
       .then(() => {
-        if (!this.keyDelegation) {
-          if (!assert.isInstanceOf(delegate, Delegation)) {
-            const delegation = new Delegation(this.myId.delegate.address, 'never');
-            delegation.permitAccessToAllBubbles();
-            throw {code: 'requires-delegate', message: 'session requires delegate', delegateRequest: {delegation}};
-          }
-          return delegate.sign(this.wallet.getSignFunction())
-            .then(() => {
-              this.keyDelegation = delegate;
-              this._saveState();
-            })
-        }
-      })
-      .then(() => {
+        this.state = STATE.loggedIn;
         if (this.settings.connectionRelay) {
           this.connectionRelay = new HushBubbleConnectRelay(this.sessionKey, invite => this.receiveInvite(invite, false));
           this.connectionRelay.monitor();
@@ -89,7 +75,22 @@ export class Session {
         this.contacts = new Contacts(this.profileRegistry);
         return this.profileRegistry.initialise();
       })
-      .then(this._initialiseConversations.bind(this));
+      .then(this._initialiseConversations.bind(this))
+      .catch(error => {
+        if (error.code === 'missing-delegation') this.state = STATE.notLoggedIn;
+        else throw error;
+      });
+  }
+
+  async logIn() {
+    const delegation = new Delegation(this.myId.delegate.address, 'never');
+    delegation.permitAccessToAllBubbles();
+    return delegation.sign(this.wallet.getSignFunction())
+      .then(() => {
+        this.keyDelegation = delegation;
+        this._saveState();
+        return this.open(this.wallet);
+      });
   }
 
   async reconnect() {
@@ -181,7 +182,12 @@ export class Session {
     const promise = this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name);
     return promise
       .then(() => {
-        return this.wallet.send(conversation.contentId.contract, conversation.chatType.sourceCode.abi, 'terminate', [terminateKey])
+        return this.wallet.send(
+          conversation.contentId.contract, 
+          conversation.chatType.sourceCode.abi, 
+          'terminate', 
+          [terminateKey], 
+          {from: this.myId.account, account: this.myId.account})
       })
       .then(() => conversation.terminate())
       .then(() => this._removeChat(conversation));
@@ -238,28 +244,30 @@ export class Session {
       const chain = DEFAULT_CONFIG.chains.find(c => c.id === chat.contentId.chain) || {id: chat.contentId.chain, name: 'Unknown'};
       return Promise.resolve()
       .then(() => {
-        console.trace(chat.id, 'adding new members')
+        console.trace(chat.id, 'adding new members', addedMembers)
         return addedMembers.length === 0 ? Promise.resolve() : 
-          this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name)
+          (this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name))
           .then(() => {
             return this.wallet.send(
               chat.contentId.contract, 
               chat.chatType.sourceCode.abi,
               chat.chatType.actions.addMembers.method,
-              ParamFactory.getParamsAsArray(chat.chatType.actions.addMembers.params, {members: addedMembers})
+              ParamFactory.getParamsAsArray(chat.chatType.actions.addMembers.params, {members: addedMembers}),
+              {from: this.myId.account, account: this.myId.account}
             )
           })
       })
       .then(() => {
-        console.trace(chat.id, 'removing old members')
+        console.trace(chat.id, 'removing old members', removedMembers)
         return removedMembers.length === 0 ? Promise.resolve() : 
-          this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name)
+          (this.wallet.getChain() === chain.id ? Promise.resolve() : this.wallet.switchChain(chain.id, chain.name))
           .then(() => {
             return this.wallet.send(
               chat.contentId.contract, 
               chat.chatType.sourceCode.abi,
               chat.chatType.actions.removeMembers.method,
-              ParamFactory.getParamsAsArray(chat.chatType.actions.removeMembers.params, {members: removedMembers})
+              ParamFactory.getParamsAsArray(chat.chatType.actions.removeMembers.params, {members: removedMembers}),
+              {from: this.myId.account, account: this.myId.account}
             )
           })
       })

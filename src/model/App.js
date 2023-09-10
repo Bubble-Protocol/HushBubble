@@ -3,12 +3,16 @@ import { stateManager } from "../state-context";
 import localStorage from "./utils/LocalStorage";
 import { ecdsa } from "@bubble-protocol/crypto";
 import { Session } from "./Session";
-import { MetamaskWallet } from "./wallets/MetamaskWallet";
+import { RainbowKitWallet } from "./wallets/RainbowKitWallet";
 
 const STATE = {
   uninitialised: 'uninitialised',
+  initialising: 'initialising',
   noWallet: 'no-wallet',
-  initialised: 'initialised',
+  disconnected: 'disconnected',
+  notLoggedIn: 'not-logged-in',
+  loggingIn: 'logging-in',
+  loggedIn: 'logged-in',
   switching: 'switching-session'
 }
 
@@ -20,6 +24,7 @@ export class MessengerApp {
   newMsgCount = 0;
 
   constructor() {
+    this._handleWalletConnected = this._handleWalletConnected.bind(this);
     stateManager.register('app-state', this.state);
     stateManager.register('wallet');
     stateManager.register('session');
@@ -32,7 +37,7 @@ export class MessengerApp {
     stateManager.register('config', DEFAULT_CONFIG);
     stateManager.register('join-request');
     stateManager.register('wallet-functions', {
-      connect: this.connectWallet.bind(this),
+      logIn: this.logIn.bind(this),
       disconnect: this.disconnectWallet.bind(this),
       delegate: this.disconnectWallet.bind(this),
       getAccounts: this.getAccounts.bind(this),
@@ -41,27 +46,28 @@ export class MessengerApp {
   }
 
   initialise() {
-    const wallet = new MetamaskWallet();
+    this._setAppState(STATE.initialising);
+    this.wallet = new RainbowKitWallet();
+    stateManager.dispatch('wallet', this.wallet);
+    this.wallet.on('connected', this._handleWalletConnected);
     const lastSession = this._loadState();
     if (!this.deviceKey) {
       this.deviceKey = new ecdsa.Key();
       this._saveState();
     }
     if (!lastSession) {
-      this._setAppState(STATE.initialised);
-      return wallet.isAvailable();
+      return this.wallet.isAvailable()
+        .then(available => {
+          this._setAppState(available ? STATE.disconnected : STATE.noWallet);
+        })
     }
-    return wallet.isAvailable()
+    return this.wallet.isAvailable()
       .then(available => {
         if (!available) this._setAppState(STATE.noWallet);
         else {
-          return wallet.connect()
+          return this.wallet.connect()
           .then(() => {
-            this.wallet = wallet;
             return this._openSession(lastSession)
-          })
-          .then(() => {
-            this._setAppState(STATE.initialised);
           })
         }
       })
@@ -83,19 +89,12 @@ export class MessengerApp {
     if (this.wallet) this.wallet.disconnect();
   }
 
-  async connectWallet(delegate) {
-    console.trace('connect wallet', delegate ? delegate : '', this.session)
-    if (this.wallet && this.session) return Promise.resolve();
-    else if (this.wallet) return this._openSession(this.wallet.getAccount(), delegate);
-    else {
-      const wallet = new MetamaskWallet();
-      return wallet.connect()
-        .then(() => {
-          this.wallet = wallet;
-          stateManager.dispatch('wallet', this.wallet);
-          return this._openSession(this.wallet.getAccount(), delegate);
-        })
-    }
+  async logIn() {
+    this._setAppState(STATE.loggingIn);
+    return this.session.logIn()
+      .finally(() => {
+        this._setAppState(this.session.state === 'not-logged-in' ? STATE.notLoggedIn : STATE.loggedIn);
+      });
   }
 
   async disconnectWallet() {
@@ -105,11 +104,14 @@ export class MessengerApp {
         stateManager.dispatch('wallet', undefined);
         return this._closeSession();
       })
+      .then(() => {
+        this._setAppState(STATE.noWallet);
+      })
   }
 
-  async _openSession(id, delegate) {
+  async _openSession(id) {
     const session = new Session(id);
-    return session.open(this.wallet, delegate)
+    return session.open(this.wallet)
       .then(() => {
         this.session = session;
         this._saveState();
@@ -123,7 +125,8 @@ export class MessengerApp {
           manageMembers: this.session.manageMembers.bind(this.session),
           leave: this.session.leaveChat.bind(this.session),
         });
-      });
+        this._setAppState(this.session.state === 'not-logged-in' ? STATE.notLoggedIn : STATE.loggedIn);
+      })
   }
 
   getAccounts() {
@@ -138,7 +141,15 @@ export class MessengerApp {
     this._setAppState(STATE.switching);
     return this._closeSession()
       .then(() => this._openSession(id))
-      .then(() => this._setAppState(STATE.initialised));
+      .then(() => this._setAppState(STATE.loggedIn));
+  }
+
+  _handleWalletConnected() {
+    this._openSession(this.wallet.getAccount().toLowerCase())
+      .catch(error => {
+        console.warn(error);
+        this.wallet.disconnect();
+      })
   }
 
   async _closeSession() {
@@ -171,7 +182,6 @@ export class MessengerApp {
   _setAppState(state) {
     this.state = state;
     stateManager.dispatch('app-state', this.state);
-    console.debug('app-state', this.state)
   }
 
 }

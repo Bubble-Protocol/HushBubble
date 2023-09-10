@@ -2,11 +2,14 @@ import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { Modal } from "../../components/Modal/Modal";
 import { Button } from "../../components/Button/Button";
-import { TextBox } from "../../components/TextBox";
 import { ErrorCodes } from "@bubble-protocol/core";
 import { ModalHostInfo } from "../../components/ModalHostInfo";
+import { ConnectWallet } from "../components/ConnectWallet";
+import { useAccount } from 'wagmi'
 
 export const JoinChatModal = ({ invite, onJoin, onCancel, onCompletion }) => {
+
+  const { isConnected: walletConnected } = useAccount();
   const [error, setError] = useState();
   const [chainError, setChainError] = useState();
 
@@ -36,9 +39,10 @@ export const JoinChatModal = ({ invite, onJoin, onCancel, onCompletion }) => {
             {invite.bubbleType && <p className="small-text">{invite.bubbleType.details}</p>}
             {<ModalHostInfo chain={invite.chain} host={invite.host} centered={true} />}
             <div></div>
-            {error && <p className="small-text error-text">{error.message}</p>}
+            {!walletConnected && <ConnectWallet />}
+            {error && <p className="small-text error-text">{error.details || error.message}</p>}
             {chainError && <div className="small-text error-text">The {chainError.name} chain is not available in your wallet.<br/>Visit <a href={"https://chainlist.org/?search="+chainError.id} target="_blank">chainlist.org</a> to add the chain to your wallet then try again.</div>}
-            <Button title="Join" onClick={() => join()} disabled={invite === undefined} />
+            {walletConnected && <Button title="Join" onClick={() => join()} disabled={invite === undefined} />}
           </React.Fragment>
         :
           <React.Fragment>
