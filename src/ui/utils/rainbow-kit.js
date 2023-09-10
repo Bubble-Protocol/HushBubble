@@ -5,7 +5,7 @@ import { publicProvider } from 'wagmi/providers/public';
 import { base, mainnet, polygon, avalanche, baseGoerli, sepolia } from 'wagmi/chains';
 
 
-const WALLET_CONNECT_PROJECT_ID = 'be5ecff22a547fe5ff88a79a14eb5bae'; // 'YOUR_PROJECT_ID';
+const WALLET_CONNECT_PROJECT_ID = 'YOUR_PROJECT_ID';
 
 
 const { chains, publicClient } = configureChains(
