@@ -273,11 +273,11 @@ export class Session {
       })
       .then(() => {
         console.trace(chat.id, "writing new users' metadata files")
-        return Promise.all(addedMembers.map(m => chat.userManager.addUser(m.publicKey)));
+        return Promise.all(addedMembers.map(m => chat.userManager.addUser(m.getEciesPublicKey())));
       })
       .then(() => {
         console.trace(chat.id, "removing old users' metadata files")
-        return Promise.all(removedMembers.map(m => chat.userManager.removeUser(m.publicKey, {silent: true})));
+        return Promise.all(removedMembers.map(m => chat.userManager.removeUser(m.getEciesPublicKey(), {silent: true})));
       })
       .then(() => {
         console.trace(chat.id, 'saving new metadata to bubble')
