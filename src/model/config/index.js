@@ -18,5 +18,5 @@ export const DEFAULT_CONFIG = {
   chains: DEFAULT_CHAINS,
   hosts: DEFAULT_HOSTS,
   bubbles: DEFAULT_BUBBLES,
-  defaultChainId: 8453
+  defaultChainId: 137
 }
