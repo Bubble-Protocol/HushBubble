@@ -18,9 +18,6 @@ export const DEFAULT_HOSTS = [
       11155111: {
         url: "wss://vault.bubbleprotocol.com/v2/sepolia"
       },
-      84531: {
-        url: "wss://vault.bubbleprotocol.com/v2/base-goerli"
-      },
       8453: {
         url: "wss://vault.bubbleprotocol.com/v2/base"
       }

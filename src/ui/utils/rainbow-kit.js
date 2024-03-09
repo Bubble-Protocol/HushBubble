@@ -2,14 +2,14 @@ import '@rainbow-me/rainbowkit/styles.css';
 import { getDefaultWallets } from '@rainbow-me/rainbowkit';
 import { configureChains, createConfig } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
-import { base, mainnet, polygon, avalanche, baseGoerli, sepolia } from 'wagmi/chains';
+import { base, mainnet, polygon, avalanche, sepolia } from 'wagmi/chains';
 
 
 const WALLET_CONNECT_PROJECT_ID = 'YOUR_PROJECT_ID';
 
 
 const { chains, publicClient } = configureChains(
-  [base, polygon, avalanche, mainnet, baseGoerli, sepolia],
+  [polygon, base, avalanche, mainnet, sepolia],
   [
     publicProvider()
   ]
