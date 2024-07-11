@@ -12,6 +12,9 @@ export const DEFAULT_HOSTS = [
       137: {
         url: "wss://vault.bubbleprotocol.com/v2/polygon"
       },
+      995: {
+        url: "wss://vault.bubbleprotocol.com/v2/5ire"
+      },
       43114: {
         url: "wss://vault.bubbleprotocol.com/v2/avalanche"
       },
