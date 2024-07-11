@@ -24,6 +24,19 @@ export const WelcomeScreen = () => {
 
   return (
     <div className="welcome-screen" >
+      <div className="titles">
+        <h1>Welcome to HushBubble!</h1>
+        <subtitle>End-to-end encrypted decentralised messaging app.</subtitle>
+      </div>
+      <div className="description">
+        <p>
+          HushBubble is built on <a href="https://bubbleprotocol.com" target="_blank">Bubble Protocol's</a> secure off-chain storage technology.
+          Your chats are end-to-end encrypted and stored in a private <a href="https://bubbleprotocol.com/how-it-works.html" target="_blank">bubble</a> on an off-chain host of your choice. 
+        </p>
+      </div>
+      <p>
+        Connect your wallet to begin.
+      </p>
       <ConnectButton showBalance={false} chainStatus="none" />
       {appState === 'not-logged-in' && <div className="connect-text" onClick={logIn}>Login</div>}
       {error && <div className="error-text">{error.details || error.message}</div>}

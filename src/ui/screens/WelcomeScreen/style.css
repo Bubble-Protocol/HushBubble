@@ -5,11 +5,37 @@
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 64px;
   padding: 0 32px;
   flex: 1;
   height: 100%;
   max-width: 100%;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.description {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 16px;
+  max-width: 800px;
+  font-style: italic;
+}
+
+h1 {
+  font-size: 48px;
+  font-weight: 400;
+}
+
+subtitle {
+  font-size: 18px;
+  font-weight: 200;
+  color: #344487;
 }
 
 .connect-text {
