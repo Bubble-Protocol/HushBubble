@@ -209,6 +209,14 @@
   text-align: left;
 }
 
+.modal .sublabel {
+  color: #0F1217;
+  font-size: 12px;
+  font-weight: 400;
+  white-space: nowrap;
+  text-align: left;
+}
+
 .modal .field {
   display: flex;
   gap: 8px;
@@ -219,6 +227,17 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.modal .field.code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.modal .field.small {
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .modal .loading {

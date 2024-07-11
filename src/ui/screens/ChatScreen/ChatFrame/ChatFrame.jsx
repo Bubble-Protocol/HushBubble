@@ -16,6 +16,7 @@ import { LeaveChatModal } from "../../../modals/LeaveChatModal";
 import { EditChatModal } from "../../../modals/EditChatModal/EditChatModal";
 import { ArrowLeft } from "../../../icons/ArrowLeft/ArrowLeft";
 import { MessageGroup } from "./MessageGroup";
+import { ChatInfoModal } from "../../../modals/ChatInfoModal";
 
 export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setModal }) => {
 
@@ -96,6 +97,7 @@ export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setMod
     scrollToBottom();
   }
 
+  const infoModal = <ChatInfoModal chat={chat} chains={config.chains} hosts={config.hosts} invite={config.appUrl+'?chat='+chat.getInvite()} onClose={() => setModal()} />;
   const editModal = <EditChatModal chat={chat} onCancel={() => setModal()} onCompletion={() => setModal()} />;
   const leaveModal = <LeaveChatModal chat={chat} onLeave={chatFunctions.leave} onCancel={() => setModal()} onCompletion={() => setModal()} />;
   const deleteModal = <DeleteChatModal chat={chat} onDelete={chatFunctions.terminate} onCancel={() => setModal()} onCompletion={() => setModal()} />;
@@ -193,6 +195,7 @@ export const ChatFrame = ({ className, mobileVisible, chat, onBack, hide, setMod
         </div>
         <div className="chat-header-menu">
           <DropdownMenu direction="bottom-left" options={[
+            {name: 'Info', onClick: () => setModal(infoModal)},
             {name: "Copy Chat Link", onClick: () => navigator.clipboard.writeText(config.appUrl+'?chat='+chat.getInvite())},
             chat.chatType.metadata.title || chat.chatType.metadata.icon ? {name: 'Edit Chat', onClick: () => setModal(editModal)} : null,
             capabilities.canLeave || chatState !== 'open' ? {name: "Leave Chat", onClick: () => setModal(leaveModal)} : null,

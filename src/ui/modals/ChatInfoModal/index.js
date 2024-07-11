@@ -1,0 +1,1 @@
+export { ChatInfoModal } from "./ChatInfoModal";
