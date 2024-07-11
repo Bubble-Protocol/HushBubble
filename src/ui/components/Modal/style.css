@@ -55,7 +55,7 @@
 .modal .close-icon {
   flex: 0;
   height: 28px !important;
-  min-width: 28px !important;
+  width: 28px !important;
 }
 
 .modal .close-icon:hover {

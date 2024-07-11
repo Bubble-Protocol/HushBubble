@@ -45,7 +45,7 @@
 .icon-chat-selector .contact-icon {
   border-radius: 21px;
   height: 42px;
-  min-width: 42px;
+  width: 42px;
   position: relative;
 }
 
