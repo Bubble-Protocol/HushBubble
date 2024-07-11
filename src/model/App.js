@@ -24,7 +24,6 @@ export class MessengerApp {
   newMsgCount = 0;
 
   constructor() {
-    this._handleWalletConnected = this._handleWalletConnected.bind(this);
     stateManager.register('app-state', this.state);
     stateManager.register('wallet');
     stateManager.register('session');
@@ -49,7 +48,8 @@ export class MessengerApp {
     this._setAppState(STATE.initialising);
     this.wallet = new RainbowKitWallet();
     stateManager.dispatch('wallet', this.wallet);
-    this.wallet.on('connected', this._handleWalletConnected);
+    this.wallet.on('connected', this._handleWalletConnected.bind(this));
+    this.wallet.on('disconnected', this._handleWalletDisconnected.bind(this));
     const lastSession = this._loadState();
     if (!this.deviceKey) {
       this.deviceKey = new ecdsa.Key();
@@ -99,14 +99,14 @@ export class MessengerApp {
 
   async disconnectWallet() {
     if (!this.wallet) return Promise.resolve();
-    return this.wallet.disconnect()
-      .then(() => {
-        stateManager.dispatch('wallet', undefined);
-        return this._closeSession();
-      })
-      .then(() => {
-        this._setAppState(STATE.noWallet);
-      })
+    await this.wallet.disconnect();
+    this._handleWalletDisconnected();
+  }
+
+  async _handleWalletDisconnected() {
+    stateManager.dispatch('wallet', undefined);
+    await this._closeSession();
+    this._setAppState(STATE.noWallet);
   }
 
   async _openSession(id) {

@@ -19,7 +19,7 @@ export class RainbowKitWallet extends Wallet {
   state = WALLET_STATE.disconnected;
   account;
   closeWatchers = [];
-  listeners = new EventManager(['connected']);
+  listeners = new EventManager(['connected', 'disconnected']);
 
   constructor(applicationKey) {
     super();
@@ -167,7 +167,9 @@ export class RainbowKitWallet extends Wallet {
     else {
       this.account = undefined;
       console.trace('wallet disconnected');
+      const newDisconnection = this.state !== WALLET_STATE.disconnected;
       this.state = WALLET_STATE.disconnected;
+      if (newDisconnection) this.listeners.notifyListeners('disconnected');
     }
   }
 
