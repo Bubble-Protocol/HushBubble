@@ -88,14 +88,15 @@ export const ChatSelectorColumn = ({className, mobileVisible, chats, selectedCha
             <div className="title-item">
               <div className="selector-content">
                 <div className="selector-title-row">
-                  <div className="title-item-title">New Chat</div>
+                  <div className="title-item-title">Create New Chat</div>
                   <ArrowLeft className="icon-plus button-like" color="#0F1217" onClick={() => setCentrePanel('chat')} />
                 </div>
               </div>
             </div>
             <div></div>
             <div className="chat-list">
-              <CopySelector title="Your Connection Link" subtitle="Share this link to allow others to send you connection requests." value={config.appUrl + '?connect=' + myId.id} />
+              
+              <CopySelector title="Your Invite Link" subtitle="Click here to copy your invite link then share it to connect with your friends." value={config.appUrl + '?connect=' + myId.id} />
               {
                 config.bubbles.filter(b => b.actions.canConstruct).map((bubble, index) => {
                   return <BubbleSelector key={index} title={bubble.title} icon={bubble.icon} description={bubble.description || ""} disabled={!online || bubble.disabled} onClick={() => setModal(createChatModal(bubble))} />

@@ -31,7 +31,7 @@ export const DEFAULT_BUBBLES = [
   },
   {
     title: "One-to-One Chat", 
-    description: "Encrypted chat between two people", 
+    description: "Connect with a friend and start an end-to-end encrypted chat", 
     details: "Two person, end-to-end encrypted chat. No-one, not even HushBubble, can read your messages.", 
     id: {category: 'one-to-one', bytecodeHash: '6a50777810fb784389b557b9058fd0d5eea28466d0711fca6a31a36252a356e9'}, 
     classType: 'OneToOneChat', 
@@ -62,7 +62,7 @@ export const DEFAULT_BUBBLES = [
   },
   {
     title: "Public Chat", 
-    description: "Anyone can join", 
+    description: "Unencrypted group chat that anyone can join", 
     details: "Unencrypted public chat with no restrictions.", 
     id: {category: 'public', bytecodeHash: '1cc04f1670339fb356fae402c8b20a69ec585d90526d4798a30d793102e2d776'}, 
     classType: 'PublicChat', 
@@ -76,7 +76,7 @@ export const DEFAULT_BUBBLES = [
   },
   {
     title: "Public Event", 
-    description: "Group chat with public read", 
+    description: "Unencrypted group chat that anyone can join, but only permitted users can post", 
     details: "Unencrypted public chat with write permission limited to users you grant access.", 
     id: {category: 'public', bytecodeHash: '41ef5d0a546851b6277619540ba5bf19629374d1157dfde59c84518013b7724d'}, 
     classType: 'PublicChat', 
@@ -93,7 +93,7 @@ export const DEFAULT_BUBBLES = [
   },
   {
     title: "friend.tech Chat", 
-    description: "Chat with your friend.tech key holders", 
+    description: "Unencrypted group chat that only your friend.tech key holders can join", 
     details: "Only your friend.tech key holders can access the chat. You MUST be logged in to HushBubble with your friend.tech account to create this chat.", 
     id: {category: 'public', bytecodeHash: '928726f9072f58097631fc0d852b6666b48559406f9637cd0374e4f5af714f17'}, 
     classType: 'PublicChat', 
@@ -109,7 +109,7 @@ export const DEFAULT_BUBBLES = [
   },
   {
     title: "NFT Chat (ERC721)", 
-    description: "Chat with other NFT owners", 
+    description: "Unencrypted group chat that only your NFT owners can join", 
     details: "Only owners of the ERC721 contract can access the chat.", 
     id: {category: 'public', bytecodeHash: '82529b8fe9aab266baedd7be8feb501bfa1aa0f954411c23dff1884bf1d5cd43'}, 
     classType: 'PublicChat', 
@@ -128,7 +128,7 @@ export const DEFAULT_BUBBLES = [
   },
   {
     title: "NFT Chat (ERC1155)", 
-    description: "Chat with other NFT owners", 
+    description: "Unencrypted group chat that only your NFT owners can join", 
     details: "Only owners of the ERC1155 contract and token ID can access the chat.", 
     id: {category: 'public', bytecodeHash: '3554d7214ef318dda9a0cbfa742cdc4a419f8564c81f27b448981459580935b8'}, 
     classType: 'PublicChat', 
@@ -146,6 +146,6 @@ export const DEFAULT_BUBBLES = [
     },
     icon: nftIcon
   },
-  {id: {category: 'group', bytecodeHash: ''}, title: "Moderated Group Chat", description: "Group chat with admin controls", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
-  {id: {category: 'custom', bytecodeHash: ''}, title: "Custom Chat", description: "Your chat, your rules", sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
+  {id: {category: 'group', bytecodeHash: ''}, title: "Moderated Group Chat", description: "Coming Soon! - Group chat with admin controls", classType: 'PrivateChat', sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
+  {id: {category: 'custom', bytecodeHash: ''}, title: "Custom Chat", description: "Coming Soon! - Your chat, your rules", sourceCode: groupChatSourceCode.default, actions: {canConstruct: true}, disabled: true},
 ]
