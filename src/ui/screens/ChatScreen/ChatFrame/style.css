@@ -44,7 +44,7 @@
   border-color: #ffffff;
   border-radius: 28px;
   height: 52px;
-  min-width: 52px;
+  width: 52px;
 }
 
 .chat-frame .chat-header-member-icons .chat-header-icon:nth-child(2) {
