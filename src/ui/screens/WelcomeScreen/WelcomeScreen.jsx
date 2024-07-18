@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./style.css";
 import { stateManager } from "../../../state-context";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import heroImage from "../../../assets/img/hero.png";
 
 export const WelcomeScreen = () => {
 
@@ -24,6 +25,7 @@ export const WelcomeScreen = () => {
 
   return (
     <div className="welcome-screen" >
+      <img src={heroImage} class="hero-image"></img>
       <div className="titles">
         <h1>Welcome to HushBubble!</h1>
         <subtitle>End-to-end encrypted decentralised messaging app.</subtitle>
