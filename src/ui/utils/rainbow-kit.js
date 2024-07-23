@@ -21,17 +21,29 @@ const fireChain = {
   blockExplorers: {
     default: { name: '5ireScan', url: 'https://preview.5ire.network' },
   },
-  contracts: {
-    // multicall3: {
-    //   address: '0xca11bde05977b3631167028862be2a173976ca11',
-    //   blockCreated: 11_907_934,
-    // },
-  }  
+  contracts: {}  
+}
+
+const scrollChain = {
+  id: 534352,
+  name: 'Scroll',
+  iconUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/26998.png',
+  iconBackground: '#fff',
+  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+  network: 'scroll',
+  rpcUrls: {
+    default: { http: ['https://rpc.scroll.io'] },
+    public: { http: ['https://rpc.scroll.io'] }
+  },
+  blockExplorers: {
+    default: { name: 'ScrollScan', url: 'https://scrollscan.com' },
+  },
+  contracts: {}  
 }
 
 
 const { chains, publicClient } = configureChains(
-  [polygon, fireChain, base, avalanche, mainnet, sepolia],
+  [polygon, fireChain, base, avalanche, mainnet, scrollChain, sepolia],
   [
     publicProvider()
   ]

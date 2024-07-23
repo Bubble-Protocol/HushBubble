@@ -18,6 +18,9 @@ export const DEFAULT_HOSTS = [
       43114: {
         url: "wss://vault.bubbleprotocol.com/v2/avalanche"
       },
+      534352: {
+        url: "wss://vault.bubbleprotocol.com/v2/scroll"
+      },
       11155111: {
         url: "wss://vault.bubbleprotocol.com/v2/sepolia"
       },
